@@ -1,0 +1,16 @@
+{
+  "octopus": {
+    "project": "Program Certification Platform"
+  },
+  "nuget": {
+    "pack": [
+    ]
+  },
+  "dotnet": {
+    "pack": [
+      ".\\Abim.Enterprise.Core.Program.Interservice\\Abim.Enterprise.Core.Program.Interservice.csproj",
+	  ".\\Abim.Enterprise.Core.Program.Resources\\Abim.Enterprise.Core.Program.Resources.csproj",
+     ".\\Abim.Platform.Program.Events\\Abim.Platform.Program.Events.csproj"
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+﻿using Abim.Platform.Program.App.Domain;
+using Abim.Platform.Program.Relational.Validation;
+using Abim.Platform.Program.Relational.Validation.Impl;
+
+namespace Abim.Platform.Program.App.Services.CommandResults
+{
+    /// <summary>
+    /// AddIssuanceCommandResult Class.
+    /// </summary>
+    public class AddIssuanceCommandResult :IssuanceCommandResult
+    {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public AddIssuanceCommandResult(CommandStatus status, AbimValidationResult validation, Issuance data)
+            : base(status, validation, data)
+        {
+        }
+
+        /// <summary>
+        /// Parameterless Public Constructor
+        /// </summary>
+        public AddIssuanceCommandResult()
+        {
+        }
+    }
+}

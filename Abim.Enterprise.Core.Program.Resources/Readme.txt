@@ -1,0 +1,1 @@
+﻿This project is for building a nuget package that holds Program resource classes which are returned by RESTful Api calls

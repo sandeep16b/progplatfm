@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <application-config>
+    <cache-regions>
+      <!--<region name="AbsoluteExpirationRegion" cache-name="#{CacheName}" xdt:Locator="Match(name)" xdt:Transform="SetAttributes(cache-name)"/>-->
+      <region name="default" cache-name="#{CacheName}" xdt:Locator="Match(name)" xdt:Transform="SetAttributes(cache-name)"/>
+    </cache-regions>
+  </application-config>
+</configuration>

@@ -1,0 +1,7923 @@
+﻿{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Membership API",
+    "version": "v2"
+  },
+  "paths": {
+    "/api/v2.0/membership/ada/comfort_aid": {
+      "get": {
+        "tags": [
+          "Ada"
+        ],
+        "operationId": "GetComfortAids",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ComfortAidResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/ada/status": {
+      "get": {
+        "tags": [
+          "Ada"
+        ],
+        "operationId": "GetAdaStatuses",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdaStatusResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/country": {
+      "get": {
+        "tags": [
+          "Geo"
+        ],
+        "operationId": "GetCountries",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CountryResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/country/{code}/region": {
+      "get": {
+        "tags": [
+          "Geo"
+        ],
+        "operationId": "GetRegions",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RegionResource"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/image/{id}": {
+      "get": {
+        "tags": [
+          "Image"
+        ],
+        "operationId": "GetImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MedicalSchoolResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/licensure": {
+      "get": {
+        "tags": [
+          "Licensure"
+        ],
+        "operationId": "GetReportProfiles",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LicenseReportProfileResourceIEnumerablePagedCollectionResource"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/member/{id}/licensure/reports": {
+      "get": {
+        "tags": [
+          "Licensure"
+        ],
+        "operationId": "GetReports",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LicenseReportResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/basisinfo/category/types": {
+      "get": {
+        "tags": [
+          "Licensure"
+        ],
+        "operationId": "GetBasisCategories",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/licensure/summary/decision/types": {
+      "get": {
+        "tags": [
+          "Licensure"
+        ],
+        "operationId": "GetDecisionTypes",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/licensure/state/report/status/types": {
+      "get": {
+        "tags": [
+          "Licensure"
+        ],
+        "operationId": "GetStateReportStatuses",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/licensure/report": {
+      "put": {
+        "tags": [
+          "Licensure"
+        ],
+        "operationId": "UpdateReport",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReport"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetProfiles",
+        "parameters": [
+          {
+            "name": "index",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProfileListResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/query": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetProfilesComplex",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResourceIEnumerablePagedCollectionResource"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetProfileById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdateProfile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfile"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/abim/{abim_id}": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetProfileByAbimId",
+        "parameters": [
+          {
+            "name": "abim_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{board_name}/{board_id}": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetProfileByBoard",
+        "parameters": [
+          {
+            "name": "board_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "board_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/abms/{abms_id}": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetProfilesByAbmsId",
+        "parameters": [
+          {
+            "name": "abms_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/exists": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetProfileExists",
+        "parameters": [
+          {
+            "name": "firstName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateOfBirth",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "partialTaxId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/exists/{abim_id}": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetProfilesExistByAbimId",
+        "parameters": [
+          {
+            "name": "abim_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuidBooleanValueTuple"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/genders": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetGenders",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/salutations": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetSalutations",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/honorifics": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetHonorifics",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/suffixes": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetSuffixes",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/address/types": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "AddressTypes",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/degree/types": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetDegreeTypes",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/license/statuses/types": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetLicenseStatuses",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/license/types": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetLicenseTypes",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/note/types": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetNoteTypes",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/pathway/types": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetPathwayTypes",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/phone/types": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetPhoneTypes",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/school/types": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetSchoolTypes",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/sync/statuses": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetSyncStatuses",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/ethnicities": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetEthnicities",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/cultures": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetCultures",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/genders/types": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetGenderTypes",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/ada/comfort_aid": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "AddComfortAid",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddComfortAid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdateComfortAid",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateComfortAid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/ada/comfort_aid/{aid_id}": {
+      "delete": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "RemoveComfortAid",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "aid_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/ada/status": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "AddAdaStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddAdaStatus"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/ada": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "AddStatusesAndAids",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddStatusAndAids"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/ada/{ada_id}": {
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdateAdaStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "ada_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAdaStatus"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "RemoveAdaStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "ada_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/address": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "AddAddress",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddAddress"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/address/{address_id}": {
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdateAddress",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "address_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAddress"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "RemoveAddress",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "address_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/phone": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "AddPhone",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddPhoneNumber"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/phone/{phone_id}": {
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdatePhone",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "phone_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePhone"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "RemovePhone",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "phone_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/license": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "AddLicense",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddLicense"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/license/{license_id}": {
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdateLicense",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "license_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicense"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "RemoveLicense",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "license_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/license/{license_id}/status": {
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdateLicenseStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "license_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseStatus"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/degree": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "AddDegree",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDegree"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/degree/{degree_id}": {
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdateDegree",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "degree_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDegree"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "RemoveDegree",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "degree_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/identity": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "AddIdentifier",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddIdentifier"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/identity/{identity_id}": {
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdateIdentifier",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "identity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIdentifier"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "RemoveIdentifier",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "identity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/identity/tax": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "AddTaxIdentifier",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTaxId"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdateTaxIdentifier",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaxId"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/name": {
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdateName",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateName"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/name/alias": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "AddAlias",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddAlias"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdateAlias",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAlias"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/name/alias/{alias_id}": {
+      "delete": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "RemoveAlias",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "alias_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/note": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "AddNote",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddNote"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/note/{note_id}": {
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdateNote",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "note_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNote"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/restriction": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "AddRestriction",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddRestriction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/restriction/{restrict_id}": {
+      "delete": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "RemoveRestriction",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "restrict_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/cosponsored": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "CreateCosponsored",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCosponsored"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/cosponsored/pin": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "SendPinEmail",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmailPin"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/cosponsored/welcome": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "SendWelcomeEmail",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmailWelcome"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/crm": {
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdateCrm",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFromCrm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/crm": {
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdateCrmByAbimId",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFromCrmByAbimId"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/{id}/email": {
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "UpdateEmailAddress",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEmail"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/register": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "Register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterAccount"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/profile/register/status": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "operationId": "GetRegistrationStatus",
+        "parameters": [
+          {
+            "name": "firstName",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastName",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "partialTaxId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateOfBirth",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/restriction": {
+      "get": {
+        "tags": [
+          "Restriction"
+        ],
+        "operationId": "GetRestrictions",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RestrictionResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/restriction/{id}": {
+      "get": {
+        "tags": [
+          "Restriction"
+        ],
+        "operationId": "GetRestrictionById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestrictionResource"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/school": {
+      "get": {
+        "tags": [
+          "School"
+        ],
+        "operationId": "GetSchools",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MedicalSchoolResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "School"
+        ],
+        "operationId": "CreateSchool",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSchool"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicalSchoolResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/school/query": {
+      "get": {
+        "tags": [
+          "School"
+        ],
+        "operationId": "GetSchoolsCriteria",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MedicalSchoolResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/school/{id}": {
+      "get": {
+        "tags": [
+          "School"
+        ],
+        "operationId": "GetSchoolById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicalSchoolResource"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "School"
+        ],
+        "operationId": "UpdateSchool",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSchool"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicalSchoolResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "School"
+        ],
+        "operationId": "DeleteSchool",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/survey/types": {
+      "get": {
+        "tags": [
+          "Survey"
+        ],
+        "operationId": "GetSurveyTypes",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/survey/{abim_id}": {
+      "get": {
+        "tags": [
+          "Survey"
+        ],
+        "operationId": "GetSurveys",
+        "parameters": [
+          {
+            "name": "abim_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SurveyResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/voc/search/npi/{number}": {
+      "get": {
+        "tags": [
+          "Voc"
+        ],
+        "operationId": "GetVocByNpi",
+        "parameters": [
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VocProfileResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/voc/search/abim_id/{id}": {
+      "get": {
+        "tags": [
+          "Voc"
+        ],
+        "operationId": "GetVocByAbimId",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VocProfileResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v2.0/membership/voc/search/name": {
+      "get": {
+        "tags": [
+          "Voc"
+        ],
+        "operationId": "GetVocByCriteria",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VocProfileResource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AdaStatusResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "publicId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "cardioDuration": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "fourSessionDuration": {
+            "type": "string",
+            "nullable": true
+          },
+          "numberOfDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "threeSessionDuration": {
+            "type": "string",
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "modifiedBy": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AddAdaStatus": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "adaStatusId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AddAddress": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "line1": {
+            "type": "string",
+            "nullable": true
+          },
+          "line2": {
+            "type": "string",
+            "nullable": true
+          },
+          "line3": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          },
+          "postalCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "Office",
+              "Home",
+              "Other"
+            ]
+          },
+          "primary": {
+            "type": "boolean"
+          },
+          "secure": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AddAlias": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "middleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "maidenName": {
+            "type": "string",
+            "nullable": true
+          },
+          "salutation": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Mr",
+              "Mrs",
+              "Miss",
+              "Ms",
+              "Dr",
+              "FirstLieutenant",
+              "SecondLieutenant",
+              "Ambassador",
+              "BrigadierGeneral",
+              "Brother",
+              "Captain",
+              "Commander",
+              "Colonel",
+              "Dean",
+              "Ensign",
+              "General",
+              "Governor",
+              "Judge",
+              "Justice",
+              "LieutenantCommander",
+              "LanceCorporal",
+              "Lieutenant",
+              "LieutenantColonel",
+              "LieutenantGeneral",
+              "SubLieutenant",
+              "Major",
+              "MajorGeneral",
+              "MasterSergeant",
+              "Mayor",
+              "Madame",
+              "Monsignor",
+              "Prince",
+              "Professor",
+              "RearAdmiral",
+              "RightReverend",
+              "Rabbi",
+              "Reverend",
+              "ClergyDoctorate",
+              "Priest",
+              "Senator",
+              "Sir",
+              "Sister"
+            ]
+          },
+          "suffix": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Esq",
+              "Jr",
+              "Sr",
+              "I",
+              "II",
+              "III",
+              "IV",
+              "V",
+              "VI",
+              "VII",
+              "VIII",
+              "IX",
+              "X",
+              "BVM",
+              "CFRE",
+              "CLU",
+              "CPA",
+              "CSC",
+              "CSJ",
+              "DC",
+              "DD",
+              "DDS",
+              "DMD",
+              "DVM",
+              "EdD",
+              "JD",
+              "LLD",
+              "OD",
+              "OSB",
+              "PC",
+              "PE",
+              "Ret",
+              "RGS",
+              "RN",
+              "RNC",
+              "SHCJ",
+              "SJ",
+              "SNJM",
+              "SSMO",
+              "USA",
+              "USAF",
+              "USAFR",
+              "USAR",
+              "USCG",
+              "USMC",
+              "USMCR",
+              "USN",
+              "USNR"
+            ]
+          },
+          "degreeType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "DO",
+              "MD"
+            ]
+          },
+          "honorific": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "AGAF",
+              "ChB",
+              "CDE",
+              "DABSM",
+              "DO",
+              "DSc",
+              "DSc_Hon",
+              "FACP",
+              "FACC",
+              "FACG",
+              "FACR",
+              "FACS",
+              "FAHA",
+              "FASGE",
+              "FASN",
+              "FASNC",
+              "FCCM",
+              "FCCP",
+              "FHM",
+              "FHRS",
+              "FRCP",
+              "FRCS",
+              "FSCAI",
+              "MACC",
+              "MACP",
+              "MBA",
+              "MBBS",
+              "MD",
+              "MEd",
+              "MHS",
+              "MPA",
+              "MPH",
+              "MSPH",
+              "MS",
+              "MSc",
+              "MSCE",
+              "MSEd",
+              "MSN",
+              "PhD",
+              "MA",
+              "FRCPC",
+              "FESC",
+              "FIDSA",
+              "FAAHPM",
+              "SFHM",
+              "JD",
+              "DNP"
+            ]
+          }
+        }
+      },
+      "AddComfortAid": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "adaComfortAidCodes": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AddDegree": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "medicalSchoolId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "degreeEarnedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveEndDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveStartDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "degreeType": {
+            "type": "string",
+            "enum": [
+              "DO",
+              "MD"
+            ]
+          }
+        }
+      },
+      "AddIdentifier": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AddLicense": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "country": {
+            "type": "string",
+            "nullable": true
+          },
+          "jurisdiction": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "licenseType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Training",
+              "Unrestricted"
+            ]
+          },
+          "licenseNumber": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AddNote": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "DA",
+              "LE",
+              "LM",
+              "OT",
+              "SC",
+              "TE",
+              "PC"
+            ]
+          }
+        }
+      },
+      "AddPhoneNumber": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "extension": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneType": {
+            "type": "string",
+            "enum": [
+              "Office",
+              "Mobile",
+              "Home",
+              "Assistant",
+              "Other",
+              "Fax"
+            ]
+          },
+          "countryCode": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AddRestriction": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "restrictionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AddStatusAndAids": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "comfortAids": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "statusCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AddTaxId": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "claimType": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AddressInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "line1": {
+            "type": "string",
+            "nullable": true
+          },
+          "line2": {
+            "type": "string",
+            "nullable": true
+          },
+          "line3": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "regionId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          },
+          "postalCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "Office",
+              "Home",
+              "Other"
+            ]
+          },
+          "primary": {
+            "type": "boolean"
+          },
+          "secure": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AliasInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "middleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "maidenName": {
+            "type": "string",
+            "nullable": true
+          },
+          "salutation": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Mr",
+              "Mrs",
+              "Miss",
+              "Ms",
+              "Dr",
+              "FirstLieutenant",
+              "SecondLieutenant",
+              "Ambassador",
+              "BrigadierGeneral",
+              "Brother",
+              "Captain",
+              "Commander",
+              "Colonel",
+              "Dean",
+              "Ensign",
+              "General",
+              "Governor",
+              "Judge",
+              "Justice",
+              "LieutenantCommander",
+              "LanceCorporal",
+              "Lieutenant",
+              "LieutenantColonel",
+              "LieutenantGeneral",
+              "SubLieutenant",
+              "Major",
+              "MajorGeneral",
+              "MasterSergeant",
+              "Mayor",
+              "Madame",
+              "Monsignor",
+              "Prince",
+              "Professor",
+              "RearAdmiral",
+              "RightReverend",
+              "Rabbi",
+              "Reverend",
+              "ClergyDoctorate",
+              "Priest",
+              "Senator",
+              "Sir",
+              "Sister"
+            ]
+          },
+          "suffix": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Esq",
+              "Jr",
+              "Sr",
+              "I",
+              "II",
+              "III",
+              "IV",
+              "V",
+              "VI",
+              "VII",
+              "VIII",
+              "IX",
+              "X",
+              "BVM",
+              "CFRE",
+              "CLU",
+              "CPA",
+              "CSC",
+              "CSJ",
+              "DC",
+              "DD",
+              "DDS",
+              "DMD",
+              "DVM",
+              "EdD",
+              "JD",
+              "LLD",
+              "OD",
+              "OSB",
+              "PC",
+              "PE",
+              "Ret",
+              "RGS",
+              "RN",
+              "RNC",
+              "SHCJ",
+              "SJ",
+              "SNJM",
+              "SSMO",
+              "USA",
+              "USAF",
+              "USAFR",
+              "USAR",
+              "USCG",
+              "USMC",
+              "USMCR",
+              "USN",
+              "USNR"
+            ]
+          },
+          "degreeType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "DO",
+              "MD"
+            ]
+          },
+          "honorific": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "AGAF",
+              "ChB",
+              "CDE",
+              "DABSM",
+              "DO",
+              "DSc",
+              "DSc_Hon",
+              "FACP",
+              "FACC",
+              "FACG",
+              "FACR",
+              "FACS",
+              "FAHA",
+              "FASGE",
+              "FASN",
+              "FASNC",
+              "FCCM",
+              "FCCP",
+              "FHM",
+              "FHRS",
+              "FRCP",
+              "FRCS",
+              "FSCAI",
+              "MACC",
+              "MACP",
+              "MBA",
+              "MBBS",
+              "MD",
+              "MEd",
+              "MHS",
+              "MPA",
+              "MPH",
+              "MSPH",
+              "MS",
+              "MSc",
+              "MSCE",
+              "MSEd",
+              "MSN",
+              "PhD",
+              "MA",
+              "FRCPC",
+              "FESC",
+              "FIDSA",
+              "FAAHPM",
+              "SFHM",
+              "JD",
+              "DNP"
+            ]
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ComfortAidResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "publicId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "shortDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "modifiedBy": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CountryResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "alpha3Code": {
+            "type": "string",
+            "nullable": true
+          },
+          "alpha2Code": {
+            "type": "string",
+            "nullable": true
+          },
+          "format": {
+            "type": "string",
+            "nullable": true
+          },
+          "isSanctioned": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "postalCodeRegex": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "unm49Code": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "CreateCosponsored": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NameInput"
+              }
+            ]
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "boardName": {
+            "type": "string",
+            "nullable": true
+          },
+          "boardId": {
+            "type": "string",
+            "nullable": true
+          },
+          "abmsId": {
+            "type": "string",
+            "nullable": true
+          },
+          "abimId": {
+            "type": "string",
+            "nullable": true
+          },
+          "taxId": {
+            "type": "string",
+            "nullable": true
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Male",
+              "Female"
+            ]
+          },
+          "addresses": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/AddressInput"
+            }
+          },
+          "phones": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/PhoneInput"
+            }
+          }
+        }
+      },
+      "CreateEmailPin": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "abimId": {
+            "type": "string",
+            "nullable": true
+          },
+          "partialTaxId": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CreateEmailWelcome": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "abimId": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "specialty": {
+            "type": "string",
+            "nullable": true
+          },
+          "completedFirstTimeUserRegistration": {
+            "type": "boolean"
+          },
+          "hasSSNOnFile": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateSchool": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "amaCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          },
+          "federalCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "US",
+              "British",
+              "Foreign",
+              "Osteopathic",
+              "MedicalCouncilOfCanada",
+              "Other"
+            ]
+          },
+          "referenceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "regionId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "EnumResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "shortName": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "GuidBooleanValueTuple": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "LicenseReportCccResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "meetingDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LicenseReportDhhsResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "excluded": {
+            "type": "boolean"
+          },
+          "commentFederal": {
+            "type": "string",
+            "nullable": true
+          },
+          "commentState": {
+            "type": "string",
+            "nullable": true
+          },
+          "commentMilitary": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LicenseReportProfileResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "sequenceId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "abimId": {
+            "type": "string",
+            "nullable": true
+          },
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userAccountsId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "middleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "issue": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LicenseReportProfileResourceIEnumerablePagedCollectionResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "currentPage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "data": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/LicenseReportProfileResource"
+            }
+          }
+        }
+      },
+      "LicenseReportResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "profileId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "basisCategoryType": {
+            "type": "string",
+            "enum": [
+              "CriminalConvictionFraud",
+              "HealthRelatedProblems",
+              "ImproperPrescribing",
+              "MentalImpairment",
+              "Miscellaneous",
+              "ProfessionalConduct",
+              "SexualMisconduct",
+              "StandardOfCare",
+              "SubstanceAbuse"
+            ]
+          },
+          "cccReports": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/LicenseReportCccResource"
+            }
+          },
+          "dhhsReports": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/LicenseReportDhhsResource"
+            }
+          },
+          "stateSections": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/LicenseReportStateSectionResource"
+            }
+          },
+          "summaries": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/LicenseReportSummaryResource"
+            }
+          }
+        }
+      },
+      "LicenseReportStateSectionResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "regionId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "statusType": {
+            "type": "string",
+            "enum": [
+              "Active",
+              "Cleared",
+              "Conditions",
+              "Denied",
+              "Expired",
+              "Inactive",
+              "NoRecord",
+              "Probation",
+              "Reprimand",
+              "Restricted",
+              "Revoked",
+              "Surrendered",
+              "Suspended"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LicenseReportSummaryResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inquiryDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decisionMeetingDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decisionLetterDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "responded": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "appeal": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "received": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "decisionType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Deferred",
+              "Reinstate",
+              "RevokeCertification",
+              "SuspendCertification",
+              "TakeNoAction"
+            ]
+          },
+          "issue": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MedicalSchoolResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "amaCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "fedCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "US",
+              "British",
+              "Foreign",
+              "Osteopathic",
+              "MedicalCouncilOfCanada",
+              "Other"
+            ]
+          },
+          "referenceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "modifiedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "regionId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "countryId": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "NameInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "middleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "maidenName": {
+            "type": "string",
+            "nullable": true
+          },
+          "salutation": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Mr",
+              "Mrs",
+              "Miss",
+              "Ms",
+              "Dr",
+              "FirstLieutenant",
+              "SecondLieutenant",
+              "Ambassador",
+              "BrigadierGeneral",
+              "Brother",
+              "Captain",
+              "Commander",
+              "Colonel",
+              "Dean",
+              "Ensign",
+              "General",
+              "Governor",
+              "Judge",
+              "Justice",
+              "LieutenantCommander",
+              "LanceCorporal",
+              "Lieutenant",
+              "LieutenantColonel",
+              "LieutenantGeneral",
+              "SubLieutenant",
+              "Major",
+              "MajorGeneral",
+              "MasterSergeant",
+              "Mayor",
+              "Madame",
+              "Monsignor",
+              "Prince",
+              "Professor",
+              "RearAdmiral",
+              "RightReverend",
+              "Rabbi",
+              "Reverend",
+              "ClergyDoctorate",
+              "Priest",
+              "Senator",
+              "Sir",
+              "Sister"
+            ]
+          },
+          "suffix": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Esq",
+              "Jr",
+              "Sr",
+              "I",
+              "II",
+              "III",
+              "IV",
+              "V",
+              "VI",
+              "VII",
+              "VIII",
+              "IX",
+              "X",
+              "BVM",
+              "CFRE",
+              "CLU",
+              "CPA",
+              "CSC",
+              "CSJ",
+              "DC",
+              "DD",
+              "DDS",
+              "DMD",
+              "DVM",
+              "EdD",
+              "JD",
+              "LLD",
+              "OD",
+              "OSB",
+              "PC",
+              "PE",
+              "Ret",
+              "RGS",
+              "RN",
+              "RNC",
+              "SHCJ",
+              "SJ",
+              "SNJM",
+              "SSMO",
+              "USA",
+              "USAF",
+              "USAFR",
+              "USAR",
+              "USCG",
+              "USMC",
+              "USMCR",
+              "USN",
+              "USNR"
+            ]
+          },
+          "degreeType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "DO",
+              "MD"
+            ]
+          },
+          "honorific": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "AGAF",
+              "ChB",
+              "CDE",
+              "DABSM",
+              "DO",
+              "DSc",
+              "DSc_Hon",
+              "FACP",
+              "FACC",
+              "FACG",
+              "FACR",
+              "FACS",
+              "FAHA",
+              "FASGE",
+              "FASN",
+              "FASNC",
+              "FCCM",
+              "FCCP",
+              "FHM",
+              "FHRS",
+              "FRCP",
+              "FRCS",
+              "FSCAI",
+              "MACC",
+              "MACP",
+              "MBA",
+              "MBBS",
+              "MD",
+              "MEd",
+              "MHS",
+              "MPA",
+              "MPH",
+              "MSPH",
+              "MS",
+              "MSc",
+              "MSCE",
+              "MSEd",
+              "MSN",
+              "PhD",
+              "MA",
+              "FRCPC",
+              "FESC",
+              "FIDSA",
+              "FAAHPM",
+              "SFHM",
+              "JD",
+              "DNP"
+            ]
+          }
+        }
+      },
+      "PhoneInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "extension": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneType": {
+            "type": "string",
+            "enum": [
+              "Office",
+              "Mobile",
+              "Home",
+              "Assistant",
+              "Other",
+              "Fax"
+            ]
+          },
+          "countryCode": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ProfileAdaComfortAidResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "adaComfortAidId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ProfileAdaStatusResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "adaStatusId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ProfileAddressResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "address1": {
+            "type": "string",
+            "nullable": true
+          },
+          "address2": {
+            "type": "string",
+            "nullable": true
+          },
+          "address3": {
+            "type": "string",
+            "nullable": true
+          },
+          "address4": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "postalCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "countryId": {
+            "type": "string",
+            "nullable": true
+          },
+          "regionId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "addressType": {
+            "type": "string",
+            "enum": [
+              "Office",
+              "Home",
+              "Other"
+            ]
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "isSecure": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProfileAliasResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "middleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "maidenName": {
+            "type": "string",
+            "nullable": true
+          },
+          "salutation": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Mr",
+              "Mrs",
+              "Miss",
+              "Ms",
+              "Dr",
+              "FirstLieutenant",
+              "SecondLieutenant",
+              "Ambassador",
+              "BrigadierGeneral",
+              "Brother",
+              "Captain",
+              "Commander",
+              "Colonel",
+              "Dean",
+              "Ensign",
+              "General",
+              "Governor",
+              "Judge",
+              "Justice",
+              "LieutenantCommander",
+              "LanceCorporal",
+              "Lieutenant",
+              "LieutenantColonel",
+              "LieutenantGeneral",
+              "SubLieutenant",
+              "Major",
+              "MajorGeneral",
+              "MasterSergeant",
+              "Mayor",
+              "Madame",
+              "Monsignor",
+              "Prince",
+              "Professor",
+              "RearAdmiral",
+              "RightReverend",
+              "Rabbi",
+              "Reverend",
+              "ClergyDoctorate",
+              "Priest",
+              "Senator",
+              "Sir",
+              "Sister"
+            ]
+          },
+          "suffix": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Esq",
+              "Jr",
+              "Sr",
+              "I",
+              "II",
+              "III",
+              "IV",
+              "V",
+              "VI",
+              "VII",
+              "VIII",
+              "IX",
+              "X",
+              "BVM",
+              "CFRE",
+              "CLU",
+              "CPA",
+              "CSC",
+              "CSJ",
+              "DC",
+              "DD",
+              "DDS",
+              "DMD",
+              "DVM",
+              "EdD",
+              "JD",
+              "LLD",
+              "OD",
+              "OSB",
+              "PC",
+              "PE",
+              "Ret",
+              "RGS",
+              "RN",
+              "RNC",
+              "SHCJ",
+              "SJ",
+              "SNJM",
+              "SSMO",
+              "USA",
+              "USAF",
+              "USAFR",
+              "USAR",
+              "USCG",
+              "USMC",
+              "USMCR",
+              "USN",
+              "USNR"
+            ]
+          },
+          "degreeType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "DO",
+              "MD"
+            ]
+          },
+          "honorific": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "AGAF",
+              "ChB",
+              "CDE",
+              "DABSM",
+              "DO",
+              "DSc",
+              "DSc_Hon",
+              "FACP",
+              "FACC",
+              "FACG",
+              "FACR",
+              "FACS",
+              "FAHA",
+              "FASGE",
+              "FASN",
+              "FASNC",
+              "FCCM",
+              "FCCP",
+              "FHM",
+              "FHRS",
+              "FRCP",
+              "FRCS",
+              "FSCAI",
+              "MACC",
+              "MACP",
+              "MBA",
+              "MBBS",
+              "MD",
+              "MEd",
+              "MHS",
+              "MPA",
+              "MPH",
+              "MSPH",
+              "MS",
+              "MSc",
+              "MSCE",
+              "MSEd",
+              "MSN",
+              "PhD",
+              "MA",
+              "FRCPC",
+              "FESC",
+              "FIDSA",
+              "FAAHPM",
+              "SFHM",
+              "JD",
+              "DNP"
+            ]
+          },
+          "firstNameSoundex": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastNameSoundex": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ProfileCultureResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "type": "string",
+            "enum": [
+              "AfricanAmerican",
+              "AlaskanNative",
+              "American",
+              "NativeAmerican",
+              "Australian",
+              "Canadian",
+              "Caribbean",
+              "CentralAmerican",
+              "CentralAsian",
+              "EastAsian",
+              "European",
+              "FirstNationsPeopleorMetis",
+              "IndigenousPeoplesAmericas",
+              "Mexican",
+              "MiddleEastern",
+              "NativeHawaiian",
+              "NorthAfrican",
+              "PacificIslander",
+              "SouthAmerican",
+              "SouthAsian",
+              "SoutheastAsian",
+              "SubSaharanAfrican",
+              "Other"
+            ]
+          },
+          "other": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ProfileEthnicityResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ProfileIdentifierResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ProfileListResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProfileNameResource"
+              }
+            ]
+          },
+          "isRetired": {
+            "type": "boolean"
+          },
+          "isDeceased": {
+            "type": "boolean"
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "birthCountry": {
+            "type": "string",
+            "nullable": true
+          },
+          "inActiveAppeal": {
+            "type": "boolean"
+          },
+          "inRestitution": {
+            "type": "boolean"
+          },
+          "isSearchable": {
+            "type": "boolean"
+          },
+          "hasLicenseIssue": {
+            "type": "boolean"
+          },
+          "emailAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "abimId": {
+            "type": "string",
+            "nullable": true
+          },
+          "abmsId": {
+            "type": "string",
+            "nullable": true
+          },
+          "isADA": {
+            "type": "boolean"
+          },
+          "specialConsideration": {
+            "type": "boolean"
+          },
+          "officeOverride": {
+            "type": "boolean"
+          },
+          "pendingIMPlan": {
+            "type": "boolean"
+          },
+          "pathwayType": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "candidateId": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ProfileMedicalLicenseResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "countryCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "region": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Training",
+              "Unrestricted"
+            ]
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "licenseNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "isDeleted": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "Unknown",
+              "NotLicensed",
+              "IsLicensed"
+            ]
+          }
+        }
+      },
+      "ProfileMedicalSchoolResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "medicalSchoolId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "degreeEarnedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "degreeType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "DO",
+              "MD"
+            ]
+          },
+          "effectiveEndDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveStartDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProfileNameResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "middleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "maidenName": {
+            "type": "string",
+            "nullable": true
+          },
+          "salutation": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Mr",
+              "Mrs",
+              "Miss",
+              "Ms",
+              "Dr",
+              "FirstLieutenant",
+              "SecondLieutenant",
+              "Ambassador",
+              "BrigadierGeneral",
+              "Brother",
+              "Captain",
+              "Commander",
+              "Colonel",
+              "Dean",
+              "Ensign",
+              "General",
+              "Governor",
+              "Judge",
+              "Justice",
+              "LieutenantCommander",
+              "LanceCorporal",
+              "Lieutenant",
+              "LieutenantColonel",
+              "LieutenantGeneral",
+              "SubLieutenant",
+              "Major",
+              "MajorGeneral",
+              "MasterSergeant",
+              "Mayor",
+              "Madame",
+              "Monsignor",
+              "Prince",
+              "Professor",
+              "RearAdmiral",
+              "RightReverend",
+              "Rabbi",
+              "Reverend",
+              "ClergyDoctorate",
+              "Priest",
+              "Senator",
+              "Sir",
+              "Sister"
+            ]
+          },
+          "suffix": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Esq",
+              "Jr",
+              "Sr",
+              "I",
+              "II",
+              "III",
+              "IV",
+              "V",
+              "VI",
+              "VII",
+              "VIII",
+              "IX",
+              "X",
+              "BVM",
+              "CFRE",
+              "CLU",
+              "CPA",
+              "CSC",
+              "CSJ",
+              "DC",
+              "DD",
+              "DDS",
+              "DMD",
+              "DVM",
+              "EdD",
+              "JD",
+              "LLD",
+              "OD",
+              "OSB",
+              "PC",
+              "PE",
+              "Ret",
+              "RGS",
+              "RN",
+              "RNC",
+              "SHCJ",
+              "SJ",
+              "SNJM",
+              "SSMO",
+              "USA",
+              "USAF",
+              "USAFR",
+              "USAR",
+              "USCG",
+              "USMC",
+              "USMCR",
+              "USN",
+              "USNR"
+            ]
+          },
+          "degreeType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "DO",
+              "MD"
+            ]
+          },
+          "honorific": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "AGAF",
+              "ChB",
+              "CDE",
+              "DABSM",
+              "DO",
+              "DSc",
+              "DSc_Hon",
+              "FACP",
+              "FACC",
+              "FACG",
+              "FACR",
+              "FACS",
+              "FAHA",
+              "FASGE",
+              "FASN",
+              "FASNC",
+              "FCCM",
+              "FCCP",
+              "FHM",
+              "FHRS",
+              "FRCP",
+              "FRCS",
+              "FSCAI",
+              "MACC",
+              "MACP",
+              "MBA",
+              "MBBS",
+              "MD",
+              "MEd",
+              "MHS",
+              "MPA",
+              "MPH",
+              "MSPH",
+              "MS",
+              "MSc",
+              "MSCE",
+              "MSEd",
+              "MSN",
+              "PhD",
+              "MA",
+              "FRCPC",
+              "FESC",
+              "FIDSA",
+              "FAAHPM",
+              "SFHM",
+              "JD",
+              "DNP"
+            ]
+          }
+        }
+      },
+      "ProfileNoteResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "noteType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "DA",
+              "LE",
+              "LM",
+              "OT",
+              "SC",
+              "TE",
+              "PC"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProfilePhoneResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "extension": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneType": {
+            "type": "string",
+            "enum": [
+              "Office",
+              "Mobile",
+              "Home",
+              "Assistant",
+              "Other",
+              "Fax"
+            ]
+          },
+          "countryCode": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ProfileResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProfileNameResource"
+              }
+            ]
+          },
+          "isRetired": {
+            "type": "boolean"
+          },
+          "isDeceased": {
+            "type": "boolean"
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Male",
+              "Female"
+            ]
+          },
+          "genderType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Man",
+              "Woman",
+              "Nonbinary",
+              "Other"
+            ]
+          },
+          "genderTypeOther": {
+            "type": "string",
+            "nullable": true
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "birthCountry": {
+            "type": "string",
+            "nullable": true
+          },
+          "inActiveAppeal": {
+            "type": "boolean"
+          },
+          "inRestitution": {
+            "type": "boolean"
+          },
+          "isSearchable": {
+            "type": "boolean"
+          },
+          "hasLicenseIssue": {
+            "type": "boolean"
+          },
+          "emailAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "abimId": {
+            "type": "string",
+            "nullable": true
+          },
+          "abmsId": {
+            "type": "string",
+            "nullable": true
+          },
+          "isADA": {
+            "type": "boolean"
+          },
+          "specialConsideration": {
+            "type": "boolean"
+          },
+          "officeOverride": {
+            "type": "boolean"
+          },
+          "pendingIMPlan": {
+            "type": "boolean"
+          },
+          "pathwayType": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "candidateId": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneNumbers": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ProfilePhoneResource"
+            }
+          },
+          "medicalLicenses": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ProfileMedicalLicenseResource"
+            }
+          },
+          "addresses": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ProfileAddressResource"
+            }
+          },
+          "aliases": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ProfileAliasResource"
+            }
+          },
+          "adaStatuses": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ProfileAdaStatusResource"
+            }
+          },
+          "adaComfortAids": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ProfileAdaComfortAidResource"
+            }
+          },
+          "restrictions": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ProfileRestrictionResource"
+            }
+          },
+          "medicalSchools": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ProfileMedicalSchoolResource"
+            }
+          },
+          "identifiers": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ProfileIdentifierResource"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ProfileNoteResource"
+            }
+          },
+          "cultures": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ProfileCultureResource"
+            }
+          },
+          "ethnicities": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ProfileEthnicityResource"
+            }
+          }
+        }
+      },
+      "ProfileResourceIEnumerablePagedCollectionResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "currentPage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "data": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ProfileResource"
+            }
+          }
+        }
+      },
+      "ProfileRestrictionResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "restrictionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "RegionResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "RegisterAccount": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "abimId": {
+            "type": "string",
+            "nullable": true
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "taxId": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReportCcc": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "meetingDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReportDhhs": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "excluded": {
+            "type": "boolean"
+          },
+          "commentFederal": {
+            "type": "string",
+            "nullable": true
+          },
+          "commentState": {
+            "type": "string",
+            "nullable": true
+          },
+          "commentMilitary": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReportStateSection": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "regionId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "reportStatus": {
+            "type": "string",
+            "enum": [
+              "Active",
+              "Cleared",
+              "Conditions",
+              "Denied",
+              "Expired",
+              "Inactive",
+              "NoRecord",
+              "Probation",
+              "Reprimand",
+              "Restricted",
+              "Revoked",
+              "Surrendered",
+              "Suspended"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReportSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "inquiryDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decisionMeetingDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decisionLetterDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decisionType": {
+            "type": "string",
+            "enum": [
+              "Deferred",
+              "Reinstate",
+              "RevokeCertification",
+              "SuspendCertification",
+              "TakeNoAction"
+            ]
+          },
+          "responded": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "appeal": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "received": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "issue": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "RestrictionResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "publicId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SurveyResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ASSESSMENT",
+              "COMMUNITY",
+              "TRAINING",
+              "MOC",
+              "OPERATIONAL",
+              "RESEARCH"
+            ]
+          },
+          "abimId": {
+            "type": "string",
+            "nullable": true
+          },
+          "discipline": {
+            "type": "string",
+            "nullable": true
+          },
+          "link": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "rationale": {
+            "type": "string",
+            "nullable": true
+          },
+          "completed": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateAdaStatus": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statusId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "creator": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateAddress": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "line1": {
+            "type": "string",
+            "nullable": true
+          },
+          "line2": {
+            "type": "string",
+            "nullable": true
+          },
+          "line3": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          },
+          "postalCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "Office",
+              "Home",
+              "Other"
+            ]
+          },
+          "primary": {
+            "type": "boolean"
+          },
+          "secure": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateAlias": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "inputs": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/AliasInput"
+            }
+          }
+        }
+      },
+      "UpdateComfortAid": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "codes": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateDegree": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "newSchoolId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "degreeEarnedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveEndDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveStartDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "degreeType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "DO",
+              "MD"
+            ]
+          }
+        }
+      },
+      "UpdateEmail": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "emailAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "UpdateFromCrm": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "crmId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "addressLine1": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine2": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine3": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
+          },
+          "zipCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateFromCrmByAbimId": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "crmId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "abimId": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine1": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine2": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine3": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
+          },
+          "zipCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateIdentifier": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateLicense": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "country": {
+            "type": "string",
+            "nullable": true
+          },
+          "jurisdiction": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "licenseType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Training",
+              "Unrestricted"
+            ]
+          },
+          "licenseNumber": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateLicenseStatus": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "Unknown",
+              "NotLicensed",
+              "IsLicensed"
+            ]
+          }
+        }
+      },
+      "UpdateName": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "middleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "maidenName": {
+            "type": "string",
+            "nullable": true
+          },
+          "salutation": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Mr",
+              "Mrs",
+              "Miss",
+              "Ms",
+              "Dr",
+              "FirstLieutenant",
+              "SecondLieutenant",
+              "Ambassador",
+              "BrigadierGeneral",
+              "Brother",
+              "Captain",
+              "Commander",
+              "Colonel",
+              "Dean",
+              "Ensign",
+              "General",
+              "Governor",
+              "Judge",
+              "Justice",
+              "LieutenantCommander",
+              "LanceCorporal",
+              "Lieutenant",
+              "LieutenantColonel",
+              "LieutenantGeneral",
+              "SubLieutenant",
+              "Major",
+              "MajorGeneral",
+              "MasterSergeant",
+              "Mayor",
+              "Madame",
+              "Monsignor",
+              "Prince",
+              "Professor",
+              "RearAdmiral",
+              "RightReverend",
+              "Rabbi",
+              "Reverend",
+              "ClergyDoctorate",
+              "Priest",
+              "Senator",
+              "Sir",
+              "Sister"
+            ]
+          },
+          "suffix": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Esq",
+              "Jr",
+              "Sr",
+              "I",
+              "II",
+              "III",
+              "IV",
+              "V",
+              "VI",
+              "VII",
+              "VIII",
+              "IX",
+              "X",
+              "BVM",
+              "CFRE",
+              "CLU",
+              "CPA",
+              "CSC",
+              "CSJ",
+              "DC",
+              "DD",
+              "DDS",
+              "DMD",
+              "DVM",
+              "EdD",
+              "JD",
+              "LLD",
+              "OD",
+              "OSB",
+              "PC",
+              "PE",
+              "Ret",
+              "RGS",
+              "RN",
+              "RNC",
+              "SHCJ",
+              "SJ",
+              "SNJM",
+              "SSMO",
+              "USA",
+              "USAF",
+              "USAFR",
+              "USAR",
+              "USCG",
+              "USMC",
+              "USMCR",
+              "USN",
+              "USNR"
+            ]
+          },
+          "degreeType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "DO",
+              "MD"
+            ]
+          },
+          "honorific": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "AGAF",
+              "ChB",
+              "CDE",
+              "DABSM",
+              "DO",
+              "DSc",
+              "DSc_Hon",
+              "FACP",
+              "FACC",
+              "FACG",
+              "FACR",
+              "FACS",
+              "FAHA",
+              "FASGE",
+              "FASN",
+              "FASNC",
+              "FCCM",
+              "FCCP",
+              "FHM",
+              "FHRS",
+              "FRCP",
+              "FRCS",
+              "FSCAI",
+              "MACC",
+              "MACP",
+              "MBA",
+              "MBBS",
+              "MD",
+              "MEd",
+              "MHS",
+              "MPA",
+              "MPH",
+              "MSPH",
+              "MS",
+              "MSc",
+              "MSCE",
+              "MSEd",
+              "MSN",
+              "PhD",
+              "MA",
+              "FRCPC",
+              "FESC",
+              "FIDSA",
+              "FAAHPM",
+              "SFHM",
+              "JD",
+              "DNP"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "creator": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateNote": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "DA",
+              "LE",
+              "LM",
+              "OT",
+              "SC",
+              "TE",
+              "PC"
+            ]
+          }
+        }
+      },
+      "UpdatePhone": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "extension": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneType": {
+            "type": "string",
+            "enum": [
+              "Office",
+              "Mobile",
+              "Home",
+              "Assistant",
+              "Other",
+              "Fax"
+            ]
+          },
+          "countryCode": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateProfile": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "gender": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Male",
+              "Female"
+            ]
+          },
+          "genderType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Man",
+              "Woman",
+              "Nonbinary",
+              "Other"
+            ]
+          },
+          "genderTypeOther": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "birthCountry": {
+            "type": "string",
+            "nullable": true
+          },
+          "retired": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "deceased": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "specialConsideration": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "activeAppeal": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "restitution": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "officeOverride": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "pendingImPlan": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "degreeType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "DO",
+              "MD"
+            ]
+          },
+          "pathwayType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "C",
+              "F",
+              "J",
+              "K",
+              "L",
+              "M",
+              "O",
+              "P",
+              "R"
+            ]
+          },
+          "ethnicities": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "NativeAmerican",
+                "Asian",
+                "Black",
+                "Hispanic",
+                "PacificIslander",
+                "White"
+              ]
+            }
+          },
+          "cultures": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "AfricanAmerican",
+                "AlaskanNative",
+                "American",
+                "NativeAmerican",
+                "Australian",
+                "Canadian",
+                "Caribbean",
+                "CentralAmerican",
+                "CentralAsian",
+                "EastAsian",
+                "European",
+                "FirstNationsPeopleorMetis",
+                "IndigenousPeoplesAmericas",
+                "Mexican",
+                "MiddleEastern",
+                "NativeHawaiian",
+                "NorthAfrican",
+                "PacificIslander",
+                "SouthAmerican",
+                "SouthAsian",
+                "SoutheastAsian",
+                "SubSaharanAfrican",
+                "Other"
+              ]
+            }
+          },
+          "otherCulture": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateReport": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reportId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "basisCategoryType": {
+            "type": "string",
+            "enum": [
+              "CriminalConvictionFraud",
+              "HealthRelatedProblems",
+              "ImproperPrescribing",
+              "MentalImpairment",
+              "Miscellaneous",
+              "ProfessionalConduct",
+              "SexualMisconduct",
+              "StandardOfCare",
+              "SubstanceAbuse"
+            ]
+          },
+          "ccc": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ReportCcc"
+            }
+          },
+          "dhhs": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ReportDhhs"
+            }
+          },
+          "stateSections": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ReportStateSection"
+            }
+          },
+          "summaries": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ReportSummary"
+            }
+          }
+        }
+      },
+      "UpdateSchool": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "amaCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          },
+          "federalCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "US",
+              "British",
+              "Foreign",
+              "Osteopathic",
+              "MedicalCouncilOfCanada",
+              "Other"
+            ]
+          },
+          "referenceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "regionId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateTaxId": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "claimType": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VocProfileResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "publicId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "abimId": {
+            "type": "string",
+            "nullable": true
+          },
+          "userAccountsId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "npiNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "credential": {
+            "type": "boolean"
+          },
+          "deceased": {
+            "type": "boolean"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "middleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "suffix": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Esq",
+              "Jr",
+              "Sr",
+              "I",
+              "II",
+              "III",
+              "IV",
+              "V",
+              "VI",
+              "VII",
+              "VIII",
+              "IX",
+              "X",
+              "BVM",
+              "CFRE",
+              "CLU",
+              "CPA",
+              "CSC",
+              "CSJ",
+              "DC",
+              "DD",
+              "DDS",
+              "DMD",
+              "DVM",
+              "EdD",
+              "JD",
+              "LLD",
+              "OD",
+              "OSB",
+              "PC",
+              "PE",
+              "Ret",
+              "RGS",
+              "RN",
+              "RNC",
+              "SHCJ",
+              "SJ",
+              "SNJM",
+              "SSMO",
+              "USA",
+              "USAF",
+              "USAFR",
+              "USAR",
+              "USCG",
+              "USMC",
+              "USMCR",
+              "USN",
+              "USNR"
+            ]
+          },
+          "firstNameSoundex": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastNameSoundex": {
+            "type": "string",
+            "nullable": true
+          },
+          "aliasId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "aliasFirstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "aliasMiddleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "aliasLastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "aliasSuffix": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Esq",
+              "Jr",
+              "Sr",
+              "I",
+              "II",
+              "III",
+              "IV",
+              "V",
+              "VI",
+              "VII",
+              "VIII",
+              "IX",
+              "X",
+              "BVM",
+              "CFRE",
+              "CLU",
+              "CPA",
+              "CSC",
+              "CSJ",
+              "DC",
+              "DD",
+              "DDS",
+              "DMD",
+              "DVM",
+              "EdD",
+              "JD",
+              "LLD",
+              "OD",
+              "OSB",
+              "PC",
+              "PE",
+              "Ret",
+              "RGS",
+              "RN",
+              "RNC",
+              "SHCJ",
+              "SJ",
+              "SNJM",
+              "SSMO",
+              "USA",
+              "USAF",
+              "USAFR",
+              "USAR",
+              "USCG",
+              "USMC",
+              "USMCR",
+              "USN",
+              "USNR"
+            ]
+          },
+          "aliasFirstNameSoundex": {
+            "type": "string",
+            "nullable": true
+          },
+          "aliasLastNameSoundex": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageHref": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "hasLicenseIssue": {
+            "type": "boolean"
+          },
+          "inRestitution": {
+            "type": "boolean"
+          },
+          "isRetired": {
+            "type": "boolean"
+          },
+          "inActiveAppeal": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "oauth2": {
+        "type": "oauth2",
+        "description": "JWT Authorization header using the Bearer scheme.",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://devidentitysts.abim.org/identity/connect/token",
+            "scopes": {
+              "pf.r": "read",
+              "pf.w": "write"
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2": [
+        null,
+        null
+      ]
+    }
+  ]
+}

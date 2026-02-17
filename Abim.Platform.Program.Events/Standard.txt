@@ -1,0 +1,1 @@
+﻿This project supports .Net Standard 2.0

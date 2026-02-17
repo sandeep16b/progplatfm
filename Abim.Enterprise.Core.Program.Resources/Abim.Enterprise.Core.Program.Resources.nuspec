@@ -1,0 +1,30 @@
+﻿<?xml version="1.0"?>
+<package >
+	<metadata>
+		<id>$id$</id>
+		<version>$version$</version>
+		<title>$title$</title>
+		<authors>$author$</authors>
+		<owners>$author$</owners>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>$description$</description>
+		<dependencies>
+			<group targetFramework="net452">
+				<dependency id="WebApiContrib.Formatting.Protobuf" version="0.9.5.0"/>
+				<dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.3"/>
+				<dependency id="protobuf-net" version="2.0.0.480"/>
+				<dependency id="DocumentFormat.OpenXml" version="2.7.2" />
+				<dependency id="Newtonsoft.Json" version="10.0.3"/>
+			</group>
+			<group targetFramework="netstandard2.0">
+				<dependency id="WebApiContrib.Core.Formatter.Protobuf" version="2.0.1"/>
+				<dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.7"/>
+				<dependency id="DocumentFormat.OpenXml" version="2.7.2" />
+				<dependency id="Newtonsoft.Json" version="10.0.3"/>
+			</group>
+		</dependencies>
+	</metadata>
+	<files>
+		<file src="bin\**\Release\**\Abim.*.dll" target="lib"/>
+	</files>
+</package>

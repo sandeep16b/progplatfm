@@ -1,0 +1,1 @@
+﻿This project is for building a nuget package for making RESTful Interservice calls to the Program platform from other platforms

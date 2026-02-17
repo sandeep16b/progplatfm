@@ -1,0 +1,1 @@
+﻿This project is for building a nuget package that holds Program events which are either published/sent by Program and consumed by other platforms, or published/sent by other platforms specifically to be consumed by Program. It also contains a folder of internal-only events only used within the Program platform

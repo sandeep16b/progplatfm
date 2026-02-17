@@ -1,0 +1,193 @@
+{
+	"variables": [],
+	"info": {
+		"name": "2 Local Certification",
+		"_postman_id": "e7073334-5843-f386-12f5-185c21d2186c",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var data = JSON.parse(responseBody);\r",
+							"postman.setEnvironmentVariable(\"a\", 'Bearer ' + data.access_token);\r",
+							"postman.setGlobalVariable(\"Authorization\", 'Bearer ' + data.access_token);"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "https://devidentity2.abim.org/identity/connect/token",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic Q2VydGlmaWNhdGlvbkFwaTpDZXJ0aWZpY2F0aW9uQXBp",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "scope",
+							"value": "webapi",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "username",
+							"value": "ProfileAdmin",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "password",
+							"value": "Password1",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text",
+							"enabled": true
+						}
+					]
+				},
+				"description": "Token"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Certifications",
+			"request": {
+				"url": "https://localhost:44310/api/v1.0/certifications",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{a}}",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": "Get Certifications"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Certifications (Post)",
+			"request": {
+				"url": "https://localhost:44310/api/v1.0/certifications",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{a}}",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"PageIndex\": 1,\n\t\"PageSize\": 2,\n\t\"Sorts\":\n\t[\n\t\t{\n\t\t\t\"SortBy\": \"Name\",\n\t\t\t\"SortDirection\": \"Ascending\"\n\t\t}\n\t]\n}"
+				},
+				"description": "Get Certifications (Post)"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Credentials",
+			"request": {
+				"url": "https://localhost:44310/api/v1.0/credentials",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{a}}",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": "Get Credentials"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Credentials (Post)",
+			"request": {
+				"url": "https://localhost:44310/api/v1.0/credentials",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{a}}",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"PageDefinition\":\n\t{\n\t\t\"PageIndex\": 1,\n\t\t\"PageSize\": 2,\n\t\t\"Sorts\":\n\t\t[\n\t\t\t{\n\t\t\t\t\"SortBy\": \"Type\",\n\t\t\t\t\"SortDirection\": \"Ascending\"\n\t\t\t}\n\t\t]\n\t}\n}"
+				},
+				"description": "Get Credentials (Post)"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Sources",
+			"request": {
+				"url": "https://localhost:44310/api/v1.0/sources",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{a}}",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": "Get Sources"
+			},
+			"response": []
+		},
+		{
+			"name": "Credential Options",
+			"request": {
+				"url": "https://localhost:44310/api/v1.0/credentials",
+				"method": "OPTIONS",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": "Credential Options"
+			},
+			"response": []
+		}
+	]
+}

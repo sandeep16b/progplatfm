@@ -1,0 +1,288 @@
+﻿using Abim.Enterprise.Core.Registration.Enums;
+using Abim.Enterprise.Core.Registration.Resources;
+using Abim.Enterprise.Core.Util.EnumResource;
+using Abim.Platform.Program.Extensions.ExternalResponses;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using static Abim.Platform.Program.App.Util.Constants;
+
+namespace Abim.Platform.Program.App.Extensions.Registration
+{
+    /// <summary>
+    /// RegistrationExtensions
+    /// </summary>
+    public static class RegistrationExtensions
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TEnum"></typeparam>
+        /// <param name="resource"></param>
+        /// <returns></returns>
+        public static TEnum ToEnum<TEnum>(this EnumValueResource<TEnum> resource)
+            where TEnum : struct, IConvertible, IComparable, IFormattable
+        {
+            return EnumAttributes.ToEnum<TEnum>(resource.Code);
+        }
+
+        // below was added from Core.Interservices 
+        /// <summary>
+        /// Exam Test Date is used to determine the date the person took the exam. 
+        /// Not all people have a seat appointment (eg. old data, exams not administered by abim) 
+        /// so we have to fall back to admin date when there is no testing date.
+        /// </summary>
+        /// <param name="registration"></param>
+        /// <returns></returns>
+        public static DateTime ExamTestDate(this RegistrationResource registration)
+        {
+            // based on DB structure AdministrationDate cannot be null in Administration table
+            return registration.Seats.Count > 0 ? registration.Seats.Min(a => a.SeatDate) : registration.AdministrationDate;
+        }
+
+        /// <summary>
+        /// Returns the minimum seat date (if there are seats) or the delivery start date.
+        /// If neither are present, returns the administration date.
+        /// </summary>
+        /// <param name="registration"></param>
+        /// <returns></returns>
+        public static DateTime MinSeatOrDeliveryDate(this RegistrationResource registration)
+        {
+            if (registration.Seats != null && registration.Seats.Any())
+                return registration.Seats.Min(x => x.SeatDate);
+            else
+            {
+                if (registration.DeliveryStartDate.HasValue)
+                    return registration.DeliveryStartDate.Value;
+                else
+                    return registration.AdministrationDate;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the specified registration is 2 Year Kci.
+        /// </summary>
+        /// <param name="registration">The registration.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified registration is 2 Year MOC; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsKci(this RegistrationResource registration)
+        {
+            return (registration.ExamType != null && registration.ExamType.Value == ExamType.Kci.ToString());
+        }
+
+        /// <summary>
+        /// Determines whether the specified registration is 10 Year MOC.
+        /// </summary>
+        /// <param name="registration">The registration.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified registration is 2 Year MOC; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsMoc(this RegistrationResource registration)
+        {
+            return (registration.ExamType != null && registration.ExamType.Value == ExamType.Moc.ToString());
+        }
+
+        /// <summary>
+        /// Determines whether the specified registration is Initial cert exam.
+        /// </summary>
+        /// <param name="registration">The registration.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified registration is 2 Year MOC; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsInitial(this RegistrationResource registration)
+        {
+            return (registration.Result == ExamType.Cert.ToString());
+        }
+
+        /// <summary>
+        ///   Determines exam  pass or fail .
+        /// </summary>
+        /// <param name="registration">The registration.</param>
+        /// <returns>
+        ///   <c>true</c> or  <c>false</c>.
+        /// </returns>
+        public static bool IsPassExam(this RegistrationResource registration)
+        {
+            return (registration.Result == ExamResultType.Pass.ToString());
+        }
+        /// <summary>
+        ///  Determines exam fail
+        /// </summary>
+        /// <param name="registration">The registration.</param>
+        /// <returns>
+        ///   <c>true</c> or  <c>false</c>.
+        /// </returns>
+        public static bool IsFailExam(this RegistrationResource registration)
+        {
+            return (registration.Result == ExamResultType.Fail.ToString());
+        }
+        /// <summary>
+        ///  IsFailIndIncUtt
+        /// </summary>
+        /// <param name="registration">The registration.</param>
+        /// <returns>
+        ///   <c>true</c> or  <c>false</c>.
+        /// </returns>
+        public static bool IsFailIndIncUtt(this RegistrationResource registration)
+        {
+            return ExamResultConstants.ExamResultFailIndIncUtt.Contains(registration.ExamResult.Result.ToEnum());
+        }
+        /// <summary>
+        ///  IsPassFailIndInvIncUtt
+        /// </summary>
+        /// <param name="registration">The registration.</param>
+        /// <returns>
+        ///   <c>true</c> or  <c>false</c>.
+        /// </returns>
+        public static bool IsPassFailIndInvIncUtt(this RegistrationResource registration)
+        {
+            return ExamResultConstants.ExamResultPassFailIndInvIncUtt.Contains(registration.ExamResult.Result.ToEnum());
+        }
+        /// <summary>
+        ///  IsPassFailIndIncUtt
+        /// </summary>
+        /// <param name="registration">The registration.</param>
+        /// <returns>
+        ///   <c>true</c> or  <c>false</c>.
+        /// </returns>
+        public static bool IsPassFailIndIncUtt(this RegistrationResource registration)
+        {
+            return ExamResultConstants.ExamResultPassFailIndIncUtt.Contains(registration.ExamResult.Result.ToEnum());
+        }
+        /// <summary>
+        ///  IsIndIncUtt
+        /// </summary>
+        /// <param name="registration">The registration.</param>
+        /// <returns>
+        ///   <c>true</c> or  <c>false</c>.
+        /// </returns>
+        public static bool IsIndIncUtt(this RegistrationResource registration)
+        {
+            return ExamResultConstants.ExamResultIndIncUtt.Contains(registration.ExamResult.Result.ToEnum());
+        }
+
+        #region IEnumerable<CMPRegistrationResource>
+        /// <summary>
+        /// Determines if a collection of CMPRegistrationResources has a passing exam in 
+        /// the date range specified and for the certificate specified.
+        /// </summary>
+        /// <param name="registrations"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="certificationGuid"></param>
+        /// <param name="issuanceDateOfTLCP"></param>
+        /// <returns></returns>
+        public static bool IfPassExamInRange(this IEnumerable<CMPRegistrationResource> registrations,
+                                            DateTime startDate,
+                                            DateTime endDate,
+                                            Guid certificationGuid,
+                                            DateTime? issuanceDateOfTLCP = null)
+        {
+            return registrations
+                             .Where(reg =>
+                                reg.TestDate.Date >= startDate.Date
+                                    && reg.TestDate.Date <= endDate.Date
+                                    && (!issuanceDateOfTLCP.HasValue || reg.TestDate.Date > issuanceDateOfTLCP.Value.Date))
+                             .Where(p => p.ExamResult.ToEnum() == ExamResultType.Pass)
+                             .Where(e => e.CMPExam.CertificationId == certificationGuid)
+                             //No need to check Exam Type. CMPs are their own animal.
+                             .Any();
+        }
+        #endregion IEnumerable<CMPRegistrationResource>
+
+        #region IEnumerable<RegistrationResource>
+        /// <summary>
+        /// IfPassExamInRange
+        /// </summary>
+        /// <param name="registrations"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="examType"></param>
+        /// <param name="certificationGuid"></param>
+        /// <param name="issuanceDateOfTLCP"></param>
+        /// <returns></returns>
+        public static bool IfPassExamInRange(this IEnumerable<RegistrationResource> registrations,
+                                            DateTime startDate,
+                                            DateTime endDate,
+                                            ExamType examType,
+                                            Guid certificationGuid,
+                                            DateTime? issuanceDateOfTLCP = null)
+        {
+            return registrations
+                             .Where(reg => reg.Seats.Count > 0
+                                    && reg.Seats.Min(a => a.SeatDate).Date >= startDate.Date
+                                    && reg.Seats.Min(a => a.SeatDate).Date <= endDate.Date
+                                    && (!issuanceDateOfTLCP.HasValue || reg.Seats.Min(a => a.SeatDate).Date > issuanceDateOfTLCP.Value.Date))
+                             .Where(p => p.Result == ExamResultType.Pass.ToString())
+                             .Where(e => e.CertificationId == certificationGuid)
+                             .Where(reg => reg.ExamType != null && reg.ExamType.Value == examType.ToString())
+                             .Any();
+        }
+
+        /// <summary>
+        /// GetRecentExamPassDate - Get most Recent Exam Pass Date for given exam type and certificationId
+        /// </summary>
+        /// <param name="registrations"></param>
+        /// <param name="examType"></param>
+        /// <param name="CertificationId"></param>
+        /// <returns></returns>
+        public static DateTime? GetRecentExamPassDate(this IEnumerable<RegistrationResource> registrations,
+                                           ExamType examType,
+                                           Guid CertificationId)
+        {
+            if (registrations.Count() == 0) return null;
+
+            DateTime? recentExamDate = null;
+
+            var mostRecentRegistration = registrations.Where(p => p.Result == ExamResultType.Pass.ToString())
+                                                  .Where(e => e.CertificationId == CertificationId)
+                                                  .Where(reg => reg.ExamType != null && reg.ExamType.ToEnum() == examType)
+                                                  .OrderByDescending(s => s.AdministrationDate)
+                                                  .FirstOrDefault();
+
+            if (mostRecentRegistration != null)
+                recentExamDate = mostRecentRegistration.ExamTestDate();
+            // there are no passes per spesified examType, try to find pass date for initial cert exam
+            else if (examType == ExamType.Moc)
+            {
+                var recentCertRegistration = registrations.Where(e => e.CertificationId == CertificationId
+                                                                  && e.ExamType != null
+                                                                  && e.ExamType.ToEnum() == ExamType.Cert
+                                                                  && e.Result == ExamResultType.Pass.ToString())
+                                               .FirstOrDefault();
+
+                if (recentCertRegistration != null)
+                    recentExamDate = recentCertRegistration.ExamTestDate();
+            }
+
+            return recentExamDate;
+        }
+
+        #endregion
+
+        #region IEnumerable<LongitudinalEnrollmentSummaryResource>
+        /// <summary>
+        /// IfMetParticipationInTheFirstYear
+        /// </summary>
+        /// <param name="longitudinalEnrollments"></param>
+        /// <param name="certificationGuid"></param>
+        /// <returns></returns>
+        public static bool IfMetParticipationInTheFirstYear(this IEnumerable<LongitudinalEnrollmentSummaryResource> longitudinalEnrollments,
+                                            Guid certificationGuid)
+        {
+            // pbi 180686 : met the participation requirement on the longitudinal assessment in their first year on the longitudinal assessment 
+            return longitudinalEnrollments.Any(e =>
+                                                   e.EnrollmentStatus.ToEnum() == EnrollmentStatusType.Active &&
+                                                   e.Assessment.CertificationId == certificationGuid &&
+                                                   e.LongitudinalParticipations.Any(x =>    x.Cycle == 1 && 
+                                                                                            x.PathwayYear == 1 && 
+                                                                                            x.Status.ToEnum() == ParticipationStatusType.Met));
+
+        }
+        #endregion IEnumerable<LongitudinalEnrollmentSummaryResource>
+
+
+
+    }
+}

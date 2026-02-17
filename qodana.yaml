@@ -1,0 +1,46 @@
+#-------------------------------------------------------------------------------#
+#               Qodana analysis is configured by qodana.yaml file               #
+#             https://www.jetbrains.com/help/qodana/qodana-yaml.html            #
+#-------------------------------------------------------------------------------#
+version: "1.0"
+#Specify IDE code to run analysis without container (Applied in CI/CD pipeline)
+ide: QDNET
+#Specify inspection profile for code analysis
+profile:
+  name: qodana.starter
+exclude:
+  - name: InvalidXmlDocComment
+  - name: UnusedAutoPropertyAccessor.Global
+  - name: CollectionNeverUpdated.Local
+  - name: CollectionNeverUpdated.Global
+  - name: ObjectCreationAsStatement
+  - name: NotAccessedPositionalProperty.Global
+  - name: RedundantBoolCompare
+  - name: ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+  - name: CheckNamespace
+  - name: CSharpWarnings__CS1572
+  - name: CSharpWarnings__CS1573
+  - name: CSharpWarnings__CS1574,CS1584,CS1581,CS1580
+  - name: CSharpWarnings__CS1584
+  - name: CSharpWarnings__CS8601
+  - name: CSharpWarnings__CS8602
+  - name: CSharpWarnings__CS8604
+  - name: CSharpWarnings__CS8618,CS9264
+  - name: CSharpWarnings__CS8618
+  - name: CSharpWarnings__CS8620
+  - name: CSharpWarnings__CS8629
+  - name: CSharpWarnings__CS9264
+
+#Enable inspections
+#include:
+#  - name: <SomeEnabledInspectionId>
+#Disable inspections
+#exclude:
+#  - name: <SomeDisabledInspectionId>
+#    paths:
+#      - <path/where/not/run/inspection>
+#Execute shell command before Qodana execution (Applied in CI/CD pipeline)
+#bootstrap: sh ./prepare-qodana.sh
+#Install IDE plugins before Qodana execution (Applied in CI/CD pipeline)
+#plugins:
+#  - id: <plugin.id> #(plugin id can be found at https://plugins.jetbrains.com)

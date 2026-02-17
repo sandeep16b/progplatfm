@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="dfd4e1a8-9d42-4576-b883-65ba15e4c80d" ChangeDateTime="11/18/2016 15:05:34">
+    <Property Name="ElementName" Value="[dbo].[AK_Certification_Column]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[Certification]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[NK_Certification_Code]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="81fe44e7-8f7b-4bdf-b1f3-1f30c4af857b" ChangeDateTime="11/18/2016 15:06:18">
+    <Property Name="ElementName" Value="[dbo].[Credential].[IX_Credential_Column]" />
+    <Property Name="ElementType" Value="SqlIndex" />
+    <Property Name="ParentElementName" Value="[dbo].[Credential]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[CLK_Credential]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="80605ef5-c0bd-452a-ac72-ddc08be9aa0e" ChangeDateTime="11/18/2016 15:12:02">
+    <Property Name="ElementName" Value="[dbo].[NK_Certification_Code]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[Certification]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[NK_Certification]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0c053205-f485-4bcc-831c-e39a1181edbc" ChangeDateTime="03/06/2017 20:14:32">
+    <Property Name="ElementName" Value="[dbo].[Credential].[NextExamDueDate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Credential]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ExamDueDate" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="77ab0f2d-6ad9-48f5-a58f-b14047accbc7" ChangeDateTime="10/25/2018 16:34:34">
+    <Property Name="ElementName" Value="[dbo].[MemberAccountInfo].[MemberAccountInfoId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[MemberAccountInfo]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="LookbackId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9209f4dc-6dbc-4e13-b68d-5ae7252c0b66" ChangeDateTime="10/25/2018 16:34:49">
+    <Property Name="ElementName" Value="[dbo].[MemberAccountInfo]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="LookbackDateInfo" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e1cda362-c3eb-4704-89f4-8c37c379d123" ChangeDateTime="11/15/2018 18:08:01">
+    <Property Name="ElementName" Value="[dbo].[LookbackMember].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[LookbackMember]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="MemberId" />
+  </Operation>
+</Operations>

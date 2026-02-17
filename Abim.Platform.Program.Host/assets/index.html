@@ -1,0 +1,160 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>ABIM - Program</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="shortcut icon">
+
+    <!-- Custom fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,100" rel="stylesheet">
+    <link href="css/social-font.css" rel="stylesheet">
+
+    <!-- Bootstrap stylesheets -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Template stylesheets -->
+    <link href="css/shader.css" rel="stylesheet">
+
+    <!-- Demo stylesheets -->
+    <link href="css/demo.css" rel="stylesheet">
+</head>
+
+<body class="theme-ice">
+    <!-- Background container -->
+    <div id="background-container" class="background-container">
+        <div id="background-output" class="background-output"></div>
+        <div id="vignette" class="background-vignette"></div>
+        <div id="noise" class="background-noise"></div>
+    </div>
+    <!-- /Background container -->
+    <!-- Main content -->
+    <div class="content">
+        <div class="container">
+            <!-- Header -->
+            <div class="row">
+                <h1 class="header col-sm-8 col-sm-offset-2">Program Platform</h1>
+            </div>
+            <!-- /Header -->
+            <!-- Description -->
+            <div class="row">
+                <p class="description col-sm-8 col-sm-offset-2">American Board of Internal Medicine - Program.Certification.Service<br /> <span id="buildVersion"></span></p>
+            </div>
+            <!-- /Description -->
+        </div>
+
+        <!-- Countdown -->
+        <div class="countdown" id="countdown">
+            <div class="container">
+                <div class="row">
+                    <div class="countdown-item col-sm-3 col-xs-6">
+                        <div class="countdown-number" id="countdown-days"></div>
+                        <div class="countdown-label">days</div>
+                    </div>
+
+                    <div class="countdown-item col-sm-3 col-xs-6">
+                        <div class="countdown-number" id="countdown-hours"></div>
+                        <div class="countdown-label">hours</div>
+                    </div>
+
+                    <div class="countdown-item col-sm-3 col-xs-6">
+                        <div class="countdown-number" id="countdown-minutes"></div>
+                        <div class="countdown-label">minutes</div>
+                    </div>
+
+                    <div class="countdown-item col-sm-3 col-xs-6">
+                        <div class="countdown-number" id="countdown-seconds"></div>
+                        <div class="countdown-label">seconds</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /Countdown -->
+
+        <div class="container">
+            <div class="row">
+                <div class="form-and-links-container col-sm-8 col-sm-offset-2">
+                    <!-- Subscription form -->
+                    <!-- /Subscription form -->
+                    <!-- Social links -->
+                    <div class="social-links">
+                        <a href="/metrics" class="icon-formspring"></a>
+                        <a href="/jobs" class="icon-ember"></a>
+                        <a href="/help" class="icon-github"></a>
+                        <a href="/swagger" class="icon-livejournal"></a>
+                    </div>
+                    <!-- /Social links -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /Main content -->
+    <!-- Scripts -->
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <script src="js/jquery.countdown.js"></script>
+    <script src="js/placeholders.min.js"></script>
+    <script src="js/flat-surface-shader.js"></script>
+    <script src="js/main.config.js"></script>
+    <script src="js/shader.js"></script>
+    <script src="js/demo.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var apiUrl = window.location.href + 'api/v1.0/';
+            // get/set version on splash page from api
+            $.get(apiUrl + 'app/version', function (ver) {
+                $('#buildVersion').text('Version : ' + JSON.parse(ver));
+            });
+            
+            var uptimeUrl = 'app/uptime' + '?time=' + (new Date()).getTime();
+            $.get(apiUrl + uptimeUrl, function (time) {
+                var timeObj = time.replace(/\"/g, '').split(':');
+                var hours = parseInt(timeObj[0]);
+                var days = parseInt(hours / 24);
+
+                hours = hours % 24;
+                var minutes = parseInt(timeObj[1]);
+                var seconds = parseInt(timeObj[2]);
+
+                $('#countdown-days').html(days);
+                $('#countdown-hours').html(hours);
+                $('#countdown-minutes').html(minutes);
+                $('#countdown-seconds').html(seconds);
+
+                $(function () {
+
+                    var interval = setInterval(function () {
+
+                        ++seconds;
+                        if (seconds > 59) {
+                            ++minutes;
+                            seconds = 0;
+                        }
+
+                        if (minutes > 59) {
+                            minutes = 0;
+                            ++hours;
+                        }
+
+                        if (hours > 23) {
+                            ++days;
+                            hours = 0;
+                        }
+
+                        $('#countdown-seconds').html(seconds);
+                        $('#countdown-minutes').html(minutes);
+                        $('#countdown-hours').html(hours);
+                        $('#countdown-days').html(days);
+                    }, 1000);
+
+                });
+            });
+
+
+        });
+    </script>
+</body>
+</html>
