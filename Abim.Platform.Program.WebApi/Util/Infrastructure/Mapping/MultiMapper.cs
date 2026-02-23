@@ -59,7 +59,7 @@ namespace Abim.Platform.Program.WebApi.Objects.Mapping
                 (src) => (TOutput)(createMethod.MakeGenericMethod(typeof(TOutput)).Invoke(null, new[]{ src }));
             Func<object, TOutput, TOutput> updateFunc =
                 (src, dest) => (TOutput)(updateMethod.MakeGenericMethod(src.GetType(), typeof(TOutput)).Invoke(null, new[]{ src, dest }));
-            return Map(createFunc, updateFunc, sources);
+            return Map<TOutput>(createFunc, updateFunc, sources);
         }
 
         /// <summary>

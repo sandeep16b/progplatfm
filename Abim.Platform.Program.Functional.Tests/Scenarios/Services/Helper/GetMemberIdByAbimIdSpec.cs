@@ -1,4 +1,4 @@
-﻿using Abim.Platform.Program.MembershipClient;
+﻿using Abim.Enterprise.Core.Profile.Resource;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NUnit.Framework;
@@ -33,12 +33,24 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.Helper
 
         [Test]
         [WorkItem(201366)]
-        public async Task GetEmptyGuidWhenProfileMembershipThrowsException()
+        public async Task GetEmptyGuidWhenProfileInterserviceThrowsException()
         {
-            
-            new GetEmptyGuidWhenProfileMembershipThrowsExceptionScenario().BDDfy();
+            new GetEmptyGuidWhenProfileInterserviceThrowsExceptionScenario().BDDfy();
         }
-         
+
+        [Test]
+        [WorkItem(230643)]
+        public async Task GetMemberIdByAbimId_WhenFirstAttemptWithExpiredAccessToken()
+        {
+            new GetMemberIdByAbimId_WhenFirstAttemptWithExpiredAccessTokenScenario().BDDfy();
+        }
+
+        [Test]
+        [WorkItem(230643)]
+        public async Task GetMemberIdByAbimId_WhenAfterThreeUnSuccessfullAttemptToGetTokenShouldStop()
+        {
+            new GetMemberIdByAbimId_WhenAfterThreeUnSuccessfullAttemptToGetTokenShouldStopScenario().BDDfy();
+        }
 
         private class GetMemberIdWhenProfileExistsForABIMIdScenario : GetMemberByAbimIdScenario
         {
@@ -55,14 +67,14 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.Helper
 
         private class GetEmptyGuidWhenProfileDoesNotExistForABIMIdScenario : GetMemberByAbimIdScenario
         {
-            protected override void SetupProfileMembershipMock()
+            protected override void SetupProfileInterserviceMock()
             {
-                base.SetupProfileMembershipMock();
-                ProfileResource profile = null;
+                base.SetupProfileInterserviceMock();
+                
                 //Modify mock to return null profile
-                _membershipClientServiceMock
-                   .Setup(x => x.GetProfileByAbimIdAsync(It.IsAny<string>()))
-                   .ReturnsAsync(profile);
+                _profileInterserviceMock
+                    .Setup(x => x.GetProfileByABIMId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                    .Returns(Task.FromResult<ProfileNestedResource>(null));
             }
 
             //Given I have an ABIM ID is in base class
@@ -76,15 +88,15 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.Helper
             //And no exception should have been thrown by GetMemberIdByAbimId() is in base class
         }
 
-        private class GetEmptyGuidWhenProfileMembershipThrowsExceptionScenario : GetMemberByAbimIdScenario
+        private class GetEmptyGuidWhenProfileInterserviceThrowsExceptionScenario : GetMemberByAbimIdScenario
         {
-            protected override void SetupProfileMembershipMock()
+            protected override void SetupProfileInterserviceMock()
             {
-                base.SetupProfileMembershipMock();
+                base.SetupProfileInterserviceMock();
 
                 //Modify mock to return null profile
-                _membershipClientServiceMock
-                     .Setup(x => x.GetProfileByAbimIdAsync(It.IsAny<string>()))
+                _profileInterserviceMock
+                    .Setup(x => x.GetProfileByABIMId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                     .Throws(new Exception("ALL YOUR BASE ARE BELONG TO US!"));
             }
 
@@ -97,8 +109,81 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.Helper
             }
 
             //And no exception should have been thrown by GetMemberIdByAbimId() is in base class
-        }  
-        
+        }
+
+        private class GetMemberIdByAbimId_WhenFirstAttemptWithExpiredAccessTokenScenario : GetMemberByAbimIdScenario
+        {
+            protected override void SetupProfileInterserviceMock()
+            {
+                base.SetupProfileInterserviceMock();
+
+                MemberId = Guid.NewGuid();
+
+                _profileInterserviceMock
+                    .SetupSequence(x => x.GetProfileByABIMId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                    .Throws(new Exception("Unauthorized was returned"))
+                    .Returns(Task.FromResult<ProfileNestedResource>(new ProfileNestedResource() { AbimId = _abimId, Id = MemberId }));
+            }
+
+            private void ThenIShouldReceiveCorrectResult()
+            {
+                _result.ShouldBe(MemberId);
+            }
+
+            private void AndThenAccessTokenShouldBeCalledThreeTimes()
+            {
+                _accessTokenServiceMock.Verify(x => x.GetAccessToken() ,Times.Exactly(3));
+
+            }
+
+            private void AndProfileInterserviceMockShouldBeCalledTwice ()
+            {
+                _profileInterserviceMock.Verify(x => x.GetProfileByABIMId(It.IsAny<string>(), It.IsAny<string>(), _abimId), Times.Exactly(2));
+            }
+
+            protected void AndNoExceptionShouldHaveBeenThrown()
+            {
+                _exception.ShouldBeNull();
+            }
+        }
+
+        private class GetMemberIdByAbimId_WhenAfterThreeUnSuccessfullAttemptToGetTokenShouldStopScenario : GetMemberByAbimIdScenario
+        {
+            protected override void SetupProfileInterserviceMock()
+            {
+                base.SetupProfileInterserviceMock();
+
+                MemberId = Guid.NewGuid();
+
+                _profileInterserviceMock
+                    .SetupSequence(x => x.GetProfileByABIMId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                    .Throws(new Exception("Unauthorized was returned"))
+                    .Throws(new Exception("Unauthorized was returned"))
+                    .Throws(new Exception("Unauthorized was returned"));
+            }
+
+            private void ThenIShouldReceiveCorrectResult()
+            {
+                _result.ShouldBe(Guid.Empty);
+            }
+
+            private void AndThenAccessTokenShouldBeCalledSixTimes()
+            {
+                _accessTokenServiceMock.Verify(x => x.GetAccessToken(), Times.Exactly(6));
+
+            }
+
+            private void AndProfileInterserviceMockShouldBeCalledThreeTimes()
+            {
+                _profileInterserviceMock.Verify(x => x.GetProfileByABIMId(It.IsAny<string>(), It.IsAny<string>(), _abimId), Times.Exactly(3));
+            }
+
+            protected void AndNoExceptionShouldHaveBeenThrown()
+            {
+                _exception.ShouldBeNull();
+            }
+        }
+
         private abstract class GetMemberByAbimIdScenario : HelperServiceScenario
         {
             protected string _abimId;

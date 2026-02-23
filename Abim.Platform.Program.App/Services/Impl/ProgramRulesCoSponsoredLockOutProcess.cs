@@ -2,7 +2,14 @@
 using Abim.Platform.Program.App.Services.Commands;
 using Abim.Platform.Program.App.Util;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Abim.Platform.Program.App.Services.CommandResults;
+using Abim.Platform.Program.Resources;
+using Abim.Platform.Program.WebApi.Authentication;
+using Abim.Enterprise.Core.Registration.Enums;
+using Abim.Platform.Program.App.Extensions.Registration;
 
 namespace Abim.Platform.Program.App.Services.Impl
 {
@@ -24,7 +31,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 if (credential == null)
                 {
                     Log.Info($"Credential not found with CredentialId {credentialId}.");
-                    return await Task.FromResult(false);
+                    return await Task.FromResult<bool>(false);
                 }
 
                 ProcessingDate = processingDate;
@@ -52,7 +59,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 throw;
             }
 
-            return await Task.FromResult(true);
+            return await Task.FromResult<bool>(true);
         }
 
         /// <summary>
@@ -82,9 +89,9 @@ namespace Abim.Platform.Program.App.Services.Impl
             /* Pbi 223711 : (Proj 1492) Program Rule 66 - Cosponsored Certificate Lock-out Period ( https://tfs.abim.org/tfs/Abim/Enterprise/_workitems/edit/223711)
                 The certificate is in the cosponsored lock-out period when:
                 The diplomate is not already in the cosponsored lock-out period. OR
-                -- removed ---> The diplomate received a result of Fail, IND, INC, UTT on the long form MOC assessment in their due year.  OR
+                The diplomate received a result of Fail, IND, INC, UTT on the long form MOC assessment in their due year.  OR
                 The diplomate is enrolled in the Longitudinal Assessment 
-                            (removed next) AND is in their due year (-- Removed per PBI 288091 : (Project 1523) Update Program Rule 66 - Cosponsored Certificate Lock-out Period
+                            AND is in their due year 
                             AND did not meet the annual LNG participation requirement 
                                 OR the diplomate received a result of FAIL on the summative assessment.
             */
@@ -95,8 +102,12 @@ namespace Abim.Platform.Program.App.Services.Impl
                 return false;
             }
 
-            // PBI 295258 : (Project 1523) Update Program Rule 66 - Cosponsored Certificate Lock-out Period - Remove MOC Exam Criteria 
-            /*
+            if (!cred.ExamDueDate.HasValue || cred.ExamDueDate.Value.Year != lockOutDate.Year)
+            {
+                Log.Info($"CoSponsored Credential {cred.ExternalId} for '{lockOutDate.ToString("yyyy-MM-dd")}' Is NOT In Due Year or ExamDueDate is not set.");
+                return false;
+            }
+
             // The diplomate received a result of Fail, IND, INC, UTT on the long form MOC assessment in their due year.
             if (Registrations.Any(r => (r.ExamType != null && r.ExamType.ToEnum() == ExamType.Moc)
                 && (r.CertificationId == cred.Certification.ExternalId)
@@ -109,10 +120,10 @@ namespace Abim.Platform.Program.App.Services.Impl
                 Log.Info($"CoSponsored Credential {cred.ExternalId} for '{lockOutDate.ToString("yyyy-MM-dd")}' received MOC exam result of Fail, IND, INC, UTT in due year");
                 return true;
             }
-            */
 
             /*
             The diplomate is enrolled in the Longitudinal Assessment
+                        AND is in their due year
                         AND did not meet the annual LNG participation requirement
                             OR the diplomate received a result of FAIL on the summative assessment.
             */

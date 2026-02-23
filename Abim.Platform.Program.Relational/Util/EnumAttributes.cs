@@ -33,7 +33,7 @@ namespace Abim.Platform.Program.Relational.Classes
         public static string ReadEnumCode(Object enumValue)
         {
             if(EnumHasCharValues(enumValue.GetType()))
-                return ReadEnumChar(enumValue);
+                return ReadEnumChar(enumValue).ToString();
             else return ReadEnumInteger(enumValue).ToString();
         }
 
@@ -185,7 +185,7 @@ namespace Abim.Platform.Program.Relational.Classes
             }
             else
             {
-                int intCode;
+                int intCode = 0;
                 if(!int.TryParse(codeString, out intCode))
                     throw new Exception(string.Format("The code string for enum {0} must be numeric", typeof(T).Name));
                 return FromIntCode<T>(intCode);
@@ -243,7 +243,7 @@ namespace Abim.Platform.Program.Relational.Classes
                 }
                 catch(Exception ex)
                 {
-                    string typeName;
+                    string typeName = null;
                     try
                     {
                         typeName = (typeof(T)).Name;
@@ -301,7 +301,7 @@ namespace Abim.Platform.Program.Relational.Classes
             }
             catch(Exception ex)
             {
-                string typeName;
+                string typeName = null;
                 try
                 {
                     typeName = (typeof(T)).Name;
@@ -447,7 +447,7 @@ namespace Abim.Platform.Program.Relational.Classes
         /// <exception cref="System.Exception"></exception>
         public static Object RandomEntry(Type type)
         {
-            return RandomEntry(type, null);
+            return RandomEntry(type, (string[])null);
         }
         
         /// <summary>

@@ -13,7 +13,6 @@ using Abim.Platform.Program.WebApi.Attributes;
 using Abim.Platform.Program.WebApi.Filters;
 using Abim.Platform.Program.WebApi.Objects;
 using AutoMapper;
-using Swashbuckle.Swagger.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -95,10 +94,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpOptions]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "CertificationOptions", typeof(CertificationOptionsResponseResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Certifications.CertificationOptions, Name = ProgramResourceConstants.RouteNames.Certifications.CertificationOptions)]
         public IHttpActionResult CertificationOptions()
         {
@@ -125,10 +120,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpGet]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetEnum", typeof(object))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Certifications.CertificationEnumValues, Name = ProgramResourceConstants.RouteNames.Certifications.CertificationEnumValues)]
         public IHttpActionResult GetEnum(string name)
         {
@@ -154,10 +145,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpGet]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetCertifications", typeof(CertificationFullCollectionResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Certifications.GetCertifications, Name = ProgramResourceConstants.RouteNames.Certifications.GetCertifications)]
         public IHttpActionResult GetCertifications([FromUri] PageDefinition pageDefinition)
         {
@@ -177,7 +164,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                     if(queryValidationErrorMsg != null) return BadRequest(queryValidationErrorMsg);
                         
                     //perform the Get and return the result
-                    int totalCount;
+                    var totalCount = 0;
                     var certifications = CertificationService.Search(pageDefinition, out totalCount);
                     if(pageDefinition.SkippedItems >= totalCount && totalCount > 0)
                         return BadRequest(ErrorMessages.PageIndexTooHigh());
@@ -203,10 +190,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpPost]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetCertificationsPost", typeof(CertificationFullCollectionResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Certifications.GetCertifications, Name = ProgramResourceConstants.RouteNames.Certifications.GetCertificationsPost)]
         public IHttpActionResult GetCertificationsPost([FromBody] PageDefinition pageDefinition)
         {
@@ -226,7 +209,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                     if(queryValidationErrorMsg != null) return BadRequest(queryValidationErrorMsg);
                         
                     //perform the Get and return the result
-                    int totalCount;
+                    var totalCount = 0;
                     var certifications = CertificationService.Search(pageDefinition, out totalCount);
                     if(pageDefinition.SkippedItems >= totalCount && totalCount > 0)
                         return BadRequest(ErrorMessages.PageIndexTooHigh());
@@ -253,10 +236,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpGet]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetCertificationsForUser", typeof(CertificationCollectionResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Certifications.GetCertificationsByMemberId, Name = ProgramResourceConstants.RouteNames.Certifications.GetCertificationsByMemberId)]
         public IHttpActionResult GetCertificationsForUser(Guid memberId, [FromUri] PageDefinition pageDefinition)
         {
@@ -291,10 +270,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpPost]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetCertificationsForUserPost", typeof(CertificationCollectionResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Certifications.GetCertificationsByMemberIdPost, Name = ProgramResourceConstants.RouteNames.Certifications.GetCertificationsByMemberIdPost)]
         public IHttpActionResult GetCertificationsForUserPost(Guid memberId, [FromBody] PageDefinition pageDefinition)
         {
@@ -330,10 +305,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [Authorize]
         [ResourceAuthorize]
         [ImpersonateMemberId]
-        [SwaggerResponse(HttpStatusCode.OK, "GetCertificationsForCurrentUser", typeof(CertificationCollectionResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Certifications.GetCurrentUserCertifications, Name = ProgramResourceConstants.RouteNames.Certifications.GetCurrentUserCertifications)]
         public IHttpActionResult GetCertificationsForCurrentUser([FromUri] PageDefinition pageDefinition, Guid? memberId = null)
         {
@@ -389,10 +360,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [Authorize]
         [ResourceAuthorize]
         [ImpersonateMemberId]
-        [SwaggerResponse(HttpStatusCode.OK, "GetCertificationsForCurrentUserPost", typeof(CertificationCollectionResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Certifications.GetCurrentUserCertificationsPost, Name = ProgramResourceConstants.RouteNames.Certifications.GetCurrentUserCertificationsPost)]
         public IHttpActionResult GetCertificationsForCurrentUserPost([FromBody] PageDefinition pageDefinition, Guid? memberId = null)
         {
@@ -448,10 +415,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpGet]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetCertificationById", typeof(CertificationResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Certifications.GetCertificationById, Name = ProgramResourceConstants.RouteNames.Certifications.GetCertificationById)]
         public IHttpActionResult GetCertificationById(Guid id)
         {
@@ -485,9 +448,9 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         /// </summary>
         /// <param name="invalidId"></param>
         /// <returns></returns>
-        [HttpGet] 
-        [HideFromSwagger]
+        [HttpGet] [HideFromSwagger]
         [Authorize]
+
         [Route(ProgramResourceConstants.Routes.Certifications.GetCertificationInvalidId, Name = ProgramResourceConstants.RouteNames.Certifications.GetCertificationInvalidId)]
         public IHttpActionResult GetWithInvalidId(string invalidId)
         {
@@ -506,10 +469,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         /// <returns></returns>
         [HttpPost]
         [ResourceAuthorize(Actions.Create)]
-        [SwaggerResponse(HttpStatusCode.OK, "AddCertification", typeof(CertificationResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Certifications.AddCertification, Name = ProgramResourceConstants.RouteNames.Certifications.AddCertification)]
         public async Task<IHttpActionResult> AddCertification([FromBody] AddCertificationCommand command)
         {
@@ -549,10 +508,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         /// <returns></returns>
         [HttpPut]
         [ResourceAuthorize(Actions.Update)]
-        [SwaggerResponse(HttpStatusCode.OK, "UpdateCertification", typeof(CertificationResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Certifications.UpdateCertification, Name = ProgramResourceConstants.RouteNames.Certifications.UpdateCertification)]
         public async Task<IHttpActionResult> UpdateCertification([FromBody] UpdateCertificationCommand command)
         {

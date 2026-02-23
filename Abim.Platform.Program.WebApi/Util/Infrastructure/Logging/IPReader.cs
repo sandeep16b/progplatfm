@@ -44,6 +44,8 @@ namespace Abim.Platform.Program.WebApi.Objects.Logging
             }
             if(ip == null || ip.Length < "0.0.0.0".Length)
             {
+                //if all else failed for some reason, run ipconfig
+                var outputText = "";
                 try
                 {
                     ProcessStartInfo procStartInfo = new ProcessStartInfo("cmd", "/c ipconfig.exe");
@@ -53,12 +55,11 @@ namespace Abim.Platform.Program.WebApi.Objects.Logging
                     Process process = new Process();
                     process.StartInfo = procStartInfo;
                     process.Start();
-                    //if all else failed for some reason, run ipconfig
-                    string outputText = process.StandardOutput.ReadToEnd();
+                    outputText = process.StandardOutput.ReadToEnd();
                     process.WaitForExit();
                     ip = ParseIPFromOutput(outputText);
                 }
-                catch(Exception )
+                catch(Exception ex)
                 {
                     ip = null;
                 }

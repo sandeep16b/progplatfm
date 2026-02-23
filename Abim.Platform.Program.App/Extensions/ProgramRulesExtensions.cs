@@ -152,7 +152,7 @@ namespace Abim.Platform.Program.App.Services
         {
             // [C028] Determine if any issuance exists that is the first issuance for the credential and the source is ABIM and 
             // the certificate is not Internal Medicine and the issuance date >= starting date and the issuance date <= evaluation date
-            return credentialList.Where(a => a.Certification.Code != "IM" && a.HasIssuances && !a.IsCosponsored) //pbi 282145: only should consider none-cosponsored certs
+            return credentialList.Where(a => a.Certification.Code != "IM" && a.HasIssuances)
                                   .Where(t=> t.Certification.Code != "HOSP") // TEMP FIX ar@2/17/2019
                                         .Select(a => a.OldestIssuance)
                                         .Where(k => k.Source.Code == "ABIM"
@@ -192,49 +192,26 @@ namespace Abim.Platform.Program.App.Services
         }
 
         /// <summary>
-        /// IsEnrolledInReciprocity_5yearLookBack
+        /// IsEnrolledInReprocity
         /// </summary>
         /// <param name="userActivities"></param>
         /// <param name="executingProcess"></param>
         /// <param name="endOfTheWindowDate"></param>
         /// <param name="evaluationDate"></param>
         /// <returns></returns>
-        public static bool IsEnrolledInReciprocity_5yearLookBack(this IEnumerable<ActivityResource> userActivities, ExecutingProcessType executingProcess, DateTime evaluationDate, DateTime endOfTheWindowDate)
+        public static bool IsEnrolledInReprocity(this IEnumerable<ActivityResource> userActivities, ExecutingProcessType executingProcess, DateTime evaluationDate, DateTime endOfTheWindowDate)
         {
             var theDate = executingProcess == ExecutingProcessType.YearEndLookBack ||
                                 executingProcess == ExecutingProcessType.EarlyYearEndLookBack ? endOfTheWindowDate.Date : evaluationDate.Date;
 
-            return userActivities.Where(p => p.Product.Code == ProductResourceConstants.ProductCode.ReciprocityAttest) //  "ReciprocityAttest"
-                                                                                                                       // if Pass (completed) then it should be only for 2 years 
+            return userActivities.Where(p => p.Product.Code == ProductResourceConstants.ProductCode.ReciprocityAttest) //  "Reciprocity"
+                                // we are checking after or equal CompletedDate
+                                .Where(p => p.CompletedDate.HasValue
+                                    && p.CompletedDate.Value.Date <= theDate)
+                                // if Pass (completed) then it should be only for 2 years 
                                 .Where(p => (p.ActivityResult.Value == ActivityResultType.Pass.ToString()
-                                                && p.CompletedDate.HasValue
-                                                // Modified Program Rule 034: a) currently in the MOC reciprocity program OR b) in the MOC reciprocity program at the end of the 5-year lookback cycle.
-                                                && ( p.CompletedDate.Value.Date.AddYears(2) > evaluationDate.Date || p.CompletedDate.Value.Date.AddYears(2) > endOfTheWindowDate.Date)) 
+                                                && p.CompletedDate.Value.Date.AddYears(2) > theDate)
                                             // if Canceled then we need to check if the date is before cancalation date 
-                                            || (p.ActivityResult.Value == ActivityResultType.Cancelled.ToString()
-                                                && p.CancelledDate.HasValue && p.CancelledDate.Value.Date > theDate))
-                                .Any();
-        }
-
-        /// <summary>
-        /// IsEnrolledInReciprocity_2yearLookBack
-        /// </summary>
-        /// <param name="userActivities"></param>
-        /// <param name="executingProcess"></param>
-        /// <param name="evaluationDate"></param>
-        /// <param name="startOfTheWindowDate"></param>
-        /// <param name="endOfTheWindowDate"></param>
-        /// <returns></returns>
-        public static bool IsEnrolledInReciprocity_2yearLookBack(this IEnumerable<ActivityResource> userActivities, ExecutingProcessType executingProcess, DateTime evaluationDate, DateTime startOfTheWindowDate, DateTime endOfTheWindowDate)
-        {
-            var theDate = executingProcess == ExecutingProcessType.YearEndLookBack ||
-                                executingProcess == ExecutingProcessType.EarlyYearEndLookBack ? endOfTheWindowDate.Date : evaluationDate.Date;
-
-            return userActivities.Where(p => p.Product.Code == ProductResourceConstants.ProductCode.ReciprocityAttest) //  "ReciprocityAttest"
-                                .Where(p => (p.ActivityResult.Value == ActivityResultType.Pass.ToString()
-                                                && p.CompletedDate.HasValue
-                                                && p.CompletedDate.Value.Date.AddYears(2) > theDate || p.CompletedDate.Value.Date.AddYears(2) >= startOfTheWindowDate.Date) // pbi 274136 : Update Program Rule 32 - 2-year Lookback Requirement
-                                                                                                                                                                            // if Canceled then we need to check if the date is before cancalation date 
                                             || (p.ActivityResult.Value == ActivityResultType.Cancelled.ToString()
                                                 && p.CancelledDate.HasValue && p.CancelledDate.Value.Date > theDate))
                                 .Any();

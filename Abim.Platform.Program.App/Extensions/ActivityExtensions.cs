@@ -1,15 +1,14 @@
 ﻿using Abim.Platform.Product.Resources;
 using Abim.Platform.Product.Resources.Constants;
 using Abim.Platform.Product.Resources.Enums;
+using Abim.Platform.Program.Interservice.Shared;
+using Abim.Platform.Program.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Abim.Platform.Program.App.Extensions
 {
-    /// <summary>
-    /// ActivityExtensions
-    /// </summary>  
     public static class ActivityExtensions
     {
         #region IEnumerable<ActivityResource>
@@ -124,52 +123,50 @@ namespace Abim.Platform.Program.App.Extensions
                                                .Sum(c => c.CreditEarned);
         }
 
-        //---- not used, but keep it just in case, delete after 2025 YELB run
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="userActivities"></param>
-        ///// <param name="earliestCertDate"></param>
-        ///// <param name="checkDate"></param>
-        ///// <param name="windowsInterval"></param>
-        ///// <returns></returns>
-        //public static bool ComputeReciprocityByWindows(this IEnumerable<ActivityResource> userActivities,
-        //                                            DateTime earliestCertDate,
-        //                                            DateTime checkDate,
-        //                                            WindowsIntervalType windowsInterval)
-        //{
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userActivities"></param>
+        /// <param name="earliestCertDate"></param>
+        /// <param name="checkDate"></param>
+        /// <param name="windowsInterval"></param>
+        /// <returns></returns>
+        public static bool ComputeReciprocityByWindows(this IEnumerable<ActivityResource> userActivities,
+                                                    DateTime earliestCertDate,
+                                                    DateTime checkDate,
+                                                    WindowsIntervalType windowsInterval)
+        {
 
-        //    var window = ProgramRulesHelpers.ComputeLookBackWindow(earliestCertDate,
-        //                                                                checkDate,
-        //                                                                windowsInterval);
-        //    return userActivities.EnrolledInReprocity(window.Item1, window.Item2);
-        //}
+            var window = ProgramRulesHelpers.ComputeLookBackWindow(earliestCertDate,
+                                                                        checkDate,
+                                                                        windowsInterval);
+            return userActivities.EnrolledInReprocity(window.Item1, window.Item2);
+        }
 
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="userActivities"></param>
-        ///// <param name="startDate"></param>
-        ///// <param name="endDate"></param>
-        ///// <returns></returns>
-        //// ** reciprocity Program
-        //public static bool EnrolledInReprocity(this IEnumerable<ActivityResource> userActivities, DateTime startDate, DateTime endDate)
-        //{
-        //    return userActivities.Where(p => p.Product.Code == ProductResourceConstants.ProductCode.ReciprocityAttest) //  "Reciprocity"
-        //                            .Where(p => p.CompletedDate.HasValue
-        //                                && p.CompletedDate.Value.Date >= startDate.Date
-        //                                && p.CompletedDate.Value.Date <= endDate.Date)
-        //                            //the reciprocity is good for 3 years from the completion date unless it is cancelled (status changed from pass to cancel) 
-        //                            //in which case the cancel date is also set and it is then considered good from credit date to cancel date
-        //                            .Where(p => p.CompletedDate.Value.AddYears(3).AddDays(-1).Date >= endDate.Date)
-        //                            .Where(p => p.ActivityResult.Value == ActivityResultType.Pass.ToString()
-        //                                     //If the status is cancelled or revoked, verify the cancel date  >= starting date + 2 years.
-        //                                     || ((p.ActivityResult.Value == ActivityResultType.Cancelled.ToString()
-        //                                            || p.ActivityResult.Value == ActivityResultType.Revoked.ToString())
-        //                                            && (!p.CancelledDate.HasValue || p.CancelledDate.Value.Date >= startDate.AddYears(2).Date)))
-        //                            .Any();
-
-        //}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userActivities"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
+        // ** reciprocity Program
+        public static bool EnrolledInReprocity(this IEnumerable<ActivityResource> userActivities, DateTime startDate, DateTime endDate)
+        {
+            return userActivities.Where(p => p.Product.Code == ProductResourceConstants.ProductCode.ReciprocityAttest) //  "Reciprocity"
+                                    .Where(p => p.CompletedDate.HasValue
+                                        && p.CompletedDate.Value.Date >= startDate.Date
+                                        && p.CompletedDate.Value.Date <= endDate.Date)
+                                    //the reciprocity is good for 3 years from the completion date unless it is cancelled (status changed from pass to cancel) 
+                                    //in which case the cancel date is also set and it is then considered good from credit date to cancel date
+                                    .Where(p => p.CompletedDate.Value.AddYears(3).AddDays(-1).Date >= endDate.Date)
+                                    .Where(p => p.ActivityResult.Value == ActivityResultType.Pass.ToString()
+                                             //If the status is cancelled or revoked, verify the cancel date  >= starting date + 2 years.
+                                             || ((p.ActivityResult.Value == ActivityResultType.Cancelled.ToString()
+                                                    || p.ActivityResult.Value == ActivityResultType.Revoked.ToString())
+                                                    && (!p.CancelledDate.HasValue || p.CancelledDate.Value.Date >= startDate.AddYears(2).Date)))
+                                    .Any();
+        }
 
         ///// <summary>
         ///// 

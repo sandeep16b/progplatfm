@@ -64,6 +64,7 @@ namespace Abim.Platform.Program.App.Util
         {
             public const string FiveYearLookBackStep = "FiveYearLookBackStep";
             public const string FiveYearLookBackFPHMStep = "FiveYearLookBackFPHMStep";
+            public const string FiveYearLookBackGFPrintingStep = "FiveYearLookBackGFPrintingStep";
 
             public const string DetermineMaintenanceStatusStep = "[P031][P032]DetermineMaintenanceStatusStep";
 

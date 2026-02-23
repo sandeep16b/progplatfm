@@ -41,12 +41,6 @@ namespace Abim.Platform.Program.Resources
         /// Revoked.
         /// </summary>
         [Display(Name = "Revoked", ShortName = "R", Description = "Revoked")]
-        Revoked       = 'R',
-
-        /// <summary>
-        /// Cancelled.
-        /// </summary>
-        [Display(Name = "Cancelled", ShortName = "C", Description = "Cancelled")]
-        Cancelled = 'C'
+        Revoked       = 'R'
     }
 }

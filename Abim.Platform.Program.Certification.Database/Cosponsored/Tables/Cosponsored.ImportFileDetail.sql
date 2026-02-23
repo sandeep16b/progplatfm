@@ -29,7 +29,6 @@
 	[FamilyName]				NVARCHAR(255)			NOT NULL DEFAULT(''),
 	[FaxNumber]					NVARCHAR(255)			NULL,
 	[FirstName]					NVARCHAR(255)			NOT NULL DEFAULT(''),
-    [FirstTimeUserReminder]     DATETIME                NULL,
 	[FormattedName]				NVARCHAR(255)			NULL,
 	[Gender]					NVARCHAR(50)			NOT NULL DEFAULT(''),
 	[GenerationIdentifier]		NVARCHAR(50)			NULL,
@@ -39,7 +38,6 @@
 	[PostalCode]				NVARCHAR(50)			NOT NULL DEFAULT(''),
 	[ProcessStatus]				VARCHAR(50)				NOT NULL DEFAULT('Initiated'),
 	[Region]					NVARCHAR(255)			NULL,
-    [RegistrationReminderSent]  DATETIME                NULL,
 	[StateOrProvince]			NVARCHAR(255)			NOT NULL DEFAULT(''),
 	[StreetAddress1]			NVARCHAR(255)			NOT NULL DEFAULT(''),
 	[StreetAddress2]			NVARCHAR(255)			NULL,
@@ -307,15 +305,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'FirstName'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Date when last First Time User Reminder was sent to physician',
-    @level0type = N'SCHEMA',
-    @level0name = N'Cosponsored',
-    @level1type = N'TABLE',
-    @level1name = N'ImportFileDetail',
-    @level2type = N'COLUMN',
-    @level2name = N'FirstTimeUserReminder'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Formatted Full Name of Candidate',
     @level0type = N'SCHEMA',
     @level0name = N'Cosponsored',
@@ -386,15 +375,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'ImportFileDetail',
     @level2type = N'COLUMN',
     @level2name = N'Region'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Date when last Registration Reminder was sent to physician',
-    @level0type = N'SCHEMA',
-    @level0name = N'Cosponsored',
-    @level1type = N'TABLE',
-    @level1name = N'ImportFileDetail',
-    @level2type = N'COLUMN',
-    @level2name = N'RegistrationReminderSent'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'State for Address',

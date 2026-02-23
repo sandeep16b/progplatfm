@@ -108,9 +108,9 @@ namespace Abim.Platform.Program.WebApi.Testing.Setup
                     try
                     {
                         Debugs.Add(string.Format(message, arg));
-                        if(OutputLogs) Console.WriteLine(message, arg);
+                        if(OutputLogs) Console.WriteLine(string.Format(message, arg));
                     }
-                    catch(Exception){ /*ignore*/ }
+                    catch(Exception ex){ /*ignore*/ }
                 })
                 .Verifiable();
             log.Setup(o => o.Debug(It.IsAny<string>(), It.IsAny<object[]>()))
@@ -119,9 +119,9 @@ namespace Abim.Platform.Program.WebApi.Testing.Setup
                     try
                     {
                         Debugs.Add(string.Format(message, args));
-                        if(OutputLogs) Console.WriteLine(message, args);
+                        if(OutputLogs) Console.WriteLine(string.Format(message, args));
                     }
-                    catch(Exception){ /*ignore*/ }
+                    catch(Exception ex){ /*ignore*/ }
                 })
                .Verifiable();
             log.Setup(o => o.Debug(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<string>()))
@@ -133,7 +133,7 @@ namespace Abim.Platform.Program.WebApi.Testing.Setup
                         Debugs.Add(debugMessage);
                         if (OutputLogs) Console.WriteLine(debugMessage);
                     }
-                    catch (Exception) { /*ignore*/ }
+                    catch (Exception ex) { /*ignore*/ }
                 })
                .Verifiable();
 
@@ -151,9 +151,9 @@ namespace Abim.Platform.Program.WebApi.Testing.Setup
                     try
                     {
                         Warns.Add(string.Format(message, arg));
-                        if(OutputLogs) Console.WriteLine(message, arg);
+                        if(OutputLogs) Console.WriteLine(string.Format(message, arg));
                     }
-                    catch(Exception){ /*ignore*/ }
+                    catch(Exception ex){ /*ignore*/ }
                 })
                 .Verifiable();
             log.Setup(o => o.Warn(It.IsAny<string>(), It.IsAny<object[]>()))
@@ -162,9 +162,9 @@ namespace Abim.Platform.Program.WebApi.Testing.Setup
                     try
                     {
                         Warns.Add(string.Format(message, args));
-                        if(OutputLogs) Console.WriteLine(message, args);
+                        if(OutputLogs) Console.WriteLine(string.Format(message, args));
                     }
-                    catch(Exception){ /*ignore*/ }
+                    catch(Exception ex){ /*ignore*/ }
                 })
                 .Verifiable();
             

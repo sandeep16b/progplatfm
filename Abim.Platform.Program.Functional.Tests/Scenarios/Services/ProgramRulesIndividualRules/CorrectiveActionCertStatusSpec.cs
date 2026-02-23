@@ -31,24 +31,17 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
         {
             new CorrectiveActionCertStatus_MeetRules_100_Points().BDDfy();
         }
-        
+
         [Test]
         public void CorrectiveActionCertStatus_FutureDates_MeetRules100Points()
         {
             new CorrectiveActionCertStatus_FutureDates_MeetRules_100_Points().BDDfy();
         }
-        
+
         [Test]
         public void CorrectiveActionCertStatus_MeetRulesReciprocity()
         {
             new CorrectiveActionCertStatus_MeetRules_Reciprocity().BDDfy();
-        }
-
-        //PBI 320769 : Program Rule 34 (5-Year Lookback Requirements, Reciprocity at the End of Lookback window): applied during Corrective Action processing
-        [Test]
-        public void CorrectiveActionCertStatus_MeetRulesReciprocityAtTheEndOfLookBackWindowus()
-        {
-            new CorrectiveActionCertStatus_MeetRules_ReciprocityAtTheEndOfLookBackWindow().BDDfy();
         }
 
         [Test]
@@ -65,9 +58,9 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
 
         //***  negative cases 
         [Test]
-        public void CorrectiveActionCertStatus_MeetRulesNoAttestation_FPHMException()
+        public void CorrectiveActionCertStatus_DontMeetRulesNoAttestation()
         {
-            new CorrectiveActionCertStatus_MeetRules_NoAttestation().BDDfy();
+            new CorrectiveActionCertStatus_DontMeetRules_NoAttestation().BDDfy();
         }
 
         [Test]
@@ -241,11 +234,10 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
                 InitializeDataProperties();
 
                 EventDate = new DateTime(2018, 01, 13);
-                // we cannot set today's date to ProcessingDate because 5-year Look Back would move, but points would be in older lookback 
-                ProcessingDate = new DateTime(2023, 12, 01);  //pbi 279364:Restore and Correct Program Platform Unit Tests Disabled During 1/6/2024 Deployment 
+                ProcessingDate = DateTime.Now;
                 FirstIssuanceDate = new DateTime(2008, 11, 01);
 
-                DateTime ActivityCompletedDate = new DateTime(2018, 11, 01);
+                DateTime ActivityCompletedDate = new DateTime(2018, 12, 01);
 
                 Set_ActivitiesWithPoints(ActivityCompletedDate: ActivityCompletedDate,
                                         TotalMOCPoints: 95.5m);
@@ -340,81 +332,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
 
                 //--- ReciprocityAttest
                 UserActivities.Add(ActivityResourceDataBuilder.WithReciprocity(ActivityCompletedDate: ActivityCompletedDate)
-                                                .Build());
-            }
-
-            /// <summary>
-            /// Secondary setup (requiring the Container)
-            /// </summary>
-            protected override void PostSetup()
-            {
-                base.PostSetup();
-            }
-
-            public void WhenICallProgramRulesServiceMethod()
-            {
-                try
-                {
-                    ResultObject = ProgramRulesServiceObject.Invoke("CorrectiveActionCertStatus_",
-                                                                                    InputCredentials,       // credentials
-                                                                                    MemberId,               // memberId
-                                                                                    EventDate,              // eventDate
-                                                                                    ProcessingDate);        // processingDate
-
-                    RuleResults = ResultObject as IList<RuleResults>;
-                    RuleResult = RuleResults[0];
-
-                }
-                catch (Exception ex)
-                {
-                    ExceptionCaught = ex;
-                }
-            }
-
-            public void ThenNoExceptionShouldHaveBeenThrown()
-            {
-                ExceptionCaught.Should().BeNull();
-            }
-
-            public void ThenResultShouldBeTrue()
-            {
-                RuleResult.MeetRuleRequirement.Should().Be(true);
-            }
-        }
-
-        private class CorrectiveActionCertStatus_MeetRules_ReciprocityAtTheEndOfLookBackWindow : CorrectiveActionCertStatus_SpecScenario
-        {
-            /// <summary>
-            /// Primary setup
-            /// </summary>
-            protected override void PreSetup()
-            {
-                InitializeBuilders();
-                InitializeDataProperties();
-
-
-                EventDate = new DateTime(2018, 01, 13);
-                ProcessingDate = new DateTime(2019, 01, 13); // Evaluation Date
-                FirstIssuanceDate = new DateTime(2008, 11, 01);
-
-                DateTime ActivityCompletedDate = new DateTime(2018, 12, 01);
-                DateTime ReciprocityCompletedDate = new DateTime(2017, 1, 5); // it is more then 2 years from Processing Date (2019, 1, 13), but valid at the end of lookback window (2018, 12, 31)
-
-                Set_ActivitiesWithPoints(ActivityCompletedDate: ActivityCompletedDate,
-                                        TotalMOCPoints: 99.9m); // !!!!
-
-                var credential = Set_SuT_Credential(category: CredentialCategoryType.MustBeMaintained,
-                                    certificationCode: ProgramResourceConstants.CertificationCode.InternalMedicine,
-                                    expirationDate: new DateTime(ProcessingDate.AddYears(-1).Year, 12, 31),
-                                    issuanceStatus: IssuanceStatusType.Expired,
-                                    issuanceDate: FirstIssuanceDate);
-
-                Set_SuT_Registration(credential: credential,
-                                    administrationDate: FirstIssuanceDate,
-                                    seatDateCert: FirstIssuanceDate);
-
-                //--- ReciprocityAttest
-                UserActivities.Add(ActivityResourceDataBuilder.WithReciprocity(ActivityCompletedDate: ReciprocityCompletedDate)
                                                 .Build());
             }
 
@@ -699,13 +616,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
                 Set_SuT_Registration(credential: credential,
                                     administrationDate: FirstIssuanceDate,
                                     seatDateCert: FirstIssuanceDate);
-
-                // Earned NewSubspecialty Initial Cert but it is CoSponsored (don't count toward this requirements)
-                Set_NewSubspecialtyInitialCert(issuanceDate: EventDate.AddYears(-1),
-                                                category: CredentialCategoryType.MustBeMaintained,
-                                                certificationCode: "GERI",
-                                                IsCosponsored: true); // pbi 282145 : (2.51) To prevent meeting 5-year window point requirements with created co-sponsored Subspecialty initial Certificate.
-
             }
 
             /// <summary>
@@ -747,7 +657,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
             }
         }
 
-        private class CorrectiveActionCertStatus_MeetRules_NoAttestation : CorrectiveActionCertStatus_SpecScenario
+        private class CorrectiveActionCertStatus_DontMeetRules_NoAttestation : CorrectiveActionCertStatus_SpecScenario
         {
             /// <summary>
             /// Primary setup
@@ -810,9 +720,9 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
                 ExceptionCaught.Should().BeNull();
             }
 
-            public void ThenResultShouldBeTrue()
+            public void ThenResultShouldBeFalse()
             {
-                RuleResult.MeetRuleRequirement.Should().Be(true);
+                RuleResult.MeetRuleRequirement.Should().Be(false);
             }
         }
         #endregion

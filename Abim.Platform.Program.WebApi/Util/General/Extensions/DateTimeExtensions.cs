@@ -153,7 +153,7 @@ namespace Abim.Platform.Program.WebApi.Util.General.Extensions
             dates = dates.OrderBy(d => d).ToList();
             var listOfLists = new List<List<DateTime>>();
             DateTime? previousDate = null;
-            List<DateTime> list;
+            List<DateTime> list = null;
             foreach(var date in dates)
             {
                 if(previousDate == null || previousDate.Value.Date.AddDays(1) < date.Date)

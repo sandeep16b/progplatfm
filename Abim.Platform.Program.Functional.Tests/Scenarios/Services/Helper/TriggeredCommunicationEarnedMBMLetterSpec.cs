@@ -1,4 +1,5 @@
-﻿extern alias SharedOldServiceBus; 
+﻿extern alias SharedOldServiceBus;
+
 using TestStack.BDDfy;
 using NUnit.Framework;
 using Abim.Platform.Program.App.Domain;
@@ -13,7 +14,7 @@ using FluentAssertions;
 using SharedOldServiceBus::Abim.Enterprise.Core.ServiceBus.Notification;
 using System.Threading;
 using Abim.Platform.Program.WebApi.Testing.Setup;
-using Abim.Platform.Program.MembershipClient;
+using Abim.Enterprise.Core.Profile.Resource;
 
 namespace Abim.Platform.Program.Tests.Scenarios.Services.Helper
 {
@@ -33,17 +34,10 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.Helper
         }
 
         [Test]
-        public void TriggeredCommunicationForEarnedMBMLetterSentForABIMUSDiplomatesTest()
+        public void TriggeredCommunicationForEarnedMBMLetterSentForABIMDiplomatesTest()
         {
-            new TriggeredCommunicationForEarnedMBMLetterSentForABIMUSDiplomates()
-                .BDDfy("Triggered communication for earned MBM letter sent for ABIM US diplomates scenario.");
-        }
-
-        [Test]
-        public void TriggeredCommunicationForEarnedMBMLetterSentForABIMNoneUSDiplomatesTest()
-        {
-            new TriggeredCommunicationForEarnedMBMLetterSentForABIMNoneUSDiplomates()
-                .BDDfy("Triggered communication for earned MBM letter sent for ABIM US diplomates scenario.");
+            new TriggeredCommunicationForEarnedMBMLetterSentForABIMDiplomates()
+                .BDDfy("Triggered communication for earned MBM letter sent for ABIM diplomates scenario.");
         }
 
         [Test]
@@ -79,7 +73,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.Helper
             {
                 try
                 {
-                    await _sut.TriggeredCommunication(mockedCredential, TriggeredCommunication.EarnedMBMCertLetter, Guid.NewGuid(), _credentialServiceMock.Object);
+                    await _sut.TriggeredCommunication(mockedCredential, TriggeredCommunication.EarnedMBMCertLetter.ToString(), Guid.NewGuid(), _credentialServiceMock.Object);
                 }
                 catch (Exception ex)
                 {
@@ -106,8 +100,8 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.Helper
 
         #endregion Triggered communication for earned MBM letter NOT sent for cosponsored only scenario
 
-        #region Triggered communication for earned MBM letter sent for ABIM certified diplomates scenario - US Address
-        private class TriggeredCommunicationForEarnedMBMLetterSentForABIMUSDiplomates
+        #region Triggered communication for earned MBM letter sent for ABIM certified diplomates scenario
+        private class TriggeredCommunicationForEarnedMBMLetterSentForABIMDiplomates
             : HelperServiceScenario
         {
             private Credential mockedCredential;
@@ -129,69 +123,42 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.Helper
                 _busControlMock.Setup(_ => _.Publish(It.IsAny<NotificationEvent>(), default(CancellationToken)))
                     .Returns(Task.Delay(0));
 
-                var profile = new ProfileResource
+                var profile = new ProfileNestedResource
                 {
-                    Addresses = new List<ProfileAddressResource>
+                    Addresses = new List<AddressSummaryResource>
                     {
-                        new ProfileAddressResource
+                        new AddressSummaryResource
                         {
                             IsPrimary = true,
-                            CountryId =  "US",
-                            RegionId =  1
+                            Country = new CountrySummaryResource
+                            {
+                                Code = "US"
+                            },
+                            Region = new RegionSummaryResource
+                            {
+                                Code = RandomString.Build()
+                            }
                         }
                     },
-                    Name = new ProfileNameResource
+                    Name = new NameResource
                     {
                         FirstName = RandomString.Build()
                     }
                 };
-
-                var region = new List<RegionResource> { 
-                    new RegionResource() {
-                            Id = 1,
-                            Code = "AL",
-                            Name = "Alabama"
-                }};
-                
-                var countries = new List<CountryResource>
-                {
-                    new CountryResource()
-                    {
-                        Code = "CA",
-                        Name = "Canada" 
-                    },                
-                    new CountryResource()
-                    {
-                        Code = "US",
-                        Name = "United States"
-                    }
-                }; 
-
-                _membershipClientServiceMock.Setup(_ => _.GetProfileByMemberIdAsync(It.IsAny<Guid>()))
-                       .ReturnsAsync(profile);
-
-                _membershipClientServiceMock.Setup(_ => _.GetCountryRegionsAsync(It.IsAny<string>()))
-                       .ReturnsAsync(region);
-
-                _membershipClientServiceMock.Setup(_ => _.GetCountriesAsync())
-                    .ReturnsAsync(countries);
+                _profileInterserviceMock.Setup(_ => _.GetProfileById(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Guid>()))
+                    .ReturnsAsync(profile);
             }
 
             public async Task WhenRequestIsMadeForEarnedMBMLetterTriggerCommunication()
             {
                 try
                 {
-                    await _sut.TriggeredCommunication(mockedCredential, TriggeredCommunication.EarnedMBMCertLetter, Guid.NewGuid(), _credentialServiceMock.Object);
+                    await _sut.TriggeredCommunication(mockedCredential, TriggeredCommunication.EarnedMBMCertLetter.ToString(), Guid.NewGuid(), _credentialServiceMock.Object);
                 }
                 catch (Exception ex)
                 {
                     _caughtException = ex;
                 }
-            }
-
-            public void ThenTheRequestIsHonoredAndLetterRequestIsCalledToGetCountryRegionsAsync()
-            {
-                _membershipClientServiceMock.Verify(_ => _.GetCountryRegionsAsync(It.IsAny<string>()), Times.Once);
             }
 
             public void ThenTheRequestIsHonoredAndLetterRequestIsSentToThePrinterQueue()
@@ -211,116 +178,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.Helper
             }
         }
 
-        #endregion Triggered communication for earned MBM letter sent for ABIM certified diplomates scenario - US Address
-
-
-        #region Triggered communication for earned MBM letter sent for ABIM certified  diplomates scenario  - Japan Address
-        private class TriggeredCommunicationForEarnedMBMLetterSentForABIMNoneUSDiplomates
-            : HelperServiceScenario
-        {
-            private Credential mockedCredential;
-            private int mockedTotalCount;
-            private Exception _caughtException;
-
-            public void GivenTheDiplomateIsNOTCosponsoredButABIMCertified()
-            {
-                // Mocked ABIM Credential. (Where OnBehalfOfCode and OnBehalfOfName are null/empty)
-                mockedCredential = CredentialBuilder
-                    .Build();
-                mockedCredential.AddIssuance(Issuance.Create(RandomString.Build()));
-                var mockedResponse = new List<Credential> { mockedCredential };
-                mockedTotalCount = mockedResponse.Count;
-                _credentialServiceMock.Setup(_ => _.SearchByMemberId(It.IsAny<Guid>(), It.IsAny<PageDefinition>(), out mockedTotalCount))
-                    .Returns(mockedResponse)
-                    .Verifiable("Credential service is expected to be called.");
-
-                _busControlMock.Setup(_ => _.Publish(It.IsAny<NotificationEvent>(), default(CancellationToken)))
-                    .Returns(Task.Delay(0));
-
-                var profile = new ProfileResource
-                {
-                    Addresses = new List<ProfileAddressResource>
-                    {
-                        new ProfileAddressResource
-                        {
-                            IsPrimary = true,
-                            CountryId =  "JP",
-                        }
-                    },
-                    Name = new ProfileNameResource
-                    {
-                        FirstName = RandomString.Build()
-                    }
-                };
-
-                var region = new List<RegionResource> {
-                    new RegionResource() {
-                            Id = 1,
-                            Code = "AL",
-                            Name = "Alabama"
-                }};
-
-                var countries = new List<CountryResource>
-                {
-                    new CountryResource()
-                    {
-                        Code = "CA",
-                        Name = "Canada"
-                    },
-                    new CountryResource()
-                    {
-                        Code = "US",
-                        Name = "United States"
-                    }
-                };
-
-                _membershipClientServiceMock.Setup(_ => _.GetProfileByMemberIdAsync(It.IsAny<Guid>()))
-                       .ReturnsAsync(profile);
-
-                _membershipClientServiceMock.Setup(_ => _.GetCountryRegionsAsync(It.IsAny<string>()))
-                       .ReturnsAsync(region);
-
-                _membershipClientServiceMock.Setup(_ => _.GetCountriesAsync())
-                    .ReturnsAsync(countries);
-            }
-
-            public async Task WhenRequestIsMadeForEarnedMBMLetterTriggerCommunication()
-            {
-                try
-                {
-                    await _sut.TriggeredCommunication(mockedCredential, TriggeredCommunication.EarnedMBMCertLetter, Guid.NewGuid(), _credentialServiceMock.Object);
-                }
-                catch (Exception ex)
-                {
-                    _caughtException = ex;
-                }
-            }
-
-            public void ThenTheRequestIsHonoredAndLetterRequestIsNeverCalledToGetCountryRegionsAsync()
-            {
-                _membershipClientServiceMock.Verify(_ => _.GetCountryRegionsAsync(It.IsAny<string>()), Times.Never);
-            }
-
-            public void ThenTheRequestIsHonoredAndLetterRequestIsSentToThePrinterQueue()
-            {
-                _busControlMock.Verify(_ => _.Publish(It.IsAny<NotificationEvent>(), default(CancellationToken)), Times.Once);
-            }
-
-            public void AndThenThereShouldNotBeAnyExceptionThrown()
-            {
-                _caughtException.Should().BeNull();
-            }
-
-            public void AndThenVerifyAllCredentialsArePulledToDetermineABIMCertifiedScenario()
-            {
-                _credentialServiceMock.Verify(_ =>
-                    _.SearchByMemberId(It.IsAny<Guid>(), It.IsAny<PageDefinition>(), out mockedTotalCount), Times.Once);
-            }
-        }
-
-        #endregion Triggered communication for earned MBM letter sent for ABIM certified diplomates scenario - Japan Address
-
-
+        #endregion Triggered communication for earned MBM letter sent for ABIM certified diplomates scenario
 
         #region Triggered communication for earned MBM letter sent for diplomates with a ABIM certified credential and a other board credential scenario (joint board)
         private class TriggeredCommunicationForEarnedMBMLetterSentForJointBoardDiplomates
@@ -352,59 +210,37 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.Helper
                 _busControlMock.Setup(_ => _.Publish(It.IsAny<NotificationEvent>(), default(CancellationToken)))
                     .Returns(Task.Delay(0));
 
-                var profile = new ProfileResource
+                var profile = new ProfileNestedResource
                 {
-                    Addresses = new List<ProfileAddressResource>
+                    Addresses = new List<AddressSummaryResource>
                     {
-                        new ProfileAddressResource
+                        new AddressSummaryResource
                         {
-                           IsPrimary = true,
-                            CountryId =  "US",
-                            RegionId = 1
+                            IsPrimary = true,
+                            Country = new CountrySummaryResource
+                            {
+                                Code = "US"
+                            },
+                            Region = new RegionSummaryResource
+                            {
+                                Code = RandomString.Build()
+                            }
                         }
                     },
-                    Name = new ProfileNameResource
+                    Name = new NameResource
                     {
                         FirstName = RandomString.Build()
                     }
                 };
-
-                var region = new List<RegionResource> { 
-                    new RegionResource() {
-                        Id = 1,
-                        Code = "AL",
-                        Name = "Alabama"
-                } };
-
-                var countries = new List<CountryResource>
-                {
-                    new CountryResource()
-                    {
-                        Code = "CA",
-                        Name = "Canada"
-                    },
-                    new CountryResource()
-                    {
-                        Code = "US",
-                        Name = "United States"
-                    }
-                };
-
-                _membershipClientServiceMock.Setup(_ => _.GetProfileByMemberIdAsync(It.IsAny<Guid>()))
+                _profileInterserviceMock.Setup(_ => _.GetProfileById(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Guid>()))
                     .ReturnsAsync(profile);
-
-                _membershipClientServiceMock.Setup(_ => _.GetCountryRegionsAsync(It.IsAny<string>()))
-                       .ReturnsAsync(region);
-
-                _membershipClientServiceMock.Setup(_ => _.GetCountriesAsync())
-                    .ReturnsAsync(countries);
             }
 
             public async Task WhenRequestIsMadeForEarnedMBMLetterTriggerCommunication()
             {
                 try
                 {
-                    await _sut.TriggeredCommunication(_abimCredential, TriggeredCommunication.EarnedMBMCertLetter, Guid.NewGuid(), _credentialServiceMock.Object);
+                    await _sut.TriggeredCommunication(_abimCredential, TriggeredCommunication.EarnedMBMCertLetter.ToString(), Guid.NewGuid(), _credentialServiceMock.Object);
                 }
                 catch (Exception ex)
                 {

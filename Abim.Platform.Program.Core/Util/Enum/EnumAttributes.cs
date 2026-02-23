@@ -45,7 +45,7 @@ namespace Abim.Platform.Program.Extensions.ExternalResponses
         public static string ReadEnumCode(Object enumValue)
         {
             if(EnumHasCharValues(enumValue.GetType()))
-                return ReadEnumChar(enumValue);
+                return ReadEnumChar(enumValue).ToString();
             else return ReadEnumInteger(enumValue).ToString();
         }
         
@@ -151,9 +151,9 @@ namespace Abim.Platform.Program.Extensions.ExternalResponses
         public static dynamic GetCustomDisplayAttribute(Object enumValue)
         {
             var @namespace = enumValue.GetType().Namespace;
-            if(@namespace != null && 
-                DisplayAttributeForNamespace.TryGetValue(@namespace, out var customAttributeType))
+            if(DisplayAttributeForNamespace.ContainsKey(@namespace))
             {
+                var customAttributeType = DisplayAttributeForNamespace[@namespace];
                 return GetAttribute(enumValue, customAttributeType);
             }
             var enumDisplayAttribute = GetAttribute<EnumDisplayAttribute>(enumValue);
@@ -237,7 +237,7 @@ namespace Abim.Platform.Program.Extensions.ExternalResponses
             }
             else
             {
-                int intCode;
+                int intCode = 0;
                 if(!int.TryParse(codeString, out intCode))
                     throw new Exception(string.Format("The code string for enum {0} must be numeric", typeof(T).Name));
                 return FromIntCode<T>(intCode);
@@ -284,7 +284,7 @@ namespace Abim.Platform.Program.Extensions.ExternalResponses
             }
             catch(Exception ex)
             {
-                string typeName;
+                string typeName = null;
                 try
                 {
                     typeName = (typeof(T)).Name;
@@ -341,7 +341,7 @@ namespace Abim.Platform.Program.Extensions.ExternalResponses
             }
             catch(Exception ex)
             {
-                string typeName;
+                string typeName = null;
                 try
                 {
                     typeName = (typeof(T)).Name;
@@ -485,7 +485,7 @@ namespace Abim.Platform.Program.Extensions.ExternalResponses
         /// <exception cref="System.Exception"></exception>
         public static Object RandomEntry(Type type)
         {
-            return RandomEntry(type, null);
+            return RandomEntry(type, (string[]) null);
         }
         
         /// <summary>

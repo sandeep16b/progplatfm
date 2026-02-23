@@ -1,10 +1,10 @@
-﻿using Abim.Enterprise.Core.Registration.Interservice;
+﻿using Abim.Enterprise.Core.Profile.Interservice.Interservices;
+using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
+using Abim.Enterprise.Core.Registration.Interservice;
 using Abim.Platform.Product.Interservices;
 using Abim.Platform.Product.Interservices.Interfaces;
 using Abim.Platform.Program.App.Domain;
 using Abim.Platform.Program.App.HangFireJobs;
-using Abim.Platform.Program.App.Services.Impl;
-using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.Core.Identity;
 using Abim.Platform.Program.Interservice;
 using Abim.Platform.Program.Relational;
@@ -19,9 +19,6 @@ using Polly;
 using Polly.Retry;
 using StructureMap;
 using System;
-using System.Net.Http;
-using Microsoft.Extensions.DependencyInjection;
-using System.Net.Http.Headers;
 
 namespace Abim.Platform.Program.Jobs.Config
 {
@@ -88,8 +85,7 @@ namespace Abim.Platform.Program.Jobs.Config
                     c.For<ICacheManager<Source>>().Singleton().Use(p => CacheFactory.FromConfiguration<Source>("cache", UseServiceCacheManagement()));
                     c.For<IDeselectCertificateChildJob>()
                         .Use<DeselectCertificateChildJob>()
-                        .Ctor<string>("profileHostUrl").Is(ConfigurationManager.AppSettings["ProfileHostUrl"])
-                        .Ctor<string>("enviroment").Is(ConfigurationManager.AppSettings["Abim.Common.Env"]);
+                        .Ctor<string>("profileHostUrl").Is(ConfigurationManager.AppSettings["ProfileHostUrl"]);
 
                     //Set up Polly RetryPolicy for the Interservices
                     RetryPolicy retryPolicy = null;
@@ -106,12 +102,20 @@ namespace Abim.Platform.Program.Jobs.Config
                     var defaultContentType = Interservice.Shared.Interservice.DefaultContentType;
 
                     // Product Interservice
-                    c.For<Abim.Platform.Product.Interservice.Shared.IInterservice>().Add(() => new Abim.Platform.Product.Interservice.Shared.Interservice(ConfigurationManager.AppSettings["ProductHostUrl"],
+                    c.For<Abim.Platform.Product.Interservice.Shared.IInterservice>().Add<Abim.Platform.Product.Interservice.Shared.Interservice>(() => new Abim.Platform.Product.Interservice.Shared.Interservice(ConfigurationManager.AppSettings["ProductHostUrl"],
                         UseProtocolBuffersForProductInterservice ? Interservice.Shared.Interservice.ProtobufContentType : Interservice.Shared.Interservice.DefaultContentType,
                         UseProtocolBuffersForProductInterservice ? Interservice.Shared.Interservice.ProtobufContentType : Interservice.Shared.Interservice.DefaultContentType))
                         .Named("InterserviceForProduct");
                     c.For<IProductInterservice>().Singleton().Use<ProductInterservice>().Ctor<Abim.Platform.Product.Interservice.Shared.Interservice>().Named("InterserviceForProduct")
-                        .SetProperty(i => i.RetryPolicy = retryPolicy); 
+                        .SetProperty(i => i.RetryPolicy = retryPolicy);
+
+                    //Legacy Profile Interservice
+                    c.For<IProfileInterservice>().Singleton().Use<ProfileInterservice>()
+                        .SetProperty(i => i.RequestContentType = UseProtocolBuffersForProductInterservice
+                            ? protobufContentType : defaultContentType)
+                        .SetProperty(i => i.ResponseDataType = UseProtocolBuffersForProductInterservice
+                            ? protobufContentType : defaultContentType)
+                        .SetProperty(i => i.RetryPolicy = retryPolicy);
                                             
                     //Program Interservice
                     c.For<Interservice.Shared.IInterservice>().Add(() => new Abim.Platform.Program.Interservice.Shared.Interservice(ConfigurationManager.AppSettings["ProgramHostUrl"],
@@ -123,7 +127,7 @@ namespace Abim.Platform.Program.Jobs.Config
                         .SetProperty(i => i.RetryPolicy = retryPolicy);
 
                     // Registration Interservice
-                    c.For<Enterprise.Core.Registration.Interservice.Shared.IInterservice>().Add(() => new Abim.Enterprise.Core.Registration.Interservice.Shared.Interservice(ConfigurationManager.AppSettings["RegistrationHostUrl"],
+                    c.For<Enterprise.Core.Registration.Interservice.Shared.IInterservice>().Add<Abim.Enterprise.Core.Registration.Interservice.Shared.Interservice>(() => new Abim.Enterprise.Core.Registration.Interservice.Shared.Interservice(ConfigurationManager.AppSettings["RegistrationHostUrl"],
                         UseProtocolBuffersForRegistrationInterservice ? Interservice.Shared.Interservice.ProtobufContentType : Interservice.Shared.Interservice.DefaultContentType,
                         UseProtocolBuffersForRegistrationInterservice ? Interservice.Shared.Interservice.ProtobufContentType : Interservice.Shared.Interservice.DefaultContentType))
                         .Named("InterserviceForRegistration");
@@ -135,28 +139,10 @@ namespace Abim.Platform.Program.Jobs.Config
                     c.For<IAccessTokenService>().Singleton().Use<AccessTokenService>();
 
                     c.For<ITokenClientWraper>().Singleton()
-                       .Use<TokenClientWraper>()
-                       .Ctor<string>("address").Is(ConfigurationManager.AppSettings["authority"] + "connect/token")
-                       .Ctor<string>("clientId").Is(ConfigurationManager.AppSettings["backgroundClientId"])
-                       .Ctor<string>("clientSecret").Is(ConfigurationManager.AppSettings["backgroundClientSecret"]);
-
-                    //In order to make IHttpClientFactory work, we must add serviceProvider first.
-                    var service = new ServiceCollection();
-                    var httpClientFactory = service.AddHttpClient().BuildServiceProvider().GetService<IHttpClientFactory>();
-                    c.For<IHttpClientFactory>().Singleton().Use(httpClientFactory);
-                    service.AddHttpClient<IHttpClientFactory>("HttpClientFactory", client =>
-                    {
-                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    }); 
-
-                    c.For<IApiClientFactory>().Singleton().Use<ApiClientFactory>();
-
-                    // Wrapper class for New Membership 
-                    c.For<IClientWrapperService>().Singleton().Use<ClientWrapperService>();
-
-                    c.For<IMembershipClientService>().Singleton().Use<MembershipClientService>()
-                          .Ctor<string>("apiBaseUrl").Is(ConfigurationManager.AppSettings["ProfileHostUrl"])
-                          .Ctor<int>("pollyRetries").Is(int.Parse(ConfigurationManager.AppSettings["PollyRetries"]));
+                        .Use<TokenClientWraper>()
+                        .Ctor<string>("address").Is(ConfigurationManager.AppSettings["authority"] + "connect/token")
+                        .Ctor<string>("clientId").Is(ConfigurationManager.AppSettings["backgroundClientId"])
+                        .Ctor<string>("clientSecret").Is(ConfigurationManager.AppSettings["backgroundClientSecret"]);
 
                     FluentValidation.AssemblyScanner.FindValidatorsInAssemblyContaining<CredentialValidator>()
                         .ForEach(result =>

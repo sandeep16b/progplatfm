@@ -85,7 +85,7 @@ namespace Abim.Platform.Program.WebApi.Util.Files
             //Create the worksheets
             var worksheetsPerSheet = new Dictionary<Sheet, Worksheet>();
             var sheets = new List<Sheet>();
-            var sheetsResource = workbookPart.Workbook.AppendChild(new Sheets());
+            var sheetsResource = workbookPart.Workbook.AppendChild<Sheets>(new Sheets());
             var sheetCollection = sheetsResource.Elements<Sheet>().ToList();
             for(int i = 0; i < SheetNames.Count; i++)
             {
@@ -171,7 +171,7 @@ namespace Abim.Platform.Program.WebApi.Util.Files
             stylePart.Stylesheet = stylesheet;
             
             //Style the cells: create a Border
-            int borderID;
+            int borderID = 0;
             if(UseBorders)
             {
                 stylesheet.Borders = new Borders();

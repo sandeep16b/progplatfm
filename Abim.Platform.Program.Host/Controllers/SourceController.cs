@@ -10,7 +10,6 @@ using Abim.Platform.Program.WebApi.Api.Attributes;
 using Abim.Platform.Program.WebApi.Attributes;
 using Abim.Platform.Program.WebApi.Objects;
 using AutoMapper;
-using Swashbuckle.Swagger.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -76,10 +75,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpOptions]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "SourceOptions", typeof(SourceOptionsResponseResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Sources.SourceOptions, Name = ProgramResourceConstants.RouteNames.Sources.SourceOptions)]
         public IHttpActionResult SourceOptions()
         {
@@ -131,10 +126,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpGet]
         [Authorize]
         [ResourceAuthorize(Actions.ViewAllAdmin)]
-        [SwaggerResponse(HttpStatusCode.OK, "GetSources", typeof(SourceCollectionResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Sources.GetSources, Name = ProgramResourceConstants.RouteNames.Sources.GetSources)]
         public IHttpActionResult GetSources([FromUri] PageDefinition pageDefinition)
         {
@@ -154,7 +145,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                     if(queryValidationErrorMsg != null) return BadRequest(queryValidationErrorMsg);
                         
                     //perform the Get and return the result
-                    int totalCount;
+                    var totalCount = 0;
                     var sources = SourceService.Search(pageDefinition, out totalCount);
                     if (pageDefinition.SkippedItems >= totalCount && totalCount > 0)
                         return BadRequest(ErrorMessages.PageIndexTooHigh());
@@ -180,10 +171,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpPost]
         [Authorize]
         [ResourceAuthorize(Actions.ViewAllAdmin)]
-        [SwaggerResponse(HttpStatusCode.OK, "GetSourcesPost", typeof(SourceCollectionResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Sources.GetSources, Name = ProgramResourceConstants.RouteNames.Sources.GetSourcesPost)]
         public IHttpActionResult GetSourcesPost([FromBody] PageDefinition pageDefinition)
         {
@@ -203,7 +190,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                     if(queryValidationErrorMsg != null) return BadRequest(queryValidationErrorMsg);
                         
                     //perform the Get and return the result
-                    int totalCount;
+                    var totalCount = 0;
                     var sources = SourceService.Search(pageDefinition, out totalCount);
                     if (pageDefinition.SkippedItems >= totalCount && totalCount > 0)
                         return BadRequest(ErrorMessages.PageIndexTooHigh());
@@ -231,10 +218,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpGet]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetSourceById", typeof(SourceResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Sources.GetSourceById, Name = ProgramResourceConstants.RouteNames.Sources.GetSourceById)]
         public IHttpActionResult GetSourceById(Guid id)
         {

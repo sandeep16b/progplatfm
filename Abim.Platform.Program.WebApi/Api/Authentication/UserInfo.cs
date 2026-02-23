@@ -78,7 +78,8 @@ namespace Abim.Platform.Program.WebApi.Authentication
         /// <summary>
         /// The default name
         /// </summary>
-        public const string DefaultName = "No Name"; 
+        public const string DefaultName = "No Name";
+
 
         /// <summary>
         /// Reads the profile identifier from a collection of claims.
@@ -88,18 +89,8 @@ namespace Abim.Platform.Program.WebApi.Authentication
         public static Guid ReadProfileIdFromClaims(IEnumerable<Claim> claims)
         {
             if(claims == null) return Guid.Empty;
-
-            // If a user logs in, profileid will be in the claims
-            var claimType = ConfigurationManager.AppSettings["ClaimType.ProfileId"] ?? "http://schemas.abim.org/2016/identifier/profileid";
-            Claim userIdClaim = claims.FirstOrDefault(x => x.Type.Equals(claimType, StringComparison.CurrentCultureIgnoreCase));
-
-            // If the profileId is not found, impersonate the login. Extract profileId from NameIdentifier 
-            if (userIdClaim == null )
-            {
-                 userIdClaim = claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
-            }
-
-            if (userIdClaim != null && !string.IsNullOrEmpty(userIdClaim.Value))
+            Claim userIdClaim = claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+            if(userIdClaim != null && !string.IsNullOrEmpty(userIdClaim.Value))
             {
                 Guid userId;
                 if(Guid.TryParse(userIdClaim.Value, out userId)) return userId;
@@ -168,18 +159,13 @@ namespace Abim.Platform.Program.WebApi.Authentication
             
             //AbimId
             userInfo.AbimId = ReadAbimIdFromClaims(claims);
-
+            
             //Username
-            // bug 291026,Staff Portal: Reinstate Expected User Name. The preferred_username no longer exists in the claims.
-            Claim preferredUsernameClaim = claims.FirstOrDefault(x => x.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-            if (preferredUsernameClaim != null && !string.IsNullOrEmpty(preferredUsernameClaim.Value))
+            Claim preferredUsernameClaim = claims.FirstOrDefault(x => x.Type == "preferred_username");
+            if(preferredUsernameClaim != null && !string.IsNullOrEmpty(preferredUsernameClaim.Value))
                 userInfo.Username = preferredUsernameClaim.Value;
-            else
-            {
-                Claim ClientId = claims.FirstOrDefault(r => r.Type == "client_id");
-                userInfo.Username = ClientId != null ? ClientId.Value : DefaultUsername;
-            }
-
+            else userInfo.Username = DefaultUsername;
+            
             //Name
             userInfo.Name = string.IsNullOrEmpty(identity.Name) ? DefaultName : identity.Name;
             
@@ -193,7 +179,7 @@ namespace Abim.Platform.Program.WebApi.Authentication
 
             //IsAdmin
             var adminRoleNames = (ConfigurationManager.AppSettings["AdminGroup"] ?? "DevAdmin").Split(',');
-            var roleClaims = claims.Where(x => x.Type ==  ClaimTypes.Role);
+            var roleClaims = claims.Where(x => x.Type == ClaimTypes.Role);
             var backgroundClientId = ConfigurationManager.AppSettings["backgroundClientId"] ?? "";
             userInfo.IsAdmin = roleClaims.Any(c => adminRoleNames.Contains(c.Value)) 
                 || claims.Any(x => x.Type.Contains("client_id") && x.Value == backgroundClientId.Trim());

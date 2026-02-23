@@ -29,6 +29,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\**\Release\**\Abim.*.dll" target="lib"/>
+    <file src="bin\Release\**\Abim.*.dll" target="lib"/>
   </files>
 </package>

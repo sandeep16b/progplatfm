@@ -1,10 +1,11 @@
-﻿using Abim.Enterprise.Core.Registration.Enums;
-using Abim.Platform.Program.MembershipClient;
+﻿using Abim.Enterprise.Core.Profile.Resource;
+using Abim.Enterprise.Core.Registration.Enums;
 using Abim.Platform.Program.App.Domain;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks; 
+using System.Threading.Tasks;
+
 
 namespace Abim.Platform.Program.App.Services
 {
@@ -36,14 +37,14 @@ namespace Abim.Platform.Program.App.Services
         /// </summary>
         /// <param name="memberId"></param>
         /// <returns></returns>
-        //Task<ProfileNestedResource> GetProfileById(Guid memberId);
+        Task<ProfileNestedResource> GetProfileById(Guid memberId);
 
         /// <summary>
         /// Get Profile By ABIMId
         /// </summary>
         /// <param name="abimId"></param>
         /// <returns></returns>
-        //Task<ProfileNestedResource> GetProfileByABIMId(string abimId);
+        Task<ProfileNestedResource> GetProfileByABIMId(string abimId);
 
         /// <summary>
         /// 
@@ -63,21 +64,7 @@ namespace Abim.Platform.Program.App.Services
         /// GetVocLetterContent
         /// </summary>
         /// <returns></returns>
-        Task<VocPdfData> GetVocLetterContent(ProfileResource profile, IEnumerable<Credential> credentials);
-
-        /// <summary>
-        /// GetCountryByCountryId
-        /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
-        Task<CountryResource> GetCountryByCountryId(ProfileAddressResource address); 
-
-        /// <summary>
-        /// GetMatchingRegionByRegionId
-        /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
-        Task<RegionResource> GetMatchingRegionByRegionId(ProfileAddressResource address);
+        VocPdfData GetVocLetterContent(ProfileNestedResource profile, IEnumerable<Credential> credentials);
 
         /// <summary>
         /// GetPriviousPathwayForSubspecialtyCertCode

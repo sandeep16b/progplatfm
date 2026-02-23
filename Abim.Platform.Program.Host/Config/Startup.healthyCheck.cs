@@ -17,11 +17,7 @@ namespace Abim.Platform.Program.Host.Config
     /// Startup class (partial class)
     /// </summary>
     public partial class Startup
-    {
-        /// <summary>
-        /// ConfigurationHealthyCheck
-        /// </summary>
-        /// <param name="app"></param>  
+    { 
         public void ConfigurationHealthyCheck(IAppBuilder app)
         {
             var config = ConfigurationManager;
@@ -38,12 +34,7 @@ namespace Abim.Platform.Program.Host.Config
                             new HealthCheckWrapper( new RabbitMQHealthCheck(amqp, sslOption), "RabbitMQHealthCheck" )
                    }) 
              );  
-        }
-        /// <summary>
-        /// CustomResponseWriter
-        /// </summary>
-        /// <param name="context"></param>  
-        /// <param name="healthReport"></param>  
+        } 
         private static Task CustomResponseWriter(IOwinContext context, HealthReport healthReport)
         {
             context.Response.ContentType = "application/json";

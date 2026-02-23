@@ -17,7 +17,7 @@
     <ModelCollation>1033,CI</ModelCollation>
     <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
     <DeployToDatabase>True</DeployToDatabase>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <TargetLanguage>CS</TargetLanguage>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <SqlServerVerification>False</SqlServerVerification>
@@ -123,7 +123,9 @@
     <Folder Include="Schema" />
     <Folder Include="Cosponsored\Views" />
     <Folder Include="Cosponsored\Functions" />
-    <Folder Include="dbo\Jobs" />
+    <Folder Include="dbo\Stored Procedures\" />
+    <Folder Include="IdentityData\" />
+    <Folder Include="IdentityData\Synonyms\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\dbo.IssuanceStatusType.sql">
@@ -190,8 +192,30 @@
     <Build Include="Cosponsored\Functions\Cosponsored.RandomSSN.sql" />
     <Build Include="Cosponsored\Tables\enum tables\Cosponsored.Board.sql" />
     <Build Include="Cosponsored\Tables\enum tables\Cosponsored.BoardContact.sql" />
+
+    <Build Include="dbo\Stored Procedures\dbo.usp_get_Certificateprint_List.sql">
+      <AnsiNulls>On</AnsiNulls>
+      <QuotedIdentifier>On</QuotedIdentifier>
+    </Build>
+    <Build Include="dbo\Stored Procedures\dbo.usp_get_certificatecount_byexam.sql">
+      <AnsiNulls>On</AnsiNulls>
+      <QuotedIdentifier>On</QuotedIdentifier>
+    </Build>
+    <Build Include="dbo\Stored Procedures\dbo.usp_get_certificate_exam_list.sql">
+      <AnsiNulls>On</AnsiNulls>
+      <QuotedIdentifier>On</QuotedIdentifier>
+    </Build>
+    <Build Include="security\IdentityData.sql" />
+    <Build Include="IdentityData\Synonyms\IdentityData.UserAccounts.sql" />
+    <Build Include="IdentityData\Synonyms\IdentityData.UserProfile.sql" />
+    <Build Include="IdentityData\Synonyms\IdentityData.RestrictionFeature.sql" />
+    <Build Include="IdentityData\Synonyms\IdentityData.UserAccountsRestriction.sql" />
+    <Build Include="IdentityData\Synonyms\IdentityData.UserClaims.sql" />
+    <Build Include="dbo\Functions\dbo.Split.sql" />
+    <Build Include="IdentityData\Synonyms\IdentityData.Region.sql" />
+    <Build Include="IdentityData\Synonyms\IdentityData.Country.sql" />
+    <Build Include="IdentityData\Synonyms\IdentityData.Addresses.sql" />
     <Build Include="dbo\Tables\LockOutPeriodCoSponsoredCredential.sql" />
-    <Build Include="Schema\IdentityData_1.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
@@ -200,8 +224,6 @@
     <None Include="Abim.Platform.Program.Certification.Database.publish.xml" />
     <None Include="Dev.publish.xml" />
     <None Include="Abim_1.Platform.Program.Certification.Database.publish.xml" />
-    <None Include="dbo\Jobs\CMPIncorrectPathwayNotification.sql" />
-    <None Include="dbo\Jobs\IssuancesCreatedYesterdayNotification.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Abim.Platform.Program.Certification.Database.refactorlog" />
@@ -216,6 +238,10 @@
       <DefaultValue>
       </DefaultValue>
       <Value>$(SqlCmdVar__2)</Value>
+    </SqlCmdVariable>
+    <SqlCmdVariable Include="IdentityData">
+      <DefaultValue>IdentityData</DefaultValue>
+      <Value>$(SqlCmdVar__3)</Value>
     </SqlCmdVariable>
   </ItemGroup>
   <ItemGroup>

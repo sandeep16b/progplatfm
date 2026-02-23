@@ -21,6 +21,7 @@ using Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest.Bas
 using Abim.Platform.Program.Tests.Setup.DomainBuilders;
 using Abim.Platform.Program.Tests.Setup.ResourceBuilders;
 using Abim.Platform.Program.Tests.Setup.Responses;
+using Abim.Platform.Program.WebApi.Testing.Setup;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -144,30 +145,18 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         [TestCase]
         [WorkItem(208254)]
         [WorkItem(216370)]
-        [WorkItem(253719)]
-        public void CorrectiveAction_SetGracePeriodIn2023WhenExamDueDateIn2020_Success()
+        public void CorrectiveAction_DontSetGracePeriodWhenExamDueDateIn2020_Success()
         {
-            new CorrectiveAction_SetGracePeriodWhenExamDueDateIn2020().BDDfy();
+            new CorrectiveAction_DontSetGracePeriodWhenExamDueDateIn2020().BDDfy();
         }
 
         [TestCase]
         [WorkItem(208254)]
         [WorkItem(216370)]
-        [WorkItem(253719)]
-        public void CorrectiveAction_SetGracePeriodIn2023WhenExamDueDateIn2021_Success()
+        public void CorrectiveAction_DontSetGracePeriodWhenExamDueDateIn2021_Success()
         {
-            new CorrectiveAction_SetGracePeriodWhenExamDueDateIn2021().BDDfy();
+            new CorrectiveAction_DontSetGracePeriodWhenExamDueDateIn2021().BDDfy();
         }
-
-        [TestCase]
-        [WorkItem(208254)]
-        [WorkItem(216370)]
-        [WorkItem(253719)]
-        public void CorrectiveAction_DontSetGracePeriodIn2023WhenExamDueDateIn2019_Success()
-        {
-            new CorrectiveAction_DontSetGracePeriodWhenExamDueDateIn2019().BDDfy();
-        }
-
 
         [TestCase]
         [WorkItem(208254)]
@@ -414,7 +403,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
 
             Credential = (new CredentialDataBuilder(certification))
                         .With(a => a.Certification = certification)
-                        .With(a => a.Pathway= Abim.Platform.Program.Resources.PathwayType.OneYear)
                         .Build();
 
             // bug 230675 : Exam Result Processing Switches Pathway But Does Not Clear Is In CMP Flag
@@ -497,17 +485,17 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
 
         }
 
-        public void WhenICallRunCorrectiveAction()
+        public async Task WhenICallRunCorrectiveActionAsync()
         {
             try
             {
-               Result = ProgramRulesService.RunCorrectiveAction(
+               Result = await ProgramRulesService.RunCorrectiveAction(
                                 credentialsIn: new List<Credential>() { Credential },
                                 memberId: new Guid(),
                                 eventDate: EventDate,
                                 processingDate: ProcessingDate,
                                 triggeringEvent: TriggeringEvent.ExamResultMocKci,
-                                registration: new RegistrationData(Registration)).Result;
+                                registration: new RegistrationData(Registration));
             }
             catch (Exception ex)
             {
@@ -1338,7 +1326,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         }
     }
 
-    public class CorrectiveAction_SetGracePeriodWhenExamDueDateIn2020 : ExamResultProcessingShouldWeExpireActiveIssuancesScenario
+    public class CorrectiveAction_DontSetGracePeriodWhenExamDueDateIn2020 : ExamResultProcessingShouldWeExpireActiveIssuancesScenario
     {
 
         protected override void SetupCredential()
@@ -1395,18 +1383,18 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
             _processingDate = new DateTime(2020, 12, 1);
         }
 
-        protected void AndTheUpdateCredentialFromObjectCommand_Handler_ShouldHaveBeCalled()
+        protected void AndTheUpdateCredentialFromObjectCommand_Handler_ShouldNeverBeCalled()
         {
             _credSvcMock.Verify(mock =>
                 mock.Handle(
                     It.Is<UpdateCredentialFromObjectCommand>(command =>
                     command.SetGracePeriod == true 
                     )),
-                Times.Once);
+                Times.Never);
         }
     }
 
-    public class CorrectiveAction_SetGracePeriodWhenExamDueDateIn2021 : ExamResultProcessingShouldWeExpireActiveIssuancesScenario
+    public class CorrectiveAction_DontSetGracePeriodWhenExamDueDateIn2021 : ExamResultProcessingShouldWeExpireActiveIssuancesScenario
     {
 
         protected override void SetupCredential()
@@ -1463,79 +1451,12 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
             _processingDate = new DateTime(2021, 12, 1);
         }
 
-        protected void AndTheUpdateCredentialFromObjectCommand_Handler_ShouldHaveBeCalled()
-        {
-            _credSvcMock.Verify(mock =>
-                mock.Handle(
-                    It.Is<UpdateCredentialFromObjectCommand>(command =>
-                    command.SetGracePeriod == true )),
-                Times.Once);
-        }
-    }
-
-    public class  CorrectiveAction_DontSetGracePeriodWhenExamDueDateIn2019 : ExamResultProcessingShouldWeExpireActiveIssuancesScenario
-    {
-
-        protected override void SetupCredential()
-        {
-            base.SetupCredential();
-            _cred.ExamDueDate = new DateTime(2019, 12, 31);
-            _cred.LookbackDate = new DateTime(2021, 12, 31);
-        }
-
-        protected void SetupLocalRegistrationInterserviceMock()
-        {
-            var builder = new RegistrationResourceBuilder();
-            RegistrationResource _reg = builder
-                    .WithCertificationId(_cred.Certification.ExternalId)
-                    .WithExamResult(ExamResultType.Fail)
-                    .WithExamType(ExamType.Moc)
-                    .WithAdministrationDate(new DateTime(2021, 11, 30))
-                    .WithAdministrationYear(2021)
-                    .Build();
-
-            List<RegistrationResource> registrations = new List<RegistrationResource>() { _reg };
-
-            _regInterSvcMock
-                .Setup(x => x.GetAllRegistrationsAndCMPRegistrationsForUser(It.IsAny<string>(), It.IsAny<Guid>()))
-                .Returns(Task.FromResult(new UserRegistrationsAndCMPRegistrationsResource() { CMPRegistrations = new List<CMPRegistrationResource>(0), Registrations = registrations }));
-        }
-
-        protected override void SetupProductInterserviceMock()
-        {
-            //Give them an activity so that they'll have met their Non-Exam requirements (they will not have met the Exam requirements)
-            var activities = new ActivityFullCollectionResource();
-            activities.Data = new List<ActivityResource>(1);
-            var builder = new ActivityResourceBuilder();
-            activities.Data.Add(
-                builder
-                    .WithCompletedDate(new DateTime(2021, 1, 1))
-                    .WithActivityResult(ActivityResultType.Pass)
-                    .WithTotalMOCPoints(100)
-                    .Build());
-
-            base.SetupProductInterserviceMock();
-            _prodInterSvcMock
-                .Setup(x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                .Returns(Task.FromResult(activities));
-        }
-
-        protected override void GivenIHaveValidParameters()
-        {
-            SetupCredential();
-            SetupRegistration();
-            SetupLocalRegistrationInterserviceMock();
-
-            _eventDate = new DateTime(2021, 11, 30);
-            _processingDate = new DateTime(2021, 12, 1);
-        }
-
         protected void AndTheUpdateCredentialFromObjectCommand_Handler_ShouldNeverBeCalled()
         {
             _credSvcMock.Verify(mock =>
                 mock.Handle(
                     It.Is<UpdateCredentialFromObjectCommand>(command =>
-                    command.SetGracePeriod == true)),
+                    command.SetGracePeriod == true )),
                 Times.Never);
         }
     }

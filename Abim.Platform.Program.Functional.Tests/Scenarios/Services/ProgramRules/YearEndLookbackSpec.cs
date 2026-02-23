@@ -81,28 +81,21 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         {
             new ShouldMeetFiveYearLookbackRequirementWhenMOCPointsLessThan100AndEnrolledInReciprocity().BDDfy();
         }
-
-        [Test]
-        [WorkItem(135348)]
-        public void Should_Meet_FiveYearLookbackRequirement_WhenMOCPointsLessThan100_AndEnrolledInReciprocityAtTheEndOfWindow()
-        {
-            new ShouldMeetFiveYearLookbackRequirementWhenMOCPointsLessThan100AndEnrolledInReciprocityAtTheEndOfWindow().BDDfy();
-        }
-
+        
         [Test]
         [WorkItem(135348)]
         public void Should_Meet_FiveYearLookbackRequirement_WhenMOCPointsLessThan100_NotEnrolledInReciprocity_EarnedSubspecialtyCert()
         {
             new ShouldMeetFiveYearLookbackRequirementWhenMOCPointsLessThan100NotEnrolledInReciprocityEarnedSubspecialtyCert().BDDfy();
         }
-
+        
         [Test]
         [WorkItem(135348)]
         public void Should_Meet_FiveYearLookbackRequirement_WhenMOCPointsLessThan100_NotEnrolledInReciprocity_NotEarnedSubspecialtyCert_RecentlyCertified()
         {
             new ShouldMeetFiveYearLookbackRequirementWhenMOCPointsLessThan100NotEnrolledInReciprocityNotEarnedSubspecialtyCertRecentlyCertified().BDDfy();
         }
-
+        
         [Test]
         [WorkItem(135348)]
         public void Should_Not_MeetFiveYearLookbackRequirement_WhenMOCPointsLessThan100_NotEnrolledInReciprocity_NotEarnedSubspecialtyCert_NotRecentlyCertified()
@@ -144,70 +137,63 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         {
             new ShouldNotMeetTLFiveYearLookbackRequirementWhenMOCPointsLessThan100NotEnrolledInReciprocityNotEarnedSubspecialtyCertNotRecentlyCertified().BDDfy();
         }
-
+        
         [Test]
         [WorkItem(135348)]
         public void ShouldMeet_FiveYearLookbackRequirement_WhenMOCPointsLessThan100_NotEnrolledInReciprocity_NotEarnedSubspecialtyCert_NotRecentlyCertified_CheckDateReqTrueBefore2018()
         {
             new ShouldMeetFiveYearLookbackRequirementWhenMOCPointsLessThan100NotEnrolledInReciprocityNotEarnedSubspecialtyCertNotRecentlyCertifiedCheckDateReqTrueBeforeEnd2018().BDDfy();
         }
-
+        
         [Test]
         [WorkItem(135348)]
         public void ShouldNotMeet_FiveYearLookbackRequirement_WhenMOCPointsLessThan100_NotEnrolledInReciprocity_NotEarnedSubspecialtyCert_NotRecentlyCertified_CheckDateReqTrueAfter2018()
         {
             new ShouldNotMeetFiveYearLookbackRequirementWhenMOCPointsLessThan100NotEnrolledInReciprocityNotEarnedSubspecialtyCertNotRecentlyCertifiedCheckDateReqTrueAfter2018().BDDfy();
         }
-
+        
         [Test]
         [WorkItem(135605)]
         public void Should_Meet_AttestationRequirment_WithPassedIcardMOCAttestation_WithinFiveYears()
         {
             new ShouldMeetAttestationRequirmentWithPassedIcardMOCAttestationWithinFiveYears().BDDfy();
         }
-
+        
         [Test]
         [WorkItem(135605)]
         public void ShouldNot_MeetAttestationRequirment_WithNoPassedIcardMOCAttestation_WithinFiveYears()
         {
             new ShouldNotMeetAttestationRequirmentWithNoPassedIcardMOCAttestationWithinFiveYears().BDDfy();
         }
-
+        
         [Test]
         [WorkItem(135605)]
         public void ShouldMeet_AttestationRequirment_WithOldestIssuanceWithinFiveYears_NoPassedAttestation()
         {
             new ShouldMeetAttestationRequirmentWithOldestIssuanceWithinFiveYearsNoPassedAttestation().BDDfy();
         }
-
+        
         [Test]
         [WorkItem(135605)]
         public void ShouldMeet_AttestationRequirment_WithPassedFphmMOCAttestation_WithinFiveYears()
         {
             new ShouldMeetAttestationRequirmentWithPassedFphmMOCAttestationWithinFiveYears().BDDfy();
         }
-
-        [Test]
-        [WorkItem(257166)]
-        public void Should_MeetAttestationRequirment_WithPassedMocAttestationWithinFiveYears_ForADifferentCert_OrPassedInitialAttestation_FPHMException()
-        {
-            new ShouldMeetAttestationRequirmentWithPassedMocAttestationWithinFiveYearsForADifferentCertOrPassedInitialAttestation().BDDfy();
-        }
-
+        
         [Test]
         [WorkItem(135605)]
         public void ShouldNot_MeetAttestationRequirment_WithPassedMocAttestationWithinFiveYears_ForADifferentCert_OrPassedInitialAttestation()
         {
-            new ShoulNotdMeetAttestationRequirmentWithPassedMocAttestationWithinFiveYearsForADifferentCertOrPassedInitialAttestation().BDDfy();
+            new ShouldNotMeetAttestationRequirmentWithPassedMocAttestationWithinFiveYearsForADifferentCertOrPassedInitialAttestation().BDDfy();
         }
-
+        
         [Test]
         [WorkItem(135605)]
         public void ShouldMeet_AttestationRequirement_WhenNotICard_NotFphm_AndNoAttestations()
         {
             new ShouldMeetAttestationRequirementWhenNotICardNotFphmAndNoAttestations().BDDfy();
         }
-
+        
         [Test]
         [WorkItem(135605)]//
         public void ShouldNotMeet_NonExamsRequirement_WhenAttestationRequirementIsNotMet()
@@ -221,14 +207,14 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         {
             new ShouldNotSetGracePeriodWhenCredentialMOCExamDueDateYearNotEqualToLookbackYear().BDDfy();
         }
-
+        
         [Test]
         [WorkItem(135753)]
         public void ShouldNot_SetGracePeriod_WhenIssuanceNotActiveAndParticipating()
         {
             new ShouldNotSetGracePeriodWhenIssuanceNotActiveAndParticipating().BDDfy();
         }
-
+        
         [Test]
         [WorkItem(135753)]
         public void ShouldNot_SetGracePeriod_WhenNoCorrespondingRegistration()
@@ -245,25 +231,66 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
 
         [Test]
         [WorkItem(135753)]
-        [WorkItem(254150)]
         public void ShouldSetGracePeriod_WhenCorrespondingRegistration_ActiveParticipating_NonExamsReq_MocExamDueYearEqualLookbackYear()
         {
-            new ShouldSetGracePeriodWhenCorrespondingRegistrationActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYear(isRegOnHold: false, isCmpRegOnHold: false).BDDfy();
+            new ShouldSetGracePeriodWhenCorrespondingRegistrationActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYear().BDDfy();
+        }
+
+        /* 
+         Pbi 216370 : Certification & Participation Status Changes for 2020 and 2021 MOC Requirements(COVID 4)
+            For 2020, 2021, and 2022, a diplomate will not experience a negative status change (from certified to not certified or participating to not participating) for any of the following reasons:           
+            *** Diplomates in one of the COVID 4 disciplines (Infectious Disease, Hospital Medicine, Critical Care, Pulmonary Disease) currently in the grace period in 2020 will have their grace period term extended to 12/31/2023.         ============================================================================================================================================================================================
+         --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            Pbi 208254 : (Release 2.35) Certification & Participation Status Changes for 2020 and 2021 MOC Requirements (Not COVID 4)
+              For 2020 and 2021, a diplomate will not experience a negative status change (from certified to not certified or participating to not participating) for any of the following reasons:           
+              *** Diplomates  currently in the grace period in 2020 will have their grace period term extended to 12/31/2022.
+        ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        */
+        [Test]
+        [WorkItem(216370)]
+        [WorkItem(208254)]
+        public void ShouldNotSetGracePeriod_in2021_Only_WhenCorrespondingRegistration_ActiveParticipating_NonExamsReq_MocExamDueYearEqualLookbackYear()
+        {
+            new ShouldNotSetGracePeriod_in2021Only_WhenCorrespondingRegistrationActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYear().BDDfy();
         }
 
         [Test]
-        [WorkItem(254150)]
-        public void ShouldNotSetGracePeriod_WhenRegistrationsIsOnHold()
+        [WorkItem(216370)]
+        [WorkItem(208254)]
+        public void ShouldNotSetGracePeriod_in2022_Covid4_WhenCorrespondingRegistration_ActiveParticipating_NonExamsReq_MocExamDueYearEqualLookbackYear()
         {
-            new ShouldSetGracePeriodWhenCorrespondingRegistrationActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYear(isRegOnHold: true, isCmpRegOnHold: false).BDDfy();
+            new ShouldNotSetGracePeriod_in2022_Covid4_WhenCorrespondingRegistrationActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYear().BDDfy();
         }
 
         [Test]
-        [WorkItem(263029)]
-        public void ShouldNotSetGracePeriod_WhenGrandFatherCertificate()
+        [WorkItem(216370)]
+        [WorkItem(208254)]
+        public void ShouldSetGracePeriod_in2022_NotCovid4_WhenCorrespondingRegistration_ActiveParticipating_NonExamsReq_MocExamDueYearEqualLookbackYear()
         {
-            new ShouldNotSetGracePeriodWhenGrandFatherCertificate().BDDfy();
+            new ShouldSetGracePeriod_in2022_NotCovid4_WhenCorrespondingRegistrationActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYear().BDDfy();
         }
+
+        // extending Grace period in 2021 ( 1 year for not covid 4 and 2 years for covid 4)
+
+        [Test]
+        [WorkItem(216370)]
+        [WorkItem(208254)]
+        public void ShouldExtendGracePeriod_in2020_ByTwoYears_NotCovid4_WhenCurrentlyInGracePeriod()
+        {
+            new ShoulExtendSetGracePeriod_in2020_ByTwoYears_NotCovid4_WhenCurrentlyInGracePeriod().BDDfy();
+        }
+
+        [Test]
+        [WorkItem(216370)]
+        [WorkItem(208254)]
+        public void ShouldExtendGracePeriod_in2020_ByThreeYears_Covid4_WhenCurrentlyInGracePeriod()
+        {
+            new ShoulExtendSetGracePeriod_in2020_ByThreeYears_Covid4_WhenCurrentlyInGracePeriod().BDDfy();
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+
 
         [Test]
         [WorkItem(135753)]
@@ -278,7 +305,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         {
             new ShouldNotSetGracePeriodWhenCorrespondingRegistrationIsForANonMocExam().BDDfy();
         }
-
+        
         [Test]
         [WorkItem(135753)]
         public void ShouldNot_SetGracePeriod_WhenCorrespondingRegistration_IsNotIndt_NotFail_NotUtt()
@@ -300,35 +327,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             new ShouldSetGracePeriodWhenCorrespondingRegistrationActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYearPointsBeyondYELB().BDDfy();
         }
 
-        // ------ Pbi 329294 : Update Program Rule 12 Grace Period to Include New CMP Criteria
-        [Test]
-        [WorkItem(329294)]
-        public void ShouldSetGracePeriodWhenEnrolledInCmpInDueYearActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYearPointsBeyondYELB_asd()
-        {
-            new ShouldSetGracePeriodWhenEnrolledInCmpInDueYearActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYearPointsBeyondYELB().BDDfy();
-        }
-
-        [Test]
-        [WorkItem(329294)]
-        public void ShouldSetGracePeriodWhenEnrolledInCmpBeforeDueYearActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYearPointsBeyondYELB_asd()
-        {
-            new ShouldSetGracePeriodWhenEnrolledInCmpBeforeDueYearActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYearPointsBeyondYELB().BDDfy();
-        }
-
-        [Test]
-        [WorkItem(329294)]
-        [WorkItem(344378)]
-        public void ShouldSetGracePeriodWhenPassOnHoldExamResultActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYearPointsBeyondYELB_asd()
-        {
-            new ShouldSetGracePeriodWhenPassOnHoldCmpExamActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYearPointsBeyondYELB().BDDfy();
-        }
-
-        [Test]
-        [WorkItem(329294)]
-        public void ShouldNotSetGracePeriodWhenEnrolledInCmpNotInDueYearActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYearPointsBeyondYELB_asd()
-        {
-            new ShouldNotSetGracePeriodWhenEnrolledInCmpNotInDueYearActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYearPointsBeyondYELB().BDDfy();
-        }
 
         //-----  Clear Assessment Met (PBI 134115 ) ----------------------------------------------------------------
         [Test]
@@ -343,6 +341,20 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         public void Should_NOT_Clear_AssesmentMet()
         {
             new ShouldNotClearAssesmentMet().BDDfy();
+        }
+
+        [Test]
+        [WorkItem(231852)]
+        public void Should_NOT_Clear_AssessmentMet_When_Eligible_For_COVID_Extension_And_Not_In_COVID_4()
+        {
+            new ShouldNotClearAssesmentMet(new DateTime(2021, 12, 31)).BDDfy();
+        }
+
+        [Test]
+        [WorkItem(231852)]
+        public void Should_NOT_Clear_AssessmentMet_When_Eligible_For_COVID_Extension_And_In_COVID_4()
+        {
+            new ShouldNotClearAssesmentMet(new DateTime(2022, 12, 31), "ID").BDDfy();
         }
 
         //---------------------------------------------------------------------------------------------
@@ -361,7 +373,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         {
             new ShouldNOTSetConsecutiveKCIPassRequired().BDDfy();
         }
-
+        
         [Test]
         [WorkItem(137218)]
         public void Should_UseTheCurrentDate_InMeetFiveYearLookbackRequirement_For100MOCPoints_And_MeetRequirement()
@@ -369,14 +381,14 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             new ShouldUseTheCurrentDateInMeetFiveYearLookbackRequirementFor100MOCPointsAndMeetRequirement().BDDfy();
         }
 
-
+        
         [Test]
         [WorkItem(137218)]
         public void Should_UseTheCurrentDate_InMeetFiveYearLookbackRequirement_For100MOCPoints_And_Not_MeetRequirement()
         {
             new ShouldUseTheCurrentDateInMeetFiveYearLookbackRequirementFor100MOCPointsAndNotMeetRequirement().BDDfy();
         }
-
+        
         [Test]
         [WorkItem(139327)]
         public void Should_Not_SetGracePeriod_When_ThereAreNo_IssuancesOnACert()
@@ -759,7 +771,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
 
             private async void WhenIRunTheLookbackProcess()
             {
-                await _sut.RunYearEndLookback(_memberId, new DateTime(DateTime.Now.Year - 1, 12, 31), new DateTime(DateTime.Now.Year, 1, 31));
+                await _sut.RunYearEndLookback(_memberId, new DateTime(DateTime.Now.Year -1, 12, 31), new DateTime(DateTime.Now.Year, 1, 31));
             }
 
             private void ThenTheGracePeriodOfTheCredentialShouldNotBeCleared()
@@ -772,7 +784,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
 
         #region ShouldDetermineFiveYearLookBackRequirement
 
-
+     
         private class ShouldMeetFiveYearLookbackRequirementWhen100MOCPointsAndNoMedicalKnowledgePoints : ProgramRulesServiceSimplifiedScenario
         {
             private Guid _memberId;
@@ -833,7 +845,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             {
                 _memberId = Guid.NewGuid();
                 _lookbackDate = new DateTime(2018, 12, 31);
-
+                
             }
 
             private void WhenICallFiveYearsLookBack()
@@ -841,7 +853,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 try
                 {
                     _sut.ProcessingDate = _lookbackDate;
-                    fiveYearLookbackStep = _sut.FiveYearsLookBack(_creds[0], _lookbackDate, _lookbackDate, checkCheckDateRequirement: false);
+                    fiveYearLookbackStep = _sut.FiveYearsLookBack(_creds[0], _lookbackDate, _lookbackDate, checkCheckDateRequirement:false);
                 }
                 catch (Exception ex)
                 {
@@ -860,7 +872,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             }
         }
 
-        private class ShouldUseTheCurrentDateInMeetFiveYearLookbackRequirementFor100MOCPointsAndMeetRequirement : ProgramRulesServiceSimplifiedScenario
+        private class ShouldUseTheCurrentDateInMeetFiveYearLookbackRequirementFor100MOCPointsAndMeetRequirement: ProgramRulesServiceSimplifiedScenario
         {
             private List<Credential> _creds;
             private DateTime _lookbackDate = new DateTime(DateTime.Today.Year, 1, 1);
@@ -908,7 +920,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 activityTwo.CompletedDate = new DateTime(_lookbackDate.Year - 1, 3, 20);
                 activityTwo.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
                 activityTwo.Product = new ProductResource() { Code = RandomString.Build() };
-
+                
                 activities.Data.Add(activityTwo);
 
 
@@ -1141,99 +1153,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             }
         }
 
-        private class ShouldMeetFiveYearLookbackRequirementWhenMOCPointsLessThan100AndEnrolledInReciprocityAtTheEndOfWindow : ProgramRulesServiceSimplifiedScenario
-        {
-            private Guid _memberId;
-            private List<Credential> _creds;
-            private DateTime _lookbackDate;
-            private Exception exception;
-            private IStep fiveYearLookbackStep;
-
-            protected override void SetupCredentialServiceMock()
-            {
-                _creds = new List<Credential>(1);
-                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
-
-                _creds.Add(CredentialBuilder.Build(abimSource));
-                _creds[0].AddIssuance(IssuanceBuilder.Build());
-
-                _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
-
-                _credSvcMock.Setup(x => x.SearchByMemberId(It.IsAny<Guid>())).Returns(_creds);
-                _credSvcMock
-                    .Setup(x => x.Handle(It.IsAny<UpdateCredentialFromLookbackCommand>()))
-                    .Returns(new UpdateCredentialFromLookbackCommandResult());
-
-
-                _credSvcMock.Setup(x => x.GetFirstIssuanceDate(It.IsAny<Guid>()))
-                    .Returns(new DateTime(DateTime.Now.Year - 20, 2, 21));
-            }
-
-            protected override void SetupProductInterserviceMock()
-            {
-                _prodInterSvcMock = new Mock<IProductInterservice>(MockBehavior.Strict);
-
-                var activities = new ActivityFullCollectionResource();
-                activities.Data = new List<ActivityResource>();
-
-                var activity = new ActivityResource();
-                activity.TotalMOCPoints = 10;
-                activity.CompletedDate = new DateTime(DateTime.Now.Year - 2, 3, 20);
-                activity.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
-                activity.Product = new ProductResource() { Code = RandomString.Build() };
-
-                activities.Data.Add(activity);
-
-                var activityTwo = new ActivityResource();
-                activityTwo.CompletedDate = new DateTime(DateTime.Now.Year - 3, 3, 20); // already expired now, but not at the end of loock back date (DateTime.Now.Year - 1, 12, 31)
-                activityTwo.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
-                activityTwo.Product = new ProductResource() { Code = "ReciprocityAttest" };
-
-                activities.Data.Add(activityTwo);
-
-                _prodInterSvcMock.Setup(
-                        x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(),
-                                It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                    .Returns(Task.FromResult(activities));
-            }
-
-            protected override void SetupAccessTokenServiceMock()
-            {
-                _accessTokenServiceMock = new Mock<IAccessTokenService>(MockBehavior.Strict);
-                _accessTokenServiceMock.Setup(x => x.GetAccessToken())
-                    .Returns(RandomString.Build());
-            }
-
-            private void GivenThatIHaveADiplomateIdAndLookbackDate()
-            {
-                _memberId = Guid.NewGuid();
-                _lookbackDate = new DateTime(DateTime.Now.Year - 1, 12, 31);
-            }
-
-            private async void WhenICallFiveYearsLookBack()
-            {
-                try
-                {
-                    _sut.ProcessingDate = _lookbackDate;
-                    _sut.ExecutingProcess = ExecutingProcessType.YearEndLookBack;
-                    fiveYearLookbackStep = _sut.FiveYearsLookBack(_creds[0], _lookbackDate, _lookbackDate, checkCheckDateRequirement: false);
-                }
-                catch (Exception ex)
-                {
-                    exception = ex;
-                }
-            }
-
-            private void ThenNoExceptionShouldHaveBeenThrown()
-            {
-                exception.ShouldBeNull();
-            }
-
-            private void AndThenFiveYearLookbackStepShouldHaveMeetStepRuleTrue()
-            {
-                fiveYearLookbackStep.MeetStepRule.ShouldBe(true);
-            }
-        }
 
         private class ShouldMeetFiveYearLookbackRequirementWhenMOCPointsLessThan100NotEnrolledInReciprocityEarnedSubspecialtyCert : ProgramRulesServiceSimplifiedScenario
         {
@@ -1277,7 +1196,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 activity.Product = new ProductResource() { Code = RandomString.Build() };
 
                 activities.Data.Add(activity);
-
+                
 
                 _prodInterSvcMock.Setup(
                         x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(),
@@ -1725,7 +1644,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             private void GivenThatIHaveADiplomateIdAndLookbackDate()
             {
                 _memberId = Guid.NewGuid();
-
+               
             }
 
             private void WhenICallFiveYearsLookBack()
@@ -2152,8 +2071,8 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
 
                 var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
                 _cred = CredentialBuilder.Build(abimSource);
-
-                _cred.AddIssuance(IssuanceBuilder.Build(abimSource, _lookbackDate.AddYears(((int)WindowsIntervalType.FiveYearLookBack + 3) * -1)));
+                
+                _cred.AddIssuance(IssuanceBuilder.Build(abimSource, _lookbackDate.AddYears(((int)WindowsIntervalType.FiveYearLookBack + 3)*-1)));
                 _cred.Certification.Code = "ICARD";
             }
 
@@ -2198,7 +2117,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 activities.Data = new List<ActivityResource>();
 
                 var activity = new ActivityResource();
-                activity.CompletedDate = new DateTime(_lookbackDate.Year - 2, 3, 20);
+                activity.CompletedDate = new DateTime(_lookbackDate.Year - 2, 3, 20); 
                 activity.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
                 activity.Product = new ProductResource() { Code = ProductResourceConstants.ProductCode.FPHMAttestMOC };
 
@@ -2394,7 +2313,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
 
                 var activities = new ActivityFullCollectionResource();
                 activities.Data = new List<ActivityResource>();
-
+                
                 _prodInterSvcMock.Setup(
                         x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(),
                                 It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -2446,7 +2365,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             }
         }
 
-        private class ShouldMeetAttestationRequirmentWithPassedMocAttestationWithinFiveYearsForADifferentCertOrPassedInitialAttestation : ProgramRulesServiceSimplifiedScenario
+        private class ShouldNotMeetAttestationRequirmentWithPassedMocAttestationWithinFiveYearsForADifferentCertOrPassedInitialAttestation : ProgramRulesServiceSimplifiedScenario
         {
             private Guid _memberId;
             private DateTime _lookbackDate;
@@ -2498,12 +2417,12 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
 
                 _cred.AddIssuance(
                     IssuanceBuilder.BuildWithoutRandoms(
-                        abimSource,
-                        IssuanceStatusType.Active,
-                        _lookbackDate.AddYears(((int)WindowsIntervalType.FiveYearLookBack + 3) * -1),
-                        DurationType.Timelimited,
-                        MaintenanceRequirementType.Required,
-                        MaintenanceStatusType.Maintained,
+                        abimSource, 
+                        IssuanceStatusType.Active, 
+                        _lookbackDate.AddYears(((int)WindowsIntervalType.FiveYearLookBack + 3) * -1), 
+                        DurationType.Timelimited, 
+                        MaintenanceRequirementType.Required, 
+                        MaintenanceStatusType.Maintained, 
                         OccurrenceType.Initial));
 
                 _cred.Certification.Code = "HOSP";
@@ -2527,89 +2446,9 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 exception.ShouldBeNull();
             }
 
-            private void AndThenAttestationLookbackStepShouldHaveMeetStepRuleTrue()
+            private void AndThenAttestationLookbackStepShouldHaveMeetStepRuleFalse()
             {
-                attestationLookbackStep.MeetStepRule.ShouldBe(true);
-            }
-        }
-
-        private class ShoulNotdMeetAttestationRequirmentWithPassedMocAttestationWithinFiveYearsForADifferentCertOrPassedInitialAttestation : ProgramRulesServiceSimplifiedScenario
-        {
-            private Guid _memberId;
-            private DateTime _lookbackDate;
-            private Exception exception;
-            private IStep attestationLookbackStep;
-            private Credential _cred;
-
-            protected override void SetupProductInterserviceMock()
-            {
-                _prodInterSvcMock = new Mock<IProductInterservice>(MockBehavior.Strict);
-
-                var activities = new ActivityFullCollectionResource();
-                activities.Data = new List<ActivityResource>();
-
-                var activity = new ActivityResource();
-                activity.CompletedDate = new DateTime(DateTime.Now.Year - 2, 3, 20);
-                activity.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
-                activity.Product = new ProductResource() { Code = ProductResourceConstants.ProductCode.ICARDAttestMOC };
-
-                activities.Data.Add(activity);
-
-                _prodInterSvcMock.Setup(
-                        x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(),
-                                It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                    .Returns(Task.FromResult(activities));
-            }
-
-            protected override void SetupAccessTokenServiceMock()
-            {
-                _accessTokenServiceMock = new Mock<IAccessTokenService>(MockBehavior.Strict);
-                _accessTokenServiceMock.Setup(x => x.GetAccessToken())
-                    .Returns(RandomString.Build());
-            }
-
-            private void GivenThatIHaveADiplomateIdAndLookbackDateAndACredentialWithIssuanceDateBeforeStartYearPeriod()
-            {
-                _memberId = Guid.NewGuid();
-                _lookbackDate = new DateTime(2018, 12, 31);
-
-                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
-                _cred = CredentialBuilder.BuildWithoutRandoms(abimSource, "SomeCode", "SomeName", CertificationType.General, CredentialType.General, Resources.PathwayType.MOC);
-
-                _cred.AddIssuance(
-                    IssuanceBuilder.BuildWithoutRandoms(
-                        abimSource,
-                        IssuanceStatusType.Active,
-                        _lookbackDate.AddYears(((int)WindowsIntervalType.FiveYearLookBack + 3) * -1),
-                        DurationType.Timelimited,
-                        MaintenanceRequirementType.Required,
-                        MaintenanceStatusType.Maintained,
-                        OccurrenceType.Initial));
-
-                _cred.Certification.Code = "XXXX";
-            }
-
-            private void WhenICallAttestationYearEndLookback()
-            {
-                try
-                {
-                    _sut.ProcessingDate = _lookbackDate;
-                    attestationLookbackStep = _sut.Attestation(_cred, _lookbackDate, _lookbackDate);
-                }
-                catch (Exception ex)
-                {
-                    exception = ex;
-                }
-            }
-
-            private void ThenNoExceptionShouldHaveBeenThrown()
-            {
-                exception.ShouldBeNull();
-            }
-
-            private void AndThenAttestationLookbackStepShouldHaveMeetStepRuleTrue()
-            {
-                attestationLookbackStep.MeetStepRule.ShouldBe(true);
+                attestationLookbackStep.MeetStepRule.ShouldBe(false);
             }
         }
 
@@ -2627,7 +2466,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
 
                 var activities = new ActivityFullCollectionResource();
                 activities.Data = new List<ActivityResource>();
-
+                
 
                 _prodInterSvcMock.Setup(
                         x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(),
@@ -2703,7 +2542,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 _creds[0].Certification.Code = "ICARD";
                 _creds[0].Certification.ExternalId = certId;
 
-                _creds[0].MOCExamDueDate = new DateTime(2018, 1, 1);
+                _creds[0].MOCExamDueDate = new DateTime(2018,1,1);
 
                 _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
 
@@ -2737,7 +2576,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                                 It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                     .Returns(Task.FromResult(activities));
             }
-
+          
             protected override void SetupRegistrationInterserviceMock()
             {
                 var regResource = new UserRegistrationsAndCMPRegistrationsResource();
@@ -3166,7 +3005,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 reg.CertificationId = certId;
                 reg.ExamType = new RegistrationEnumValueResponseResource<ExamType>(ExamType.Moc);
                 reg.Result = ExamResultType.Fail.ToString();
-                reg.AdministrationYear = _lookbackDate.Year - 5;
+                reg.AdministrationYear = _lookbackDate.Year-5;
 
                 regResource.Registrations.Add(reg);
 
@@ -3175,7 +3014,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 var cmpExamBuilder = new CMPExamSummaryResourceBuilder();
                 var cmpRegBuilder = new CMPRegistrationResourceBuilder();
 
-                var cmpReg = cmpRegBuilder.WithExamResult(ExamResultType.Fail)
+                var cmpReg =  cmpRegBuilder.WithExamResult(ExamResultType.Fail)
                                            .WithTestDate(new DateTime(_lookbackDate.Year - 5, 12, 31))
                                            .WithCMPExam(cmpExamBuilder.WithCertificationId(certId).Build())
                                            .Build();
@@ -3415,14 +3254,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             private DateTime _lookbackDate = new DateTime(2018, 12, 31);
             private Exception exception;
             private Guid certId = Guid.NewGuid();
-            private bool isRegOnHold;
-            private bool isCmpRegOnHold;
-
-            public ShouldSetGracePeriodWhenCorrespondingRegistrationActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYear(bool isRegOnHold, bool isCmpRegOnHold = false)
-            {
-                isRegOnHold = isRegOnHold;
-                isCmpRegOnHold = isCmpRegOnHold;
-            }
 
             protected override void SetupCredentialServiceMock()
             {
@@ -3431,12 +3262,13 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
 
                 _creds.Add(CredentialBuilder.Build(abimSource));
                 DateTime issuanceDate = _lookbackDate.AddMonths(-4); // make sure it is before _lookbackDate
-                _creds[0].AddIssuance(IssuanceBuilder.BuildActiveMaintained(issuanceDate: issuanceDate, durationType: DurationType.Timelimited));
+                _creds[0].AddIssuance(IssuanceBuilder.BuildActiveMaintained(issuanceDate: issuanceDate));
 
                 _creds[0].Certification.Code = "ICARD";
                 _creds[0].Certification.ExternalId = certId;
 
                 _creds[0].ExamDueDate = new DateTime(_lookbackDate.Year, 12, 31);
+                _creds[0].GrandfatherMOCPrintDate = new DateTime(2014, 1, 1);
 
                 _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
 
@@ -3491,29 +3323,15 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 reg.Result = ExamResultType.Fail.ToString();
                 reg.AdministrationYear = _lookbackDate.Year;
                 reg.AdministrationDate = _lookbackDate.AddMonths(-4);
-                reg.IsOnHold = isRegOnHold; //!!!!
+
 
                 regResource.Registrations.Add(reg);
-
-                // cmp
-                var cmpExamBuilder = new CMPExamSummaryResourceBuilder();
-                var cmpRegBuilder = new CMPRegistrationResourceBuilder();
-                var cmpReg = cmpRegBuilder.WithExamResult(ExamResultType.Fail)
-                                           .WithTestDate(new DateTime(_lookbackDate.Year, 12, 31))
-                                           .WithCMPExam(cmpExamBuilder.WithCertificationId(certId).Build())
-                                           .Build();
-                cmpReg.OnHold = isCmpRegOnHold; //!!!!
-                regResource.CMPRegistrations.Add(cmpReg);
 
                 _regInterSvcMock = new Mock<IRegistrationInterservice>(MockBehavior.Strict);
 
                 _regInterSvcMock.Setup(
                         x => x.GetAllRegistrationsAndCMPRegistrationsForUser(It.IsAny<string>(), It.IsAny<Guid>()))
                     .Returns(Task.FromResult(regResource));
-
-                _regInterSvcMock.Setup(p => p.GetLongitudinalEnrollmentsByMemberId(It.IsAny<string>(), It.IsAny<Guid>()))
-                    .Returns(Task.FromResult(new LongitudinalEnrollmentCollectionResource() { Data = new List<LongitudinalEnrollmentSummaryResource>() }));
-
             }
 
             protected override void SetupAccessTokenServiceMock()
@@ -3566,23 +3384,738 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 exception.ShouldBeNull();
             }
 
-            private void AndThenGracePeriodShouldHaveBeenSetProperlyIfAllConditionIsMet()
+            private void AndThenGracePeriodShouldHaveBeenSet()
             {
-                if (!isRegOnHold || isCmpRegOnHold)
-                {
-                    _creds[0].GracePeriodStartDate.ShouldNotBeNull();
-                    _creds[0].GracePeriodEndDate.ShouldNotBeNull();
+                _creds[0].GracePeriodStartDate.ShouldNotBeNull();
+                _creds[0].GracePeriodEndDate.ShouldNotBeNull();
 
-                    _creds[0].GracePeriodStartDate.Value.Date.ShouldBeEquivalentTo(new DateTime(_lookbackDate.Year + 1, 1, 1).Date);
-                    _creds[0].GracePeriodEndDate.Value.Date.ShouldBeEquivalentTo(new DateTime(_lookbackDate.Year + 1, 12, 31).Date);
-                }
-                else
+                _creds[0].GracePeriodStartDate.Value.Date.ShouldBeEquivalentTo(new DateTime(_lookbackDate.Year + 1, 1, 1).Date);
+                _creds[0].GracePeriodEndDate.Value.Date.ShouldBeEquivalentTo(new DateTime(_lookbackDate.Year + 1, 12, 31).Date);
+                //_creds[0].AuditData.ModifiedBy.ShouldBeEquivalentTo("SetGrace"); //This gets overriden to YearEnd
+            }
+        }
+
+        //**** Diplomates with an assessment due in 2021 who do not meet the assessment requirement in 2021 will not be put in the grace period in 2021.
+        private class ShouldNotSetGracePeriod_in2021Only_WhenCorrespondingRegistrationActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYear : ProgramRulesServiceSimplifiedScenario
+        {
+            private Guid _memberId;
+            private List<Credential> _creds;
+            private DateTime _lookbackDate = new DateTime(2021, 12, 31);
+            private Exception exception;
+            private Guid certId = Guid.NewGuid();
+
+            protected override void SetupCredentialServiceMock()
+            {
+                _creds = new List<Credential>(1);
+                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
+
+                _creds.Add(CredentialBuilder.Build(abimSource));
+                DateTime issuanceDate = _lookbackDate.AddMonths(-4); // make sure it is before _lookbackDate
+                _creds[0].AddIssuance(IssuanceBuilder.BuildActiveMaintained(issuanceDate: issuanceDate));
+
+                _creds[0].Certification.Code = "ICARD";
+                _creds[0].Certification.ExternalId = certId;
+
+                _creds[0].ExamDueDate = new DateTime(_lookbackDate.Year, 12, 31);
+                _creds[0].GrandfatherMOCPrintDate = new DateTime(2014, 1, 1);
+
+                _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
+
+                _credSvcMock.Setup(x => x.SearchByMemberId(It.IsAny<Guid>())).Returns(_creds);
+                _credSvcMock
+                    .Setup(x => x.Handle(It.IsAny<UpdateCredentialFromLookbackCommand>()))
+                    .Returns(new UpdateCredentialFromLookbackCommandResult());
+
+
+                _credSvcMock.Setup(x => x.GetFirstIssuanceDate(It.IsAny<Guid>()))
+                    .Returns(new DateTime(_lookbackDate.Year - 20, 2, 21));
+            }
+
+            protected override void SetupProductInterserviceMock()
+            {
+                _prodInterSvcMock = new Mock<IProductInterservice>(MockBehavior.Strict);
+
+                var activities = new ActivityFullCollectionResource();
+                activities.Data = new List<ActivityResource>();
+
+                var activity = new ActivityResource();
+                activity.TotalMOCPoints = 100;
+                activity.CompletedDate = new DateTime(_lookbackDate.Year - 2, 3, 20);
+                activity.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
+                activity.Product = new ProductResource() { Code = RandomString.Build() };
+
+                activities.Data.Add(activity);
+
+                var activityTwo = new ActivityResource();
+                activityTwo.CompletedDate = new DateTime(_lookbackDate.Year - 1, 3, 20);
+                activityTwo.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
+                activityTwo.Product = new ProductResource() { Code = "ICARDAttestMOC" };
+
+                activities.Data.Add(activityTwo);
+
+                _prodInterSvcMock.Setup(
+                        x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(),
+                                It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                    .Returns(Task.FromResult(activities));
+            }
+
+            protected override void SetupRegistrationInterserviceMock()
+            {
+                var regResource = new UserRegistrationsAndCMPRegistrationsResource();
+
+                regResource.Registrations = new List<RegistrationResource>(1);
+                regResource.CMPRegistrations = new List<CMPRegistrationResource>(0);
+
+                var reg = new RegistrationResource();
+                reg.CertificationId = certId;
+                reg.ExamType = new RegistrationEnumValueResponseResource<ExamType>(ExamType.Moc);
+                reg.Result = ExamResultType.Fail.ToString();
+                reg.AdministrationYear = _lookbackDate.Year;
+                reg.AdministrationDate = _lookbackDate.AddMonths(-4);
+
+
+                regResource.Registrations.Add(reg);
+
+                _regInterSvcMock = new Mock<IRegistrationInterservice>(MockBehavior.Strict);
+
+                _regInterSvcMock.Setup(
+                        x => x.GetAllRegistrationsAndCMPRegistrationsForUser(It.IsAny<string>(), It.IsAny<Guid>()))
+                    .Returns(Task.FromResult(regResource));
+            }
+
+            protected override void SetupAccessTokenServiceMock()
+            {
+                _accessTokenServiceMock = new Mock<IAccessTokenService>(MockBehavior.Strict);
+                _accessTokenServiceMock.Setup(x => x.GetAccessToken())
+                    .Returns(RandomString.Build());
+            }
+
+            protected override void SetupLookBackDatesInfoServiceMock()
+            {
+                base.SetupLookBackDatesInfoServiceMock();
+
+                _lookBackDatesInfoSvcMock
+                    .Setup(x => x.GetExpiredLookBackDatesInfo(It.IsAny<DateTime>()))
+                    .Returns(Task.FromResult(new List<LookBackDatesInfo>().AsEnumerable()));
+
+                _lookBackDatesInfoSvcMock
+                    .Setup(x => x.GetLookBackDatesInfo(It.IsAny<Guid>()))
+                    .Returns(Task.FromResult(LookBackDatesInfo.Create(Guid.NewGuid(), null, null, null, null, "")));
+
+                _lookBackDatesInfoSvcMock
+                    .Setup(x => x.Handle(It.IsAny<UpdateLookBackDatesInfoCommand>()))
+                    .Returns(Task.FromResult(true));
+            }
+
+            private void GivenThatIHaveADiplomateId()
+            {
+                _memberId = Guid.NewGuid();
+            }
+
+            private async void WhenICallRunYearEndLookbackWithNullGracePeriodStartAndEndDates()
+            {
+                try
                 {
                     _creds[0].GracePeriodStartDate.ShouldBeNull();
                     _creds[0].GracePeriodEndDate.ShouldBeNull();
+
+                    _sut.ProcessingDate = _lookbackDate;
+                    await _sut.RunYearEndLookback(Guid.NewGuid(), _lookbackDate, _lookbackDate);
+                }
+                catch (Exception ex)
+                {
+                    exception = ex;
                 }
             }
+
+            private void ThenNoExceptionShouldHaveBeenThrown()
+            {
+                exception.ShouldBeNull();
+            }
+
+            private void AndThenGracePeriodShouldNotBeSet()
+            {
+                _creds[0].GracePeriodStartDate.ShouldBeNull();
+                _creds[0].GracePeriodEndDate.ShouldBeNull();
+            }
         }
+     
+        private class ShouldNotSetGracePeriod_in2022_Covid4_WhenCorrespondingRegistrationActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYear : ProgramRulesServiceSimplifiedScenario
+        {
+            private Guid _memberId;
+            private List<Credential> _creds;
+            private DateTime _lookbackDate = new DateTime(2022, 12, 31);
+            private Exception exception;
+            private Guid certId = Guid.NewGuid();
+
+            protected override void SetupCredentialServiceMock()
+            {
+                _creds = new List<Credential>(1);
+                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
+
+                _creds.Add(CredentialBuilder.Build(abimSource));
+                DateTime issuanceDate = _lookbackDate.AddMonths(-4); // make sure it is before _lookbackDate
+                _creds[0].AddIssuance(IssuanceBuilder.BuildActiveMaintained(issuanceDate: issuanceDate));
+
+                _creds[0].Certification.Code = ProgramResourceConstants.CertificationCode.InfectiousDisease; // COVID 4 CRED
+                _creds[0].Certification.ExternalId = certId;
+
+                _creds[0].ExamDueDate = new DateTime(_lookbackDate.Year, 12, 31);
+                _creds[0].GrandfatherMOCPrintDate = new DateTime(2014, 1, 1);
+
+                _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
+
+                _credSvcMock.Setup(x => x.SearchByMemberId(It.IsAny<Guid>())).Returns(_creds);
+                _credSvcMock
+                    .Setup(x => x.Handle(It.IsAny<UpdateCredentialFromLookbackCommand>()))
+                    .Returns(new UpdateCredentialFromLookbackCommandResult());
+
+
+                _credSvcMock.Setup(x => x.GetFirstIssuanceDate(It.IsAny<Guid>()))
+                    .Returns(new DateTime(_lookbackDate.Year - 20, 2, 21));
+            }
+
+            protected override void SetupProductInterserviceMock()
+            {
+                _prodInterSvcMock = new Mock<IProductInterservice>(MockBehavior.Strict);
+
+                var activities = new ActivityFullCollectionResource();
+                activities.Data = new List<ActivityResource>();
+
+                var activity = new ActivityResource();
+                activity.TotalMOCPoints = 100;
+                activity.CompletedDate = new DateTime(_lookbackDate.Year - 2, 3, 20);
+                activity.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
+                activity.Product = new ProductResource() { Code = RandomString.Build() };
+
+                activities.Data.Add(activity);
+
+                var activityTwo = new ActivityResource();
+                activityTwo.CompletedDate = new DateTime(_lookbackDate.Year - 1, 3, 20);
+                activityTwo.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
+                activityTwo.Product = new ProductResource() { Code = "ICARDAttestMOC" };
+
+                activities.Data.Add(activityTwo);
+
+                _prodInterSvcMock.Setup(
+                        x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(),
+                                It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                    .Returns(Task.FromResult(activities));
+            }
+
+            protected override void SetupRegistrationInterserviceMock()
+            {
+                var regResource = new UserRegistrationsAndCMPRegistrationsResource();
+
+                regResource.Registrations = new List<RegistrationResource>(1);
+                regResource.CMPRegistrations = new List<CMPRegistrationResource>(0);
+
+                var reg = new RegistrationResource();
+                reg.CertificationId = certId;
+                reg.ExamType = new RegistrationEnumValueResponseResource<ExamType>(ExamType.Moc);
+                reg.Result = ExamResultType.Fail.ToString();
+                reg.AdministrationYear = _lookbackDate.Year;
+                reg.AdministrationDate = _lookbackDate.AddMonths(-4);
+
+
+                regResource.Registrations.Add(reg);
+
+                _regInterSvcMock = new Mock<IRegistrationInterservice>(MockBehavior.Strict);
+
+                _regInterSvcMock.Setup(
+                        x => x.GetAllRegistrationsAndCMPRegistrationsForUser(It.IsAny<string>(), It.IsAny<Guid>()))
+                    .Returns(Task.FromResult(regResource));
+            }
+
+            protected override void SetupAccessTokenServiceMock()
+            {
+                _accessTokenServiceMock = new Mock<IAccessTokenService>(MockBehavior.Strict);
+                _accessTokenServiceMock.Setup(x => x.GetAccessToken())
+                    .Returns(RandomString.Build());
+            }
+
+            protected override void SetupLookBackDatesInfoServiceMock()
+            {
+                base.SetupLookBackDatesInfoServiceMock();
+
+                _lookBackDatesInfoSvcMock
+                    .Setup(x => x.GetExpiredLookBackDatesInfo(It.IsAny<DateTime>()))
+                    .Returns(Task.FromResult(new List<LookBackDatesInfo>().AsEnumerable()));
+
+                _lookBackDatesInfoSvcMock
+                    .Setup(x => x.GetLookBackDatesInfo(It.IsAny<Guid>()))
+                    .Returns(Task.FromResult(LookBackDatesInfo.Create(Guid.NewGuid(), null, null, null, null, "")));
+
+                _lookBackDatesInfoSvcMock
+                    .Setup(x => x.Handle(It.IsAny<UpdateLookBackDatesInfoCommand>()))
+                    .Returns(Task.FromResult(true));
+            }
+
+            private void GivenThatIHaveADiplomateId()
+            {
+                _memberId = Guid.NewGuid();
+            }
+
+            private async void WhenICallRunYearEndLookbackWithNullGracePeriodStartAndEndDates()
+            {
+                try
+                {
+                    _creds[0].GracePeriodStartDate.ShouldBeNull();
+                    _creds[0].GracePeriodEndDate.ShouldBeNull();
+
+                    _sut.ProcessingDate = _lookbackDate;
+                    await _sut.RunYearEndLookback(Guid.NewGuid(), _lookbackDate, _lookbackDate);
+                }
+                catch (Exception ex)
+                {
+                    exception = ex;
+                }
+            }
+
+            private void ThenNoExceptionShouldHaveBeenThrown()
+            {
+                exception.ShouldBeNull();
+            }
+
+            private void AndThenGracePeriodShouldNotBeSet()
+            {
+                _creds[0].GracePeriodStartDate.ShouldBeNull();
+                _creds[0].GracePeriodEndDate.ShouldBeNull();
+            }
+        }
+
+        private class ShouldSetGracePeriod_in2022_NotCovid4_WhenCorrespondingRegistrationActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYear : ProgramRulesServiceSimplifiedScenario
+        {
+            private Guid _memberId;
+            private List<Credential> _creds;
+            private DateTime _lookbackDate = new DateTime(2022, 12, 31);
+            private Exception exception;
+            private Guid certId = Guid.NewGuid();
+
+            protected override void SetupCredentialServiceMock()
+            {
+                _creds = new List<Credential>(1);
+                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
+
+                _creds.Add(CredentialBuilder.Build(abimSource));
+                DateTime issuanceDate = _lookbackDate.AddMonths(-4); // make sure it is before _lookbackDate
+                _creds[0].AddIssuance(IssuanceBuilder.BuildActiveMaintained(issuanceDate: issuanceDate));
+
+                _creds[0].Certification.Code = ProgramResourceConstants.CertificationCode.GeriatricMedicine; // not COVID 4 CRED
+                _creds[0].Certification.ExternalId = certId;
+
+                _creds[0].ExamDueDate = new DateTime(_lookbackDate.Year, 12, 31);
+                _creds[0].GrandfatherMOCPrintDate = new DateTime(2014, 1, 1);
+
+                _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
+
+                _credSvcMock.Setup(x => x.SearchByMemberId(It.IsAny<Guid>())).Returns(_creds);
+                _credSvcMock
+                    .Setup(x => x.Handle(It.IsAny<UpdateCredentialFromLookbackCommand>()))
+                    .Returns(new UpdateCredentialFromLookbackCommandResult());
+
+
+                _credSvcMock.Setup(x => x.GetFirstIssuanceDate(It.IsAny<Guid>()))
+                    .Returns(new DateTime(_lookbackDate.Year - 20, 2, 21));
+            }
+
+            protected override void SetupProductInterserviceMock()
+            {
+                _prodInterSvcMock = new Mock<IProductInterservice>(MockBehavior.Strict);
+
+                var activities = new ActivityFullCollectionResource();
+                activities.Data = new List<ActivityResource>();
+
+                var activity = new ActivityResource();
+                activity.TotalMOCPoints = 100;
+                activity.CompletedDate = new DateTime(_lookbackDate.Year - 2, 3, 20);
+                activity.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
+                activity.Product = new ProductResource() { Code = RandomString.Build() };
+
+                activities.Data.Add(activity);
+
+                var activityTwo = new ActivityResource();
+                activityTwo.CompletedDate = new DateTime(_lookbackDate.Year - 1, 3, 20);
+                activityTwo.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
+                activityTwo.Product = new ProductResource() { Code = "ICARDAttestMOC" };
+
+                activities.Data.Add(activityTwo);
+
+                _prodInterSvcMock.Setup(
+                        x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(),
+                                It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                    .Returns(Task.FromResult(activities));
+            }
+
+            protected override void SetupRegistrationInterserviceMock()
+            {
+                var regResource = new UserRegistrationsAndCMPRegistrationsResource();
+
+                regResource.Registrations = new List<RegistrationResource>(1);
+                regResource.CMPRegistrations = new List<CMPRegistrationResource>(0);
+
+                var reg = new RegistrationResource();
+                reg.CertificationId = certId;
+                reg.ExamType = new RegistrationEnumValueResponseResource<ExamType>(ExamType.Moc);
+                reg.Result = ExamResultType.Fail.ToString();
+                reg.AdministrationYear = _lookbackDate.Year;
+                reg.AdministrationDate = _lookbackDate.AddMonths(-4);
+
+
+                regResource.Registrations.Add(reg);
+
+                _regInterSvcMock = new Mock<IRegistrationInterservice>(MockBehavior.Strict);
+
+                _regInterSvcMock.Setup(
+                        x => x.GetAllRegistrationsAndCMPRegistrationsForUser(It.IsAny<string>(), It.IsAny<Guid>()))
+                    .Returns(Task.FromResult(regResource));
+            }
+
+            protected override void SetupAccessTokenServiceMock()
+            {
+                _accessTokenServiceMock = new Mock<IAccessTokenService>(MockBehavior.Strict);
+                _accessTokenServiceMock.Setup(x => x.GetAccessToken())
+                    .Returns(RandomString.Build());
+            }
+
+            protected override void SetupLookBackDatesInfoServiceMock()
+            {
+                base.SetupLookBackDatesInfoServiceMock();
+
+                _lookBackDatesInfoSvcMock
+                    .Setup(x => x.GetExpiredLookBackDatesInfo(It.IsAny<DateTime>()))
+                    .Returns(Task.FromResult(new List<LookBackDatesInfo>().AsEnumerable()));
+
+                _lookBackDatesInfoSvcMock
+                    .Setup(x => x.GetLookBackDatesInfo(It.IsAny<Guid>()))
+                    .Returns(Task.FromResult(LookBackDatesInfo.Create(Guid.NewGuid(), null, null, null, null, "")));
+
+                _lookBackDatesInfoSvcMock
+                    .Setup(x => x.Handle(It.IsAny<UpdateLookBackDatesInfoCommand>()))
+                    .Returns(Task.FromResult(true));
+            }
+
+            private void GivenThatIHaveADiplomateId()
+            {
+                _memberId = Guid.NewGuid();
+            }
+
+            private async void WhenICallRunYearEndLookbackWithNullGracePeriodStartAndEndDates()
+            {
+                try
+                {
+                    _sut.ProcessingDate = _lookbackDate;
+                    await _sut.RunYearEndLookback(Guid.NewGuid(), _lookbackDate, _lookbackDate);
+                }
+                catch (Exception ex)
+                {
+                    exception = ex;
+                }
+            }
+
+            private void ThenNoExceptionShouldHaveBeenThrown()
+            {
+                exception.ShouldBeNull();
+            }
+
+            private void AndThenGracePeriodShouldBeSet()
+            {
+                _creds[0].GracePeriodEndDate.ShouldBe(_creds[0].ExamDueDate.Value.AddYears(1));
+                _creds[0].GracePeriodStartDate.ShouldBe(new DateTime(_creds[0].ExamDueDate.Value.Year + 1,1,1));
+            }
+        }
+
+        //***** Diplomates currently in the grace period in 2021 will have their grace period term extended to 12/31/2022.
+        private class ShoulExtendSetGracePeriod_in2020_ByTwoYears_NotCovid4_WhenCurrentlyInGracePeriod : ProgramRulesServiceSimplifiedScenario
+        {
+            private Guid _memberId;
+            private List<Credential> _creds;
+            private DateTime _lookbackDate = new DateTime(2021, 12, 31);
+            private Exception exception;
+            private Guid certId = Guid.NewGuid();
+
+            protected override void SetupCredentialServiceMock()
+            {
+                _creds = new List<Credential>(1);
+                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
+
+                _creds.Add(CredentialBuilder.Build(abimSource));
+                DateTime issuanceDate = _lookbackDate.AddMonths(-4); // make sure it is before _lookbackDate
+                _creds[0].AddIssuance(IssuanceBuilder.BuildActiveMaintained(issuanceDate: issuanceDate));
+
+                _creds[0].Certification.Code = "ICARD";
+                _creds[0].Certification.ExternalId = certId;
+
+                _creds[0].ExamDueDate = new DateTime(_lookbackDate.Year, 12, 31);
+                _creds[0].GrandfatherMOCPrintDate = new DateTime(2014, 1, 1);
+
+                // existing grace period in 2020
+                _creds[0].GracePeriodStartDate = new DateTime(2020, 1, 1);
+                _creds[0].GracePeriodEndDate = new DateTime(2021, 12, 31); // was extended in 2021
+
+                _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
+
+                _credSvcMock.Setup(x => x.SearchByMemberId(It.IsAny<Guid>())).Returns(_creds);
+                _credSvcMock
+                    .Setup(x => x.Handle(It.IsAny<UpdateCredentialFromLookbackCommand>()))
+                    .Returns(new UpdateCredentialFromLookbackCommandResult());
+
+                _credSvcMock.Setup(x => x.GetFirstIssuanceDate(It.IsAny<Guid>()))
+                    .Returns(new DateTime(_lookbackDate.Year - 20, 2, 21));
+            }
+
+            protected override void SetupProductInterserviceMock()
+            {
+                _prodInterSvcMock = new Mock<IProductInterservice>(MockBehavior.Strict);
+
+                var activities = new ActivityFullCollectionResource();
+                activities.Data = new List<ActivityResource>();
+
+                var activity = new ActivityResource();
+                activity.TotalMOCPoints = 100;
+                activity.CompletedDate = new DateTime(_lookbackDate.Year - 2, 3, 20);
+                activity.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
+                activity.Product = new ProductResource() { Code = RandomString.Build() };
+
+                activities.Data.Add(activity);
+
+                var activityTwo = new ActivityResource();
+                activityTwo.CompletedDate = new DateTime(_lookbackDate.Year - 1, 3, 20);
+                activityTwo.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
+                activityTwo.Product = new ProductResource() { Code = "ICARDAttestMOC" };
+
+                activities.Data.Add(activityTwo);
+
+                _prodInterSvcMock.Setup(
+                        x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(),
+                                It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                    .Returns(Task.FromResult(activities));
+            }
+
+            protected override void SetupRegistrationInterserviceMock()
+            {
+                var regResource = new UserRegistrationsAndCMPRegistrationsResource();
+
+                regResource.Registrations = new List<RegistrationResource>(1);
+                regResource.CMPRegistrations = new List<CMPRegistrationResource>(0);
+
+                var reg = new RegistrationResource();
+                reg.CertificationId = certId;
+                reg.ExamType = new RegistrationEnumValueResponseResource<ExamType>(ExamType.Moc);
+                reg.Result = ExamResultType.Fail.ToString();
+                reg.AdministrationYear = _lookbackDate.Year;
+                reg.AdministrationDate = _lookbackDate.AddMonths(-4);
+
+
+                regResource.Registrations.Add(reg);
+
+                _regInterSvcMock = new Mock<IRegistrationInterservice>(MockBehavior.Strict);
+
+                _regInterSvcMock.Setup(
+                        x => x.GetAllRegistrationsAndCMPRegistrationsForUser(It.IsAny<string>(), It.IsAny<Guid>()))
+                    .Returns(Task.FromResult(regResource));
+            }
+
+            protected override void SetupAccessTokenServiceMock()
+            {
+                _accessTokenServiceMock = new Mock<IAccessTokenService>(MockBehavior.Strict);
+                _accessTokenServiceMock.Setup(x => x.GetAccessToken())
+                    .Returns(RandomString.Build());
+            }
+
+            protected override void SetupLookBackDatesInfoServiceMock()
+            {
+                base.SetupLookBackDatesInfoServiceMock();
+
+                _lookBackDatesInfoSvcMock
+                    .Setup(x => x.GetExpiredLookBackDatesInfo(It.IsAny<DateTime>()))
+                    .Returns(Task.FromResult(new List<LookBackDatesInfo>().AsEnumerable()));
+
+                _lookBackDatesInfoSvcMock
+                    .Setup(x => x.GetLookBackDatesInfo(It.IsAny<Guid>()))
+                    .Returns(Task.FromResult(LookBackDatesInfo.Create(Guid.NewGuid(), null, null, null, null, "")));
+
+                _lookBackDatesInfoSvcMock
+                    .Setup(x => x.Handle(It.IsAny<UpdateLookBackDatesInfoCommand>()))
+                    .Returns(Task.FromResult(true));
+            }
+
+            private void GivenThatIHaveADiplomateId()
+            {
+                _memberId = Guid.NewGuid();
+            }
+
+            private async void WhenICallRunYearEndLookbackWithNullGracePeriodStartAndEndDates()
+            {
+                try
+                {
+
+                    _sut.ProcessingDate = _lookbackDate;
+                    await _sut.RunYearEndLookback(Guid.NewGuid(), _lookbackDate, _lookbackDate);
+                }
+                catch (Exception ex)
+                {
+                    exception = ex;
+                }
+            }
+
+            private void ThenNoExceptionShouldHaveBeenThrown()
+            {
+                exception.ShouldBeNull();
+            }
+
+            private void AndThenGracePeriodShouldBeSet2YearsGracePeriod()
+            {
+                _creds[0].GracePeriodStartDate.Value.Date.ShouldBeEquivalentTo(new DateTime(2020, 1, 1).Date);
+                _creds[0].GracePeriodEndDate.Value.Date.ShouldBeEquivalentTo(new DateTime(2022, 12, 31).Date);
+            }
+        }
+
+        private class ShoulExtendSetGracePeriod_in2020_ByThreeYears_Covid4_WhenCurrentlyInGracePeriod : ProgramRulesServiceSimplifiedScenario
+        {
+            private Guid _memberId;
+            private List<Credential> _creds;
+            private DateTime _lookbackDate = new DateTime(2021, 12, 31);
+            private Exception exception;
+            private Guid certId = Guid.NewGuid();
+
+            protected override void SetupCredentialServiceMock()
+            {
+                _creds = new List<Credential>(1);
+                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
+
+                _creds.Add(CredentialBuilder.Build(abimSource));
+                DateTime issuanceDate = _lookbackDate.AddMonths(-4); // make sure it is before _lookbackDate
+                _creds[0].AddIssuance(IssuanceBuilder.BuildActiveMaintained(issuanceDate: issuanceDate));
+
+                _creds[0].Certification.Code = ProgramResourceConstants.CertificationCode.InfectiousDisease;
+                _creds[0].Certification.ExternalId = certId;
+
+                _creds[0].ExamDueDate = new DateTime(_lookbackDate.Year, 12, 31);
+                _creds[0].GrandfatherMOCPrintDate = new DateTime(2014, 1, 1);
+
+                // existing grace period in 2020
+                _creds[0].GracePeriodStartDate = new DateTime(2020, 1, 1);
+                _creds[0].GracePeriodEndDate = new DateTime(2021, 12, 31); // was extenended last year
+
+                _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
+
+                _credSvcMock.Setup(x => x.SearchByMemberId(It.IsAny<Guid>())).Returns(_creds);
+                _credSvcMock
+                    .Setup(x => x.Handle(It.IsAny<UpdateCredentialFromLookbackCommand>()))
+                    .Returns(new UpdateCredentialFromLookbackCommandResult());
+
+                _credSvcMock.Setup(x => x.GetFirstIssuanceDate(It.IsAny<Guid>()))
+                    .Returns(new DateTime(_lookbackDate.Year - 20, 2, 21));
+            }
+
+            protected override void SetupProductInterserviceMock()
+            {
+                _prodInterSvcMock = new Mock<IProductInterservice>(MockBehavior.Strict);
+
+                var activities = new ActivityFullCollectionResource();
+                activities.Data = new List<ActivityResource>();
+
+                var activity = new ActivityResource();
+                activity.TotalMOCPoints = 100;
+                activity.CompletedDate = new DateTime(_lookbackDate.Year - 2, 3, 20);
+                activity.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
+                activity.Product = new ProductResource() { Code = RandomString.Build() };
+
+                activities.Data.Add(activity);
+
+                var activityTwo = new ActivityResource();
+                activityTwo.CompletedDate = new DateTime(_lookbackDate.Year - 1, 3, 20);
+                activityTwo.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
+                activityTwo.Product = new ProductResource() { Code = "ICARDAttestMOC" };
+
+                activities.Data.Add(activityTwo);
+
+                _prodInterSvcMock.Setup(
+                        x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(),
+                                It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                    .Returns(Task.FromResult(activities));
+            }
+
+            protected override void SetupRegistrationInterserviceMock()
+            {
+                var regResource = new UserRegistrationsAndCMPRegistrationsResource();
+
+                regResource.Registrations = new List<RegistrationResource>(1);
+                regResource.CMPRegistrations = new List<CMPRegistrationResource>(0);
+
+                var reg = new RegistrationResource();
+                reg.CertificationId = certId;
+                reg.ExamType = new RegistrationEnumValueResponseResource<ExamType>(ExamType.Moc);
+                reg.Result = ExamResultType.Fail.ToString();
+                reg.AdministrationYear = _lookbackDate.Year;
+                reg.AdministrationDate = _lookbackDate.AddMonths(-4);
+
+
+                regResource.Registrations.Add(reg);
+
+                _regInterSvcMock = new Mock<IRegistrationInterservice>(MockBehavior.Strict);
+
+                _regInterSvcMock.Setup(
+                        x => x.GetAllRegistrationsAndCMPRegistrationsForUser(It.IsAny<string>(), It.IsAny<Guid>()))
+                    .Returns(Task.FromResult(regResource));
+            }
+
+            protected override void SetupAccessTokenServiceMock()
+            {
+                _accessTokenServiceMock = new Mock<IAccessTokenService>(MockBehavior.Strict);
+                _accessTokenServiceMock.Setup(x => x.GetAccessToken())
+                    .Returns(RandomString.Build());
+            }
+
+            protected override void SetupLookBackDatesInfoServiceMock()
+            {
+                base.SetupLookBackDatesInfoServiceMock();
+
+                _lookBackDatesInfoSvcMock
+                    .Setup(x => x.GetExpiredLookBackDatesInfo(It.IsAny<DateTime>()))
+                    .Returns(Task.FromResult(new List<LookBackDatesInfo>().AsEnumerable()));
+
+                _lookBackDatesInfoSvcMock
+                    .Setup(x => x.GetLookBackDatesInfo(It.IsAny<Guid>()))
+                    .Returns(Task.FromResult(LookBackDatesInfo.Create(Guid.NewGuid(), null, null, null, null, "")));
+
+                _lookBackDatesInfoSvcMock
+                    .Setup(x => x.Handle(It.IsAny<UpdateLookBackDatesInfoCommand>()))
+                    .Returns(Task.FromResult(true));
+            }
+
+            private void GivenThatIHaveADiplomateId()
+            {
+                _memberId = Guid.NewGuid();
+            }
+
+            private async void WhenICallRunYearEndLookbackWithNullGracePeriodStartAndEndDates()
+            {
+                try
+                {
+                    _sut.ProcessingDate = _lookbackDate;
+                    await _sut.RunYearEndLookback(Guid.NewGuid(), _lookbackDate, _lookbackDate);
+                }
+                catch (Exception ex)
+                {
+                    exception = ex;
+                }
+            }
+
+            private void ThenNoExceptionShouldHaveBeenThrown()
+            {
+                exception.ShouldBeNull();
+            }
+
+            private void AndThenGracePeriodShouldBeSet3YearGracePeriod()
+            {
+                _creds[0].GracePeriodStartDate.Value.Date.ShouldBeEquivalentTo(new DateTime(2020, 1, 1).Date);
+                _creds[0].GracePeriodEndDate.Value.Date.ShouldBeEquivalentTo(new DateTime(2023, 12, 31).Date);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------
 
         private class ShouldSetGracePeriodWhenCorrespondingRegistrationActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYearPointsBeyondYELB : ProgramRulesServiceSimplifiedScenario
         {
@@ -3599,12 +4132,13 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
 
                 _creds.Add(CredentialBuilder.Build(abimSource));
                 DateTime issuanceDate = _lookbackDate.AddMonths(-4); // make sure it is before _lookbackDate
-                _creds[0].AddIssuance(IssuanceBuilder.BuildActiveMaintained(issuanceDate: issuanceDate, durationType: DurationType.Timelimited));
+                _creds[0].AddIssuance(IssuanceBuilder.BuildActiveMaintained(issuanceDate: issuanceDate));
 
                 _creds[0].Certification.Code = "ICARD";
                 _creds[0].Certification.ExternalId = certId;
 
                 _creds[0].ExamDueDate = new DateTime(_lookbackDate.Year, 12, 31);
+                _creds[0].GrandfatherMOCPrintDate = new DateTime(2014, 1, 1);
 
                 _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
 
@@ -3732,619 +4266,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             }
         }
 
-        private class ShouldSetGracePeriodWhenEnrolledInCmpInDueYearActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYearPointsBeyondYELB : ProgramRulesServiceSimplifiedScenario
-        {
-            private Guid _memberId;
-            private List<Credential> _creds;
-            private DateTime _lookbackDate = new DateTime(2018, 12, 31);
-            private Exception exception;
-            private Guid certId = Guid.NewGuid();
-
-            protected override void SetupCredentialServiceMock()
-            {
-                _creds = new List<Credential>(1);
-                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
-
-                _creds.Add(CredentialBuilder.Build(abimSource));
-                DateTime issuanceDate = _lookbackDate.AddMonths(-4); // make sure it is before _lookbackDate
-                _creds[0].AddIssuance(IssuanceBuilder.BuildActiveMaintained(issuanceDate: issuanceDate, durationType: DurationType.Timelimited));
-
-                _creds[0].Certification.Code = "ICARD";
-                _creds[0].Certification.ExternalId = certId;
-
-                _creds[0].ExamDueDate = new DateTime(_lookbackDate.Year, 12, 31);
-
-                // !!! was enrolled in cmp only one day
-                _creds[0].CMPEnrollmentDate = new DateTime(_lookbackDate.Year, 1, 1);
-                _creds[0].CMPUnenrollmentDate = new DateTime(_lookbackDate.Year, 1, 1);
-                _creds[0].IsInCMP = false;
-
-                _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
-
-                _credSvcMock.Setup(x => x.SearchByMemberId(It.IsAny<Guid>())).Returns(_creds);
-                _credSvcMock
-                    .Setup(x => x.Handle(It.IsAny<UpdateCredentialFromLookbackCommand>()))
-                    .Returns(new UpdateCredentialFromLookbackCommandResult());
-
-                _credSvcMock.Setup(x => x.GetFirstIssuanceDate(It.IsAny<Guid>()))
-                    .Returns(new DateTime(_lookbackDate.Year - 20, 2, 21));
-            }
-
-            protected override void SetupProductInterserviceMock()
-            {
-                _prodInterSvcMock = new Mock<IProductInterservice>(MockBehavior.Strict);
-
-                var activities = new ActivityFullCollectionResource();
-                activities.Data = new List<ActivityResource>();
-
-                var activity = new ActivityResource();
-                activity.TotalMOCPoints = 80;
-                activity.CompletedDate = new DateTime(_lookbackDate.Year - 2, 3, 8);
-                activity.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
-                activity.Product = new ProductResource() { Code = RandomString.Build() };
-
-                activities.Data.Add(activity);
-
-                var activityTwo = new ActivityResource();
-                activity.TotalMOCPoints = 100;
-                activityTwo.CompletedDate = new DateTime(_lookbackDate.Year + 1, 1, 10);
-                activityTwo.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
-                activityTwo.Product = new ProductResource() { Code = "ICARDAttestMOC" };
-
-                activities.Data.Add(activityTwo);
-
-                _prodInterSvcMock.Setup(
-                        x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(),
-                                It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                    .Returns(Task.FromResult(activities));
-            }
-
-            protected override void SetupRegistrationInterserviceMock()
-            {
-                var regResource = new UserRegistrationsAndCMPRegistrationsResource();
-
-                regResource.Registrations = new List<RegistrationResource>(1);
-                regResource.CMPRegistrations = new List<CMPRegistrationResource>(0);
-
-                var reg = new RegistrationResource();
-                reg.CertificationId = certId;
-                reg.ExamType = new RegistrationEnumValueResponseResource<ExamType>(ExamType.Cert);
-                reg.Result = ExamResultType.Pass.ToString();
-                reg.AdministrationYear = _lookbackDate.Year - 10;
-                reg.AdministrationDate = new DateTime(_lookbackDate.Year - 10, 1, 10);
-
-                regResource.Registrations.Add(reg);
-
-                _regInterSvcMock = new Mock<IRegistrationInterservice>(MockBehavior.Strict);
-
-                _regInterSvcMock.Setup(
-                        x => x.GetAllRegistrationsAndCMPRegistrationsForUser(It.IsAny<string>(), It.IsAny<Guid>()))
-                    .Returns(Task.FromResult(regResource));
-            }
-
-            protected override void SetupAccessTokenServiceMock()
-            {
-                _accessTokenServiceMock = new Mock<IAccessTokenService>(MockBehavior.Strict);
-                _accessTokenServiceMock.Setup(x => x.GetAccessToken())
-                    .Returns(RandomString.Build());
-            }
-
-            protected override void SetupLookBackDatesInfoServiceMock()
-            {
-                base.SetupLookBackDatesInfoServiceMock();
-
-                _lookBackDatesInfoSvcMock
-                    .Setup(x => x.GetExpiredLookBackDatesInfo(It.IsAny<DateTime>()))
-                    .Returns(Task.FromResult(new List<LookBackDatesInfo>().AsEnumerable()));
-
-                _lookBackDatesInfoSvcMock
-                    .Setup(x => x.GetLookBackDatesInfo(It.IsAny<Guid>()))
-                    .Returns(Task.FromResult(LookBackDatesInfo.Create(Guid.NewGuid(), null, null, null, null, "")));
-
-                _lookBackDatesInfoSvcMock
-                    .Setup(x => x.Handle(It.IsAny<UpdateLookBackDatesInfoCommand>()))
-                    .Returns(Task.FromResult(true));
-            }
-
-            private void GivenThatIHaveADiplomateId()
-            {
-                _memberId = Guid.NewGuid();
-            }
-
-            private async void WhenICallRunYearEndLookbackWithNullGracePeriodStartAndEndDates()
-            {
-                try
-                {
-                    _creds[0].GracePeriodStartDate.ShouldBeNull();
-                    _creds[0].GracePeriodEndDate.ShouldBeNull();
-
-                    _sut.ProcessingDate = _lookbackDate.AddMonths(2);
-                    await _sut.RunYearEndLookback(Guid.NewGuid(), _lookbackDate, _sut.ProcessingDate);
-                }
-                catch (Exception ex)
-                {
-                    exception = ex;
-                }
-            }
-
-            private void ThenNoExceptionShouldHaveBeenThrown()
-            {
-                exception.ShouldBeNull();
-            }
-
-            private void AndThenGracePeriodShouldHaveBeenSet()
-            {
-                _creds[0].GracePeriodStartDate.ShouldNotBeNull();
-                _creds[0].GracePeriodEndDate.ShouldNotBeNull();
-
-                _creds[0].GracePeriodStartDate.Value.Date.ShouldBeEquivalentTo(new DateTime(_lookbackDate.Year + 1, 1, 1).Date);
-                _creds[0].GracePeriodEndDate.Value.Date.ShouldBeEquivalentTo(new DateTime(_lookbackDate.Year + 1, 12, 31).Date);
-            }
-        }
-
-        private class ShouldSetGracePeriodWhenEnrolledInCmpBeforeDueYearActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYearPointsBeyondYELB : ProgramRulesServiceSimplifiedScenario
-        {
-            private Guid _memberId;
-            private List<Credential> _creds;
-            private DateTime _lookbackDate = new DateTime(2018, 12, 31);
-            private Exception exception;
-            private Guid certId = Guid.NewGuid();
-
-            protected override void SetupCredentialServiceMock()
-            {
-                _creds = new List<Credential>(1);
-                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
-
-                _creds.Add(CredentialBuilder.Build(abimSource));
-                DateTime issuanceDate = _lookbackDate.AddMonths(-4); // make sure it is before _lookbackDate
-                _creds[0].AddIssuance(IssuanceBuilder.BuildActiveMaintained(issuanceDate: issuanceDate, durationType: DurationType.Timelimited));
-
-                _creds[0].Certification.Code = "ICARD";
-                _creds[0].Certification.ExternalId = certId;
-
-                _creds[0].ExamDueDate = new DateTime(_lookbackDate.Year, 12, 31);
-
-                // !!! was enrolled in cmp before due date
-                _creds[0].CMPEnrollmentDate = new DateTime(_lookbackDate.Year - 1, 1, 1);
-                _creds[0].CMPUnenrollmentDate = new DateTime(_lookbackDate.Year, 1, 1);
-                _creds[0].IsInCMP = false;
-
-                _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
-
-                _credSvcMock.Setup(x => x.SearchByMemberId(It.IsAny<Guid>())).Returns(_creds);
-                _credSvcMock
-                    .Setup(x => x.Handle(It.IsAny<UpdateCredentialFromLookbackCommand>()))
-                    .Returns(new UpdateCredentialFromLookbackCommandResult());
-
-                _credSvcMock.Setup(x => x.GetFirstIssuanceDate(It.IsAny<Guid>()))
-                    .Returns(new DateTime(_lookbackDate.Year - 20, 2, 21));
-            }
-
-            protected override void SetupProductInterserviceMock()
-            {
-                _prodInterSvcMock = new Mock<IProductInterservice>(MockBehavior.Strict);
-
-                var activities = new ActivityFullCollectionResource();
-                activities.Data = new List<ActivityResource>();
-
-                var activity = new ActivityResource();
-                activity.TotalMOCPoints = 80;
-                activity.CompletedDate = new DateTime(_lookbackDate.Year - 2, 3, 8);
-                activity.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
-                activity.Product = new ProductResource() { Code = RandomString.Build() };
-
-                activities.Data.Add(activity);
-
-                var activityTwo = new ActivityResource();
-                activity.TotalMOCPoints = 100;
-                activityTwo.CompletedDate = new DateTime(_lookbackDate.Year + 1, 1, 10);
-                activityTwo.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
-                activityTwo.Product = new ProductResource() { Code = "ICARDAttestMOC" };
-
-                activities.Data.Add(activityTwo);
-
-                _prodInterSvcMock.Setup(
-                        x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(),
-                                It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                    .Returns(Task.FromResult(activities));
-            }
-
-            protected override void SetupRegistrationInterserviceMock()
-            {
-                var regResource = new UserRegistrationsAndCMPRegistrationsResource();
-
-                regResource.Registrations = new List<RegistrationResource>(1);
-                regResource.CMPRegistrations = new List<CMPRegistrationResource>(0);
-
-                var reg = new RegistrationResource();
-                reg.CertificationId = certId;
-                reg.ExamType = new RegistrationEnumValueResponseResource<ExamType>(ExamType.Cert);
-                reg.Result = ExamResultType.Pass.ToString();
-                reg.AdministrationYear = _lookbackDate.Year - 10;
-                reg.AdministrationDate = new DateTime(_lookbackDate.Year - 10, 1, 10);
-
-                regResource.Registrations.Add(reg);
-
-                _regInterSvcMock = new Mock<IRegistrationInterservice>(MockBehavior.Strict);
-
-                _regInterSvcMock.Setup(
-                        x => x.GetAllRegistrationsAndCMPRegistrationsForUser(It.IsAny<string>(), It.IsAny<Guid>()))
-                    .Returns(Task.FromResult(regResource));
-            }
-
-            protected override void SetupAccessTokenServiceMock()
-            {
-                _accessTokenServiceMock = new Mock<IAccessTokenService>(MockBehavior.Strict);
-                _accessTokenServiceMock.Setup(x => x.GetAccessToken())
-                    .Returns(RandomString.Build());
-            }
-
-            protected override void SetupLookBackDatesInfoServiceMock()
-            {
-                base.SetupLookBackDatesInfoServiceMock();
-
-                _lookBackDatesInfoSvcMock
-                    .Setup(x => x.GetExpiredLookBackDatesInfo(It.IsAny<DateTime>()))
-                    .Returns(Task.FromResult(new List<LookBackDatesInfo>().AsEnumerable()));
-
-                _lookBackDatesInfoSvcMock
-                    .Setup(x => x.GetLookBackDatesInfo(It.IsAny<Guid>()))
-                    .Returns(Task.FromResult(LookBackDatesInfo.Create(Guid.NewGuid(), null, null, null, null, "")));
-
-                _lookBackDatesInfoSvcMock
-                    .Setup(x => x.Handle(It.IsAny<UpdateLookBackDatesInfoCommand>()))
-                    .Returns(Task.FromResult(true));
-            }
-
-            private void GivenThatIHaveADiplomateId()
-            {
-                _memberId = Guid.NewGuid();
-            }
-
-            private async void WhenICallRunYearEndLookbackWithNullGracePeriodStartAndEndDates()
-            {
-                try
-                {
-                    _creds[0].GracePeriodStartDate.ShouldBeNull();
-                    _creds[0].GracePeriodEndDate.ShouldBeNull();
-
-                    _sut.ProcessingDate = _lookbackDate.AddMonths(2);
-                    await _sut.RunYearEndLookback(Guid.NewGuid(), _lookbackDate, _sut.ProcessingDate);
-                }
-                catch (Exception ex)
-                {
-                    exception = ex;
-                }
-            }
-
-            private void ThenNoExceptionShouldHaveBeenThrown()
-            {
-                exception.ShouldBeNull();
-            }
-
-            private void AndThenGracePeriodShouldHaveBeenSet()
-            {
-                _creds[0].GracePeriodStartDate.ShouldNotBeNull();
-                _creds[0].GracePeriodEndDate.ShouldNotBeNull();
-
-                _creds[0].GracePeriodStartDate.Value.Date.ShouldBeEquivalentTo(new DateTime(_lookbackDate.Year + 1, 1, 1).Date);
-                _creds[0].GracePeriodEndDate.Value.Date.ShouldBeEquivalentTo(new DateTime(_lookbackDate.Year + 1, 12, 31).Date);
-            }
-        }
-
-        private class ShouldSetGracePeriodWhenPassOnHoldCmpExamActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYearPointsBeyondYELB : ProgramRulesServiceSimplifiedScenario
-        {
-            private Guid _memberId;
-            private List<Credential> _creds;
-            private DateTime _lookbackDate = new DateTime(2018, 12, 31);
-            private Exception exception;
-            private Guid certId = Guid.NewGuid();
-
-            protected override void SetupCredentialServiceMock()
-            {
-                _creds = new List<Credential>(1);
-                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
-
-                _creds.Add(CredentialBuilder.Build(abimSource));
-                DateTime issuanceDate = _lookbackDate.AddMonths(-4); // make sure it is before _lookbackDate
-                _creds[0].AddIssuance(IssuanceBuilder.BuildActiveMaintained(issuanceDate: issuanceDate, durationType: DurationType.Timelimited));
-
-                _creds[0].Certification.Code = "ICARD";
-                _creds[0].Certification.ExternalId = certId;
-
-                _creds[0].ExamDueDate = new DateTime(_lookbackDate.Year, 12, 31);
-
-                // !!! Weird case when never been enrolled in CMP but we recieved CMP exam result on hold
-                _creds[0].CMPEnrollmentDate = null;
-                _creds[0].CMPUnenrollmentDate = null;
-                _creds[0].IsInCMP = false;
-
-                _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
-
-                _credSvcMock.Setup(x => x.SearchByMemberId(It.IsAny<Guid>())).Returns(_creds);
-                _credSvcMock
-                    .Setup(x => x.Handle(It.IsAny<UpdateCredentialFromLookbackCommand>()))
-                    .Returns(new UpdateCredentialFromLookbackCommandResult());
-
-                _credSvcMock.Setup(x => x.GetFirstIssuanceDate(It.IsAny<Guid>()))
-                    .Returns(new DateTime(_lookbackDate.Year - 20, 2, 21));
-            }
-
-            protected override void SetupProductInterserviceMock()
-            {
-                _prodInterSvcMock = new Mock<IProductInterservice>(MockBehavior.Strict);
-
-                var activities = new ActivityFullCollectionResource();
-                activities.Data = new List<ActivityResource>();
-
-                var activity = new ActivityResource();
-                activity.TotalMOCPoints = 80;
-                activity.CompletedDate = new DateTime(_lookbackDate.Year - 2, 3, 8);
-                activity.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
-                activity.Product = new ProductResource() { Code = RandomString.Build() };
-
-                activities.Data.Add(activity);
-
-                var activityTwo = new ActivityResource();
-                activity.TotalMOCPoints = 100;
-                activityTwo.CompletedDate = new DateTime(_lookbackDate.Year + 1, 1, 10);
-                activityTwo.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
-                activityTwo.Product = new ProductResource() { Code = "ICARDAttestMOC" };
-
-                activities.Data.Add(activityTwo);
-
-                _prodInterSvcMock.Setup(
-                        x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(),
-                                It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                    .Returns(Task.FromResult(activities));
-            }
-
-            protected override void SetupRegistrationInterserviceMock()
-            {
-                var regResource = new UserRegistrationsAndCMPRegistrationsResource();
-
-                regResource.Registrations = new List<RegistrationResource>(1);
-                regResource.CMPRegistrations = new List<CMPRegistrationResource>(0);
-
-                var reg = new RegistrationResource();
-                reg.CertificationId = certId;
-                reg.ExamType = new RegistrationEnumValueResponseResource<ExamType>(ExamType.Cert);
-                reg.Result = ExamResultType.Pass.ToString();
-                reg.AdministrationYear = _lookbackDate.Year - 10;
-                reg.AdministrationDate = new DateTime(_lookbackDate.Year - 10, 1, 10);
-
-
-                // cmp
-                var cmpExamBuilder = new CMPExamSummaryResourceBuilder();
-                var cmpRegBuilder = new CMPRegistrationResourceBuilder();
-                var cmpReg = cmpRegBuilder.WithExamResult(ExamResultType.Pass)
-                                           .WithTestDate(new DateTime(_lookbackDate.Year, 12, 31))
-                                           .WithCMPExam(cmpExamBuilder.WithCertificationId(certId).Build())
-                                           .Build();
-
-                cmpReg.OnHold = true; //!!!!
-                regResource.CMPRegistrations.Add(cmpReg);
-
-                regResource.Registrations.Add(reg);
-
-                _regInterSvcMock = new Mock<IRegistrationInterservice>(MockBehavior.Strict);
-
-                _regInterSvcMock.Setup(
-                        x => x.GetAllRegistrationsAndCMPRegistrationsForUser(It.IsAny<string>(), It.IsAny<Guid>()))
-                    .Returns(Task.FromResult(regResource));
-            }
-
-            protected override void SetupAccessTokenServiceMock()
-            {
-                _accessTokenServiceMock = new Mock<IAccessTokenService>(MockBehavior.Strict);
-                _accessTokenServiceMock.Setup(x => x.GetAccessToken())
-                    .Returns(RandomString.Build());
-            }
-
-            protected override void SetupLookBackDatesInfoServiceMock()
-            {
-                base.SetupLookBackDatesInfoServiceMock();
-
-                _lookBackDatesInfoSvcMock
-                    .Setup(x => x.GetExpiredLookBackDatesInfo(It.IsAny<DateTime>()))
-                    .Returns(Task.FromResult(new List<LookBackDatesInfo>().AsEnumerable()));
-
-                _lookBackDatesInfoSvcMock
-                    .Setup(x => x.GetLookBackDatesInfo(It.IsAny<Guid>()))
-                    .Returns(Task.FromResult(LookBackDatesInfo.Create(Guid.NewGuid(), null, null, null, null, "")));
-
-                _lookBackDatesInfoSvcMock
-                    .Setup(x => x.Handle(It.IsAny<UpdateLookBackDatesInfoCommand>()))
-                    .Returns(Task.FromResult(true));
-            }
-
-            private void GivenThatIHaveADiplomateId()
-            {
-                _memberId = Guid.NewGuid();
-            }
-
-            private async void WhenICallRunYearEndLookbackWithNullGracePeriodStartAndEndDates()
-            {
-                try
-                {
-                    _creds[0].GracePeriodStartDate.ShouldBeNull();
-                    _creds[0].GracePeriodEndDate.ShouldBeNull();
-
-                    _sut.ProcessingDate = _lookbackDate.AddMonths(2);
-                    await _sut.RunYearEndLookback(Guid.NewGuid(), _lookbackDate, _sut.ProcessingDate);
-                }
-                catch (Exception ex)
-                {
-                    exception = ex;
-                }
-            }
-
-            private void ThenNoExceptionShouldHaveBeenThrown()
-            {
-                exception.ShouldBeNull();
-            }
-
-            private void AndThenGracePeriodShouldHaveBeenSet()
-            {
-                _creds[0].GracePeriodStartDate.ShouldNotBeNull();
-                _creds[0].GracePeriodEndDate.ShouldNotBeNull();
-
-                _creds[0].GracePeriodStartDate.Value.Date.ShouldBeEquivalentTo(new DateTime(_lookbackDate.Year + 1, 1, 1).Date);
-                _creds[0].GracePeriodEndDate.Value.Date.ShouldBeEquivalentTo(new DateTime(_lookbackDate.Year + 1, 12, 31).Date);
-            }
-        }
-
-        private class ShouldNotSetGracePeriodWhenEnrolledInCmpNotInDueYearActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYearPointsBeyondYELB : ProgramRulesServiceSimplifiedScenario
-        {
-            private Guid _memberId;
-            private List<Credential> _creds;
-            private DateTime _lookbackDate = new DateTime(2018, 12, 31);
-            private Exception exception;
-            private Guid certId = Guid.NewGuid();
-
-            protected override void SetupCredentialServiceMock()
-            {
-                _creds = new List<Credential>(1);
-                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
-
-                _creds.Add(CredentialBuilder.Build(abimSource));
-                DateTime issuanceDate = _lookbackDate.AddMonths(-4); // make sure it is before _lookbackDate
-                _creds[0].AddIssuance(IssuanceBuilder.BuildActiveMaintained(issuanceDate: issuanceDate, durationType: DurationType.Timelimited));
-
-                _creds[0].Certification.Code = "ICARD";
-                _creds[0].Certification.ExternalId = certId;
-
-                _creds[0].ExamDueDate = new DateTime(_lookbackDate.Year, 12, 31);
-
-                // !!! was enrolled in cmp in the previous year of due year
-                _creds[0].CMPEnrollmentDate = new DateTime(_lookbackDate.Year - 1, 1, 1);
-                _creds[0].CMPUnenrollmentDate = new DateTime(_lookbackDate.Year - 1, 12, 31);
-                _creds[0].IsInCMP = false;
-
-                _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
-
-                _credSvcMock.Setup(x => x.SearchByMemberId(It.IsAny<Guid>())).Returns(_creds);
-                _credSvcMock
-                    .Setup(x => x.Handle(It.IsAny<UpdateCredentialFromLookbackCommand>()))
-                    .Returns(new UpdateCredentialFromLookbackCommandResult());
-
-                _credSvcMock.Setup(x => x.GetFirstIssuanceDate(It.IsAny<Guid>()))
-                    .Returns(new DateTime(_lookbackDate.Year - 20, 2, 21));
-            }
-
-            protected override void SetupProductInterserviceMock()
-            {
-                _prodInterSvcMock = new Mock<IProductInterservice>(MockBehavior.Strict);
-
-                var activities = new ActivityFullCollectionResource();
-                activities.Data = new List<ActivityResource>();
-
-                var activity = new ActivityResource();
-                activity.TotalMOCPoints = 80;
-                activity.CompletedDate = new DateTime(_lookbackDate.Year - 2, 3, 8);
-                activity.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
-                activity.Product = new ProductResource() { Code = RandomString.Build() };
-
-                activities.Data.Add(activity);
-
-                var activityTwo = new ActivityResource();
-                activity.TotalMOCPoints = 100;
-                activityTwo.CompletedDate = new DateTime(_lookbackDate.Year + 1, 1, 10);
-                activityTwo.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
-                activityTwo.Product = new ProductResource() { Code = "ICARDAttestMOC" };
-
-                activities.Data.Add(activityTwo);
-
-                _prodInterSvcMock.Setup(
-                        x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(),
-                                It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                    .Returns(Task.FromResult(activities));
-            }
-
-            protected override void SetupRegistrationInterserviceMock()
-            {
-                var regResource = new UserRegistrationsAndCMPRegistrationsResource();
-
-                regResource.Registrations = new List<RegistrationResource>(1);
-                regResource.CMPRegistrations = new List<CMPRegistrationResource>(0);
-
-                var reg = new RegistrationResource();
-                reg.CertificationId = certId;
-                reg.ExamType = new RegistrationEnumValueResponseResource<ExamType>(ExamType.Cert);
-                reg.Result = ExamResultType.Pass.ToString();
-                reg.AdministrationYear = _lookbackDate.Year - 10;
-                reg.AdministrationDate = new DateTime(_lookbackDate.Year - 10, 1, 10);
-
-                regResource.Registrations.Add(reg);
-
-                _regInterSvcMock = new Mock<IRegistrationInterservice>(MockBehavior.Strict);
-
-                _regInterSvcMock.Setup(
-                        x => x.GetAllRegistrationsAndCMPRegistrationsForUser(It.IsAny<string>(), It.IsAny<Guid>()))
-                    .Returns(Task.FromResult(regResource));
-
-                _regInterSvcMock
-                   .Setup(x => x.GetLongitudinalEnrollmentsByMemberId(It.IsAny<string>(), It.IsAny<Guid>()))
-                   .Returns(Task.FromResult(new LongitudinalEnrollmentCollectionResource()));
-            }
-
-            protected override void SetupAccessTokenServiceMock()
-            {
-                _accessTokenServiceMock = new Mock<IAccessTokenService>(MockBehavior.Strict);
-                _accessTokenServiceMock.Setup(x => x.GetAccessToken())
-                    .Returns(RandomString.Build());
-            }
-
-            protected override void SetupLookBackDatesInfoServiceMock()
-            {
-                base.SetupLookBackDatesInfoServiceMock();
-
-                _lookBackDatesInfoSvcMock
-                    .Setup(x => x.GetExpiredLookBackDatesInfo(It.IsAny<DateTime>()))
-                    .Returns(Task.FromResult(new List<LookBackDatesInfo>().AsEnumerable()));
-
-                _lookBackDatesInfoSvcMock
-                    .Setup(x => x.GetLookBackDatesInfo(It.IsAny<Guid>()))
-                    .Returns(Task.FromResult(LookBackDatesInfo.Create(Guid.NewGuid(), null, null, null, null, "")));
-
-                _lookBackDatesInfoSvcMock
-                    .Setup(x => x.Handle(It.IsAny<UpdateLookBackDatesInfoCommand>()))
-                    .Returns(Task.FromResult(true));
-            }
-
-            private void GivenThatIHaveADiplomateId()
-            {
-                _memberId = Guid.NewGuid();
-            }
-
-            private async void WhenICallRunYearEndLookbackWithNullGracePeriodStartAndEndDates()
-            {
-                try
-                {
-                    _creds[0].GracePeriodStartDate.ShouldBeNull();
-                    _creds[0].GracePeriodEndDate.ShouldBeNull();
-
-                    _sut.ProcessingDate = _lookbackDate.AddMonths(2);
-                    await _sut.RunYearEndLookback(Guid.NewGuid(), _lookbackDate, _sut.ProcessingDate);
-                }
-                catch (Exception ex)
-                {
-                    exception = ex;
-                }
-            }
-
-            private void ThenNoExceptionShouldHaveBeenThrown()
-            {
-                exception.ShouldBeNull();
-            }
-
-            private void AndThenGracePeriodShouldHaveBeenSet()
-            {
-                _creds[0].GracePeriodStartDate.ShouldBeNull();
-                _creds[0].GracePeriodEndDate.ShouldBeNull();
-            }
-        }
-
         private class ShouldNotSetGracePeriodWhenCorrespondingRegistrationActiveParticipatingNonExamsReqMocExamDueYearEqualLookbackYearPointsBeyondYELBLessThan100 : ProgramRulesServiceSimplifiedScenario
         {
             private Guid _memberId;
@@ -4373,6 +4294,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 _creds[0].Certification.ExternalId = certId;
 
                 _creds[0].ExamDueDate = new DateTime(_lookbackDate.Year, 12, 31);
+                _creds[0].GrandfatherMOCPrintDate = new DateTime(2014, 1, 1);
 
                 _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
 
@@ -4500,6 +4422,8 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             }
         }
 
+
+
         private class ShouldNotSetGracePeriodWhenThereAreNoIssuancesOnACert : ProgramRulesServiceSimplifiedScenario
         {
             private Guid _memberId;
@@ -4519,6 +4443,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 _creds[0].Certification.ExternalId = certId;
 
                 _creds[0].ExamDueDate = new DateTime(_lookbackDate.Year, 12, 31);
+                _creds[0].GrandfatherMOCPrintDate = new DateTime(2014, 1, 1);
 
                 _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
 
@@ -4643,13 +4568,13 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             {
                 _creds[0].GracePeriodStartDate.ShouldBeNull();
                 _creds[0].GracePeriodEndDate.ShouldBeNull();
-
+                
             }
         }
 
 
 
-        private class ShouldNotSetGracePeriodWhenCorrespondingRegistrationIsForADifferentCert : ProgramRulesServiceSimplifiedScenario
+        private class ShouldNotSetGracePeriodWhenCorrespondingRegistrationIsForADifferentCert: ProgramRulesServiceSimplifiedScenario
         {
             private Guid _memberId;
             private List<Credential> _creds;
@@ -4683,6 +4608,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
 
                 _creds[0].ExamDueDate = new DateTime(_lookbackDate.Year, 12, 31);
 
+                _creds[0].GrandfatherMOCPrintDate = new DateTime(2014, 1, 1);
 
                 _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
 
@@ -5125,144 +5051,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 _creds[0].GracePeriodEndDate.ShouldBeNull();
             }
         }
-
-        private class ShouldNotSetGracePeriodWhenGrandFatherCertificate : ProgramRulesServiceSimplifiedScenario
-        {
-            private Guid _memberId;
-            private List<Credential> _creds;
-            private DateTime _lookbackDate = new DateTime(2018, 12, 31);
-            private Exception exception;
-            private Guid certId = Guid.NewGuid();
-            private readonly DateTime _issuanceDate = new DateTime(1989, 10, 1); // pre 1990 certificate
-
-            protected override void SetupCredentialServiceMock()
-            {
-                _creds = new List<Credential>(1);
-                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
-
-                _creds.Add(CredentialBuilder.Build(abimSource));
-                _creds[0].AddIssuance(IssuanceBuilder.Build(abimSource, IssuanceStatusType.Active, DurationType.Lifetime, _issuanceDate));
-
-                _creds[0].Certification.Code = ProgramResourceConstants.CertificationCode.GeriatricMedicine;
-                _creds[0].Certification.ExternalId = certId;
-
-                _creds[0].ExamDueDate = new DateTime(_lookbackDate.Year, 12, 31);
-
-                _credSvcMock = new Mock<App.Services.ICredentialService>(MockBehavior.Strict);
-
-                _credSvcMock.Setup(x => x.SearchByMemberId(It.IsAny<Guid>())).Returns(_creds);
-                _credSvcMock
-                    .Setup(x => x.Handle(It.IsAny<UpdateCredentialFromLookbackCommand>()))
-                    .Returns(new UpdateCredentialFromLookbackCommandResult());
-
-
-                _credSvcMock.Setup(x => x.GetFirstIssuanceDate(It.IsAny<Guid>()))
-                    .Returns(_issuanceDate);
-            }
-
-            protected override void SetupProductInterserviceMock()
-            {
-                _prodInterSvcMock = new Mock<IProductInterservice>(MockBehavior.Strict);
-
-                var activities = new ActivityFullCollectionResource();
-                activities.Data = new List<ActivityResource>();
-
-                var activity = new ActivityResource();
-                activity.TotalMOCPoints = 100;
-                activity.CompletedDate = new DateTime(_lookbackDate.Year - 2, 3, 20);
-                activity.ActivityResult = new EnumValueResponseResource<ActivityResultType>(ActivityResultType.Pass);
-                activity.Product = new ProductResource() { Code = RandomString.Build() };
-
-                activities.Data.Add(activity);
-
-                _prodInterSvcMock.Setup(
-                        x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(),
-                                It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                    .Returns(Task.FromResult(activities));
-            }
-
-            protected override void SetupRegistrationInterserviceMock()
-            {
-                var regResource = new UserRegistrationsAndCMPRegistrationsResource();
-
-                regResource.Registrations = new List<RegistrationResource>(1);
-                regResource.CMPRegistrations = new List<CMPRegistrationResource>(0);
-
-                var reg = new RegistrationResource();
-                reg.CertificationId = certId;
-                reg.ExamType = new RegistrationEnumValueResponseResource<ExamType>(ExamType.Moc);
-                reg.Result = ExamResultType.Pass.ToString();
-                reg.AdministrationYear = _issuanceDate.Year;
-                reg.AdministrationDate = _issuanceDate.AddMonths(-4);
-                reg.Seats = new List<SeatRegistrationSummaryResource>();
-                regResource.Registrations.Add(reg);
-
-                _regInterSvcMock = new Mock<IRegistrationInterservice>(MockBehavior.Strict);
-
-                _regInterSvcMock.Setup(
-                        x => x.GetAllRegistrationsAndCMPRegistrationsForUser(It.IsAny<string>(), It.IsAny<Guid>()))
-                    .Returns(Task.FromResult(regResource));
-
-                _regInterSvcMock
-                   .Setup(x => x.GetLongitudinalEnrollmentsByMemberId(It.IsAny<string>(), It.IsAny<Guid>()))
-                   .Returns(Task.FromResult(new LongitudinalEnrollmentCollectionResource()));
-
-            }
-
-            protected override void SetupAccessTokenServiceMock()
-            {
-                _accessTokenServiceMock = new Mock<IAccessTokenService>(MockBehavior.Strict);
-                _accessTokenServiceMock.Setup(x => x.GetAccessToken())
-                    .Returns(RandomString.Build());
-            }
-
-            protected override void SetupLookBackDatesInfoServiceMock()
-            {
-                base.SetupLookBackDatesInfoServiceMock();
-
-                _lookBackDatesInfoSvcMock
-                    .Setup(x => x.GetExpiredLookBackDatesInfo(It.IsAny<DateTime>()))
-                    .Returns(Task.FromResult(new List<LookBackDatesInfo>().AsEnumerable()));
-
-                _lookBackDatesInfoSvcMock
-                    .Setup(x => x.GetLookBackDatesInfo(It.IsAny<Guid>()))
-                    .Returns(Task.FromResult(LookBackDatesInfo.Create(Guid.NewGuid(), null, null, null, null, "")));
-
-                _lookBackDatesInfoSvcMock
-                    .Setup(x => x.Handle(It.IsAny<UpdateLookBackDatesInfoCommand>()))
-                    .Returns(Task.FromResult(true));
-            }
-
-            private void GivenThatIHaveADiplomateId()
-            {
-                _memberId = Guid.NewGuid();
-            }
-
-            private async void WhenICallRunYearEndLookbackWithNullGracePeriodStartAndEndDates()
-            {
-                try
-                {
-                    _sut.ProcessingDate = _lookbackDate;
-                    await _sut.RunYearEndLookback(Guid.NewGuid(), _lookbackDate, _lookbackDate);
-                }
-                catch (Exception ex)
-                {
-                    exception = ex;
-                }
-            }
-
-            private void ThenNoExceptionShouldHaveBeenThrown()
-            {
-                exception.ShouldBeNull();
-            }
-
-            private void AndThenGracePeriodShouldNotBeSet()
-            {
-                _creds[0].GracePeriodStartDate.ShouldBeNull();
-                _creds[0].GracePeriodEndDate.ShouldBeNull();
-            }
-        }
-
 
         #endregion
 

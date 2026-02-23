@@ -126,7 +126,7 @@ namespace Abim.Platform.Program.Relational.Validation.Impl
         /// <summary>
         /// internal backing field
         /// </summary>
-        internal bool _persistValidationMessages;
+        internal bool _persistValidationMessages = false;
 
         /// <summary>
         /// Keeps the validation messages as custom error messages (unions them, effectually), instead of replacing them with the custom error messages

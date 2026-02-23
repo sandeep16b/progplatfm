@@ -22,6 +22,8 @@ namespace Abim.Platform.Program.App.Services
         ICommandHandler<CreateCredentialIssuanceCommand>,
         ICommandValidationHandler<CreateCredentialIssuanceCommand>,
 
+        ICommandHandler<IssueFPHMCommand>,
+        ICommandValidationHandler<IssueFPHMCommand>,
         ICommandHandler<ReissueCommand>,
         ICommandValidationHandler<ReissueCommand>,
         ICommandHandler<ExpireAndReissueCommand>,
@@ -45,7 +47,9 @@ namespace Abim.Platform.Program.App.Services
         IAsyncCommandHandler<UpdatePathwayCommand, UpdatePathwayCommandResult>,
         ICommandValidationHandler<UpdatePathwayCommand>,
 
-   
+        ICommandHandler<UpdateGrandfatherMOCPrintDateCommand>,
+        ICommandValidationHandler<UpdateGrandfatherMOCPrintDateCommand>,
+
         IAsyncCommandHandler<WithdrawCredentialCommand, WithdrawCredentialCommandResult>,
         ICommandValidationHandler<WithdrawCredentialCommand>,
 

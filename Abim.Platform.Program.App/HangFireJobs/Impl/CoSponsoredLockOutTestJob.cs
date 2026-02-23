@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Abim.Platform.Program.App.HangFireJobs.Helpers;
 using Abim.Platform.Program.App.Services;
 using Hangfire;
@@ -55,7 +59,7 @@ namespace Abim.Platform.Program.App.HangFireJobs.Impl
                 DateTime lockOutDate = new DateTime(DateTime.Now.AddYears(-1).Year, 12, 31);
                 Log.Info($"Excecuting CoSponsoredLockOutJob for lockOut date {lockOutDate}.");
 
-                using (var dbCommand = GetDbCommand())
+                using (var dbCommand = GetDbCommand(lockOutDate))
                 {
                     IEnumerable<Guid> credentialIds = GetCredentialIds(dbCommand);
 
@@ -74,7 +78,7 @@ namespace Abim.Platform.Program.App.HangFireJobs.Impl
             }
         }
 
-        private IDbCommand GetDbCommand()
+        private IDbCommand GetDbCommand(DateTime lookbackDate)
         {
             var dbCommand = _session.Connection.CreateCommand();
 

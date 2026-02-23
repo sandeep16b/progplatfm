@@ -1,4 +1,5 @@
-﻿using Abim.Platform.Program.MembershipClient;
+﻿using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
+using Abim.Enterprise.Core.Profile.Resource;
 using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.Core.Identity;
 using Abim.Platform.Program.Integration.Scenarios.Controllers.PhysicianCertification.Base;
@@ -18,6 +19,8 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using TestStack.BDDfy;
+using NameResource = Abim.Enterprise.Core.Profile.Resource.NameResource;
+using ProfileSummaryShortResource = Abim.Enterprise.Core.Profile.Resource.ProfileSummaryShortResource;
 
 namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 {
@@ -96,25 +99,20 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         {
             var list = base.AdditionalDependencies();
             list.Add(typeof(IEnumService));
+            list.Add(typeof(ICredentialService));
+            list.Add(typeof(IProfileInterservice));
             list.Add(typeof(IAccessTokenService));
             list.Add(typeof(ILogger));
             return list;
         }
 
-        protected App.Domain.Credential ConstructDomainObject(string SourceCode = "ABIM", int numberOfIssuances = 1, bool isCosponsored = false)
+        protected App.Domain.Credential ConstructDomainObject()
         {
-            var source = App.Domain.Source.Create(RandomString.Build(), SourceCode, RandomString.Build());
+            var source = App.Domain.Source.Create(RandomString.Build(), RandomString.Build(), RandomString.Build());
             var certification = App.Domain.Certification.Create(null, source, EnumAttributes.RandomEntry<CertificationType>(),
-                name: (SourceCode == "ABIM" ? "ABIM" + RandomString.Build() : RandomString.Build()),
-                code: RandomString.Build(),
-                createdBy: RandomString.Build());
+                RandomString.Build(), RandomString.Build(), RandomString.Build());
             var credential = App.Domain.Credential.Create(certification, Guid.NewGuid(), EnumAttributes.RandomEntry<CredentialType>(),
-                  EnumAttributes.RandomEntry<PathwayType>(), null, null, RandomString.Build());
-
-            credential.IsCosponsored = isCosponsored;
-
-            foreach (var i in Enumerable.Range(0, numberOfIssuances))
-                credential.AddIssuance(App.Domain.Issuance.Create(RandomString.Build()));
+                EnumAttributes.RandomEntry<PathwayType>(), null, null, RandomString.Build());
 
             return credential;
         }
@@ -125,7 +123,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
     /// <summary>
     /// The basic Get by Id scenario
     /// </summary>
-    public class GetPhysicianCredentialsByNPIReturnsOK : GetPhyCredentialByNPIScenario
+    public class GetPhysicianCredentialsByNPIReturnsOK : GetPhyCredentialByAbimIdScenario
     {
         PhysicianCertificationsPublicResource Resource { get; set; }
 
@@ -140,35 +138,26 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         {
             CredentialDomainObjects = new List<App.Domain.Credential>() { ConstructDomainObject() };
 
-            List<VocProfileResource> profileSummaryShortResource = new List<VocProfileResource>() { new VocProfileResource()
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                FirstName = "Alex",
-                LastName = "Reznit",
-                MiddleName = "Mike",
-                AliasFirstName = "",
-                AliasMiddleName = "",
-                AliasLastName = "",
-            } };
-
-            ProfileResource profileResource = new ProfileResource()
-            {
-                AbimId = "123",
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "Reznit" },
-                Aliases = (new List<ProfileAliasResource>())
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
             };
 
-            My<IMembershipClientService>()
-            .Setup(o => o.GetProfileByMemberIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(profileResource);
-            
-            My<IMembershipClientService>()
-            .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>()))
-            .ReturnsAsync(profileSummaryShortResource); 
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
+            My<ICredentialService>()
+                .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
+                .Returns(Task.FromResult(CredentialDomainObjects));
+
+            // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
-                 .Setup(o => o.GetAccessToken())
-                 .Returns("--token--");
+               .Setup(o => o.GetAccessToken())
+               .Returns("--token--");
+
         }
 
         public void GivenIPassTheCorrectUrl()
@@ -203,7 +192,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
     /// <summary>
     /// The basic Get by Id scenario
     /// </summary>
-    public class GetPhysicianCredentialsByNPIReturnsOnlyABIMCert : GetPhyCredentialByNPIScenario
+    public class GetPhysicianCredentialsByNPIReturnsOnlyABIMCert : GetPhyCredentialByAbimIdScenario
     {
         PhysicianCertificationsPublicResource Resource { get; set; }
 
@@ -220,31 +209,25 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
             CredentialDomainObjects = new List<App.Domain.Credential>() { abimCredential, ConstructDomainObject(RandomString.Build()), ConstructDomainObject(RandomString.Build()) };
 
-            List<VocProfileResource> profileSummaryShortResource = new List<VocProfileResource>() { new VocProfileResource()
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                FirstName = "Alex",
-                LastName = "Reznit",
-                MiddleName = "Mike",
-                AliasFirstName = "",
-                AliasMiddleName = "",
-                AliasLastName = "",
-            } }; 
-     
-            var GUID = Guid.NewGuid();
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
+            };
+
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(CredentialDomainObjects); 
-
-            My<IMembershipClientService>()
-                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>()))
-                .ReturnsAsync(profileSummaryShortResource); 
+                .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
-                .Setup(o => o.GetAccessToken())
-                .Returns("--token--");
+               .Setup(o => o.GetAccessToken())
+               .Returns("--token--");
 
         }
 
@@ -290,7 +273,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
     /// <summary>
     /// The basic Get by Id scenario
     /// </summary>
-    public class GetPhysicianCredentialsByNPIDontReturnCoSponsoredCreds : GetPhyCredentialByNPIScenario
+    public class GetPhysicianCredentialsByNPIDontReturnCoSponsoredCreds : GetPhyCredentialByAbimIdScenario
     {
         PhysicianCertificationsPublicResource Resource { get; set; }
 
@@ -307,32 +290,21 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
             CredentialDomainObjects = new List<App.Domain.Credential>() {   ConstructDomainObject(SourceCode: "ABIM", numberOfIssuances: 1, isCosponsored:false), // only this should be return
                                                                             ConstructDomainObject(SourceCode: "ABIM", numberOfIssuances: 1, isCosponsored:true),
                                                                             ConstructDomainObject(RandomString.Build(), numberOfIssuances: 1, isCosponsored:true) };
-            
-            List<VocProfileResource> profileSummaryShortResource = new List<VocProfileResource>() { new VocProfileResource()
+
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                FirstName = "Alex",
-                LastName = "Reznit",
-                MiddleName = "Mike",
-                AliasFirstName = "",
-                AliasMiddleName = "",
-                AliasLastName = "",
-            } };
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
+            };
 
-            ProfileResource profileResource = new ProfileResource()
-            {
-                AbimId = "123",
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "Reznit" },
-                Aliases = (new List<ProfileAliasResource>())
-            };   
-
-            My<IMembershipClientService>()
-                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>()))
-                .ReturnsAsync(profileSummaryShortResource);
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
-               .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-               .ReturnsAsync(CredentialDomainObjects);
+                .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
+                .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
@@ -383,7 +355,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
     /// <summary>
     /// The basic Get by Id scenario
     /// </summary>
-    public class GetPhysicianCredentialsByNPIReturnsNoABIMCert : GetPhyCredentialByNPIScenario
+    public class GetPhysicianCredentialsByNPIReturnsNoABIMCert : GetPhyCredentialByAbimIdScenario
     {
         PhysicianCertificationsPublicResource Resource { get; set; }
 
@@ -397,25 +369,21 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         protected override void PostSetup()
         {
             CredentialDomainObjects = new List<App.Domain.Credential>() { ConstructDomainObject(), ConstructDomainObject(RandomString.Build()) };
-       
-            List<VocProfileResource> profileSummaryShortResource = new List<VocProfileResource>() { new VocProfileResource()
+
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                FirstName = "Alex",
-                LastName = "Reznit",
-                MiddleName = "Mike",
-                AliasFirstName = "",
-                AliasMiddleName = "",
-                AliasLastName = "",
-            } };  
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
+            };
 
-            My<IMembershipClientService>()
-                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>()))
-                .ReturnsAsync(profileSummaryShortResource);
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
-               .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-               .ReturnsAsync(CredentialDomainObjects);
+                .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
+                .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
@@ -466,7 +434,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
     /// <summary>
     /// The basic Get by Id scenario
     /// </summary>
-    public class GetPhysicianCredentialsByNPIReturnsNoABIMCertIssuances : GetPhyCredentialByNPIScenario
+    public class GetPhysicianCredentialsByNPIReturnsNoABIMCertIssuances : GetPhyCredentialByAbimIdScenario
     {
         PhysicianCertificationsPublicResource Resource { get; set; }
 
@@ -481,35 +449,21 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         {
             // has ABIM cert bu no issuances
             CredentialDomainObjects = new List<App.Domain.Credential>() { ConstructDomainObject(SourceCode: "ABIM", numberOfIssuances: 0), ConstructDomainObject(RandomString.Build()), ConstructDomainObject(RandomString.Build()) };
-           
-            List<VocProfileResource> profileSummaryShortResource = new List<VocProfileResource>() { new VocProfileResource()
+
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                FirstName = "Alex",
-                LastName = "Reznit",
-                MiddleName = "Mike",
-                AliasFirstName = "",
-                AliasMiddleName = "",
-                AliasLastName = "",
-            } };
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
+            };
 
-            ProfileResource profileResource = new ProfileResource()
-            {
-                AbimId = "123",
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "Reznit" },
-                Aliases = (new List<ProfileAliasResource>())
-            }; 
-
-            //My<IProfileApiClientWraperService>()
-            //      .Setup(o => o.ProfileGETAsync(It.IsAny<Guid>())).ReturnsAsync(profileResource);
-
-            My<IMembershipClientService>()
-                 .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>()))
-                 .ReturnsAsync(profileSummaryShortResource);
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
-               .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-               .ReturnsAsync(CredentialDomainObjects);
+                .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
+                .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
@@ -560,7 +514,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
     /// <summary>
     /// The basic Get by Id scenario
     /// </summary>
-    public class GetPhysicianCredentialsByNPI_NoCredentials_ReturnsOk : GetPhyCredentialByNPIScenario
+    public class GetPhysicianCredentialsByNPI_NoCredentials_ReturnsOk : GetPhyCredentialByAbimIdScenario
     {
         PhysicianCertificationsPublicResource Resource { get; set; }
 
@@ -573,31 +527,28 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PostSetup()
         {
-            CredentialDomainObjects = new List<App.Domain.Credential>();
+            CredentialDomainObjects = new List<App.Domain.Credential>() { };
 
-            List<VocProfileResource> profileSummaryShortResource = new List<VocProfileResource>() { new VocProfileResource()
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                FirstName = "Alex",
-                LastName = "Reznit",
-                MiddleName = "Mike",
-                AliasFirstName = "",
-                AliasMiddleName = "",
-                AliasLastName = "",
-            } };
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
+            };
 
-            My<IMembershipClientService>()
-                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>()))
-                .ReturnsAsync(profileSummaryShortResource);
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .Returns(Task.FromResult(CredentialDomainObjects));  
+                .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
-                .Setup(o => o.GetAccessToken())
-                .Returns("--token--"); 
+               .Setup(o => o.GetAccessToken())
+               .Returns("--token--");
+
         }
 
         public void GivenIPassTheCorrectUrl()
@@ -632,9 +583,9 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
     /// <summary>
     /// The basic Get by Id scenario
     /// </summary>
-    public class GetPhysicianCredentialsByNPIReturnsNotFound : GetPhyCredentialByNPIScenario
+    public class GetPhysicianCredentialsByNPIReturnsNotFound : GetPhyCredentialByAbimIdScenario
     {
-        PhysicianCertificationsPublicResource Resource { get; set; } 
+        PhysicianCertificationsPublicResource Resource { get; set; }
 
         IEnumerable<App.Domain.Credential> CredentialDomainObjects { get; set; }
 
@@ -645,33 +596,31 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PostSetup()
         {
-            CredentialDomainObjects = new List<App.Domain.Credential>();
+            CredentialDomainObjects = new List<App.Domain.Credential>() { };
 
-            List<VocProfileResource> profileSummaryShortResource = new List<VocProfileResource>() { new VocProfileResource()
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                FirstName = "Alex",
-                LastName = "Reznit",
-                MiddleName = "Mike",
-                AliasFirstName = "",
-                AliasMiddleName = "",
-                AliasLastName = "",
-            } };
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
+            };
 
-            var ex = new ApiException("Not Found", 404, "", null, null); 
+            var ex = new Enterprise.Core.Profile.Interservice.Util.Extensions.UnsuccessfulStatusException("");
+            ex.StatusCode = HttpStatusCode.NotFound;
 
-            My<IMembershipClientService>()
-                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>()))
-                .Throws(ex);
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                 .Throws(ex);
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(CredentialDomainObjects);
+                .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
                .Setup(o => o.GetAccessToken())
-               .Returns("--token--"); 
+               .Returns("--token--");
+
         }
 
         public void GivenIPassTheCorrectUrl()
@@ -701,7 +650,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
     /// <summary>
     /// GetPhysicianCredentialsByNPIReturnsNotFoundForCoSponsoredDiplomate
     /// </summary>
-    public class GetPhysicianCredentialsByNPIReturnsNotFoundForCoSponsoredDiplomate : GetPhyCredentialByNPIScenario
+    public class GetPhysicianCredentialsByNPIReturnsNotFoundForCoSponsoredDiplomate : GetPhyCredentialByAbimIdScenario
     {
         PhysicianCertificationsPublicResource Resource { get; set; }
 
@@ -719,24 +668,20 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
                                                                             ConstructDomainObject(SourceCode: "ABIM", numberOfIssuances: 0, isCosponsored:true),
                                                                             ConstructDomainObject(RandomString.Build(), numberOfIssuances: 1, isCosponsored:true) };
 
-            List<VocProfileResource> profileSummaryShortResource = new List<VocProfileResource>() { new VocProfileResource()
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                FirstName = "Alex",
-                LastName = "Reznit",
-                MiddleName = "Mike",
-                AliasFirstName = "",
-                AliasMiddleName = "",
-                AliasLastName = "",
-            } };
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
+            };
 
-            My<IMembershipClientService>()
-                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>()))
-                .ReturnsAsync(profileSummaryShortResource);
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(CredentialDomainObjects);
+                .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()

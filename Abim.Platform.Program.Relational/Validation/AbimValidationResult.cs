@@ -80,7 +80,7 @@ namespace Abim.Platform.Program.Relational.Validation.Impl
             #pragma warning disable 0168
             catch(Exception ex)
             {
-                string json;
+                string json = "";
                 try
                 {
                     json = JsonConvert.SerializeObject(result);

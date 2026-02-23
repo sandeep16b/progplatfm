@@ -12,7 +12,6 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using TestStack.BDDfy;
-using Assert = NUnit.Framework.Assert;
 
 namespace Abim.Platform.Program.Integration.Scenarios.Controllers.AppInfo
 {
@@ -95,11 +94,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.AppInfo
 
         public void AndThenTheResponseShouldHaveASelfLink()
         {
-            // ReSharper disable once AssignNullToNotNullAttribute
             Resource["links"].Should().NotBeNull();
-            // ReSharper disable once AssignNullToNotNullAttribute
-            var exists = Resource["links"].Any(l => l.ToString().Contains("self"));
-            Assert.IsTrue(exists);
+            Resource["links"].Any(l => l.ToString().Contains("self"));
         }
     }
     

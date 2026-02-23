@@ -141,7 +141,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Source
 
         protected override void PreSetup()
         {
-            OverrideAndInjectUnacceptableScope();
+            OverrideScope();
         }
 
         protected override void PostSetup()

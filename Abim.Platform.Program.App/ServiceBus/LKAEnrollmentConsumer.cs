@@ -1,4 +1,4 @@
-﻿using ServiceBus.Events;
+﻿using Abim.Enterprise.Core.ServiceBus.Registration;
 using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.App.Services.Commands;
 using MassTransit;
@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 namespace Abim.Platform.Program.App.ServiceBus
 {
     /// <summary>
-    /// A consumer for IMemberEnrolled objects
+    /// A consumer for IMemberEnrolledEvent objects
     /// </summary>
-    public class LKAEnrollmentConsumer : IConsumer<IMemberEnrolled>
+    public class LKAEnrollmentConsumer : IConsumer<IMemberEnrolledEvent>
     {
         #region Properties
 
@@ -42,11 +42,11 @@ namespace Abim.Platform.Program.App.ServiceBus
         }
 
         /// <summary>
-        /// The method for consuming IMemberEnrolled objects
+        /// The method for consuming IMemberEnrolledEvent objects
         /// </summary>
         /// <param name="context">A MassTransit ConsumeContext</param>
         /// <returns></returns>
-        public async Task Consume(ConsumeContext<IMemberEnrolled> context)
+        public async Task Consume(ConsumeContext<IMemberEnrolledEvent> context)
         {
             try
             {

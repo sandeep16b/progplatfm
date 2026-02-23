@@ -36,7 +36,7 @@ namespace Abim.Enterprise.Core.Interservice.Tests
             var sut = new List<CMPRegistrationResource>(1) { reg };
 
             //ACT / ASSERT
-            Assert.IsTrue(sut.IfPassExamInRange(new DateTime(2019, 1, 1), new DateTime(2019, 12, 31), certId));
+            Assert.IsTrue(sut.IfPassExamInRange(new DateTime(2019, 1, 1), new DateTime(2019, 12, 31), certId, null));
         }
 
         [Test]
@@ -72,7 +72,7 @@ namespace Abim.Enterprise.Core.Interservice.Tests
             var sut = new List<CMPRegistrationResource>(1) { reg };
 
             //ACT / ASSERT
-            Assert.IsFalse(sut.IfPassExamInRange(new DateTime(2019, 1, 1), new DateTime(2019, 12, 31), certId));
+            Assert.IsFalse(sut.IfPassExamInRange(new DateTime(2019, 1, 1), new DateTime(2019, 12, 31), certId, null));
         }
 
         [Test]
@@ -90,7 +90,7 @@ namespace Abim.Enterprise.Core.Interservice.Tests
             var sut = new List<CMPRegistrationResource>(1) { reg };
 
             //ACT / ASSERT
-            Assert.IsFalse(sut.IfPassExamInRange(new DateTime(2019, 1, 1), new DateTime(2019, 12, 31), certId));
+            Assert.IsFalse(sut.IfPassExamInRange(new DateTime(2019, 1, 1), new DateTime(2019, 12, 31), certId, null));
         }
 
         [Test]
@@ -108,7 +108,7 @@ namespace Abim.Enterprise.Core.Interservice.Tests
             var sut = new List<CMPRegistrationResource>(1) { reg };
 
             //ACT / ASSERT
-            Assert.IsFalse(sut.IfPassExamInRange(new DateTime(2019, 1, 1), new DateTime(2019, 12, 31), Guid.NewGuid()));
+            Assert.IsFalse(sut.IfPassExamInRange(new DateTime(2019, 1, 1), new DateTime(2019, 12, 31), Guid.NewGuid(), null));
         }
     }
 }

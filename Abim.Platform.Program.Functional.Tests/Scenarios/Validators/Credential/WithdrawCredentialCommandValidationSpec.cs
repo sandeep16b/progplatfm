@@ -179,7 +179,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Validators.Credential
         {
             protected override string ExpectedErrorMessage()
             {
-                return "Withdrawn Status must be one of these values: Inactive, Revoked, Surrendered or Suspended";
+                return "Withdrawn Status must be one of these values: Revoked, Surrendered or Suspended";
             }
 
             protected override void SetInvalidProperty()

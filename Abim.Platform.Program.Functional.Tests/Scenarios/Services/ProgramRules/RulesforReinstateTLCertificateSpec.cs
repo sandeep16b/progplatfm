@@ -17,6 +17,7 @@ using Abim.Platform.Program.Resources;
 using Abim.Platform.Program.Testing.Setup.DataBuilders;
 using Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest.Base;
 using Abim.Platform.Program.Tests.Setup.Responses;
+using Abim.Platform.Program.WebApi.Testing.Setup;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;

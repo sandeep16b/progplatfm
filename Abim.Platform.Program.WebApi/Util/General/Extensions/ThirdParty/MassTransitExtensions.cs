@@ -65,7 +65,7 @@ namespace Abim.Platform.Program.WebApi.Extensions
         {
             if(@event == null)
                 throw new ArgumentException("PublishAndLog() was passed a null event");
-            await bus.Publish(@event).ConfigureAwait(false);
+            await bus.Publish<TEvent>(@event).ConfigureAwait(false);
             if(log == null)
                 throw new ArgumentException("PublishAndLog() was passed a null ILogger");
             

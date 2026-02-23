@@ -10,10 +10,12 @@ namespace Abim.Platform.Program.Host.Config
     /// Startup Class.
     /// </summary>
     public partial class Startup
-    { 
+    {
         /// <summary>
-        /// A development flag. Will be false in production 
-        ///  private static readonly bool IsDevelopment; 
+        /// A development flag. Will be false in production
+        /// </summary>
+        private static readonly bool IsDevelopment;
+        /// <summary>
         /// The logger
         /// </summary>
         protected static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
@@ -21,7 +23,7 @@ namespace Abim.Platform.Program.Host.Config
         static Startup()
         {
             #if DEBUG
-             //   IsDevelopment = true;
+                IsDevelopment = true;
             #endif
         }
 

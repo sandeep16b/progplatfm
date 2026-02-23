@@ -27,7 +27,7 @@ namespace Abim.Platform.Program.WebApi.Api.Handlers
                 {
                     HttpContext.Current.Items["MS_HttpRequestMessage"] = request;
                 }
-                catch(Exception)
+                catch(Exception ex)
                 {
                 }
             }

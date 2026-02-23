@@ -58,7 +58,7 @@ namespace Abim.Platform.Program.Util.Extensions
         {
             if(string.IsNullOrEmpty(s)) return s;
             char[] c = s.ToCharArray();
-            int index;
+            int index = 0;
 
             for(index = 0; index < c.Length && CharExtensions.IsLetterCharacter(c[index]) && Char.IsUpper(c[index]); index++){}
 
@@ -207,7 +207,7 @@ namespace Abim.Platform.Program.Util.Extensions
         /// <returns></returns>
         public static string JoinWithAnd<TObject>(string joiner, IEnumerable<TObject> collection)
         {
-            return JoinWithConjunction(joiner, "and", collection);
+            return JoinWithConjunction<TObject>(joiner, "and", collection);
         }
         
         /// <summary>
@@ -218,7 +218,7 @@ namespace Abim.Platform.Program.Util.Extensions
         /// <returns></returns>
         public static string JoinWithOr<TObject>(string joiner, IEnumerable<TObject> collection)
         {
-            return JoinWithConjunction(joiner, "or", collection);
+            return JoinWithConjunction<TObject>(joiner, "or", collection);
         }
         
         /// <summary>
@@ -228,7 +228,7 @@ namespace Abim.Platform.Program.Util.Extensions
         /// <returns></returns>
         public static string JoinWithAnd<TObject>(IEnumerable<TObject> collection)
         {
-            return JoinWithConjunction(", ", "and", collection);
+            return JoinWithConjunction<TObject>(", ", "and", collection);
         }
         
         /// <summary>
@@ -238,7 +238,7 @@ namespace Abim.Platform.Program.Util.Extensions
         /// <returns></returns>
         public static string JoinWithOr<TObject>(IEnumerable<TObject> collection)
         {
-            return JoinWithConjunction(", ", "or", collection);
+            return JoinWithConjunction<TObject>(", ", "or", collection);
         }
         
         /// <summary>
@@ -408,7 +408,7 @@ namespace Abim.Platform.Program.Util.Extensions
             while(true)
             {
                 if(index == -1) index = str.ToLower().IndexOf(target.ToLower());
-                else index = str.ToLower().IndexOf(target.ToLower(), index + 1);
+                else index = index = str.ToLower().IndexOf(target.ToLower(), index + 1);
                 if(index == -1) break;
                 indices.Add(index);
             }
@@ -549,7 +549,7 @@ namespace Abim.Platform.Program.Util.Extensions
         {
             if(str == null) return null;
             
-            int len;
+            int len = 0;
             if(length != null) len = length.Value;
             else
             {

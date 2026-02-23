@@ -131,7 +131,7 @@ namespace Abim.Platform.Program.Testing.Scenarios.Consumers
 
                 ConsumerFactoryMethod = () => new RegistrationCreatedEventConsumer(CredentialService.Object, RegistrationInterservice.Object, AccessTokenService.Object);
 
-                Consumer = Harness.Consumer(ConsumerFactoryMethod);
+                Consumer = Harness.Consumer<RegistrationCreatedEventConsumer>(ConsumerFactoryMethod);
 
                 Handler = Harness.Handler<IRegistrationCreatedEvent>();
             }
@@ -219,7 +219,7 @@ namespace Abim.Platform.Program.Testing.Scenarios.Consumers
 
                 ConsumerFactoryMethod = () => new RegistrationCreatedEventConsumer(CredentialService.Object, RegistrationInterservice.Object,AccessTokenService.Object);
 
-                Consumer = Harness.Consumer(ConsumerFactoryMethod);
+                Consumer = Harness.Consumer<RegistrationCreatedEventConsumer>(ConsumerFactoryMethod);
 
                 Handler = Harness.Handler<IRegistrationCreatedEvent>();
             }
@@ -330,7 +330,7 @@ namespace Abim.Platform.Program.Testing.Scenarios.Consumers
 
                 ConsumerFactoryMethod = () => new RegistrationCreatedEventConsumer(CredentialService.Object, RegistrationInterservice.Object,AccessTokenService.Object);
 
-                Consumer = Harness.Consumer(ConsumerFactoryMethod);
+                Consumer = Harness.Consumer<RegistrationCreatedEventConsumer>(ConsumerFactoryMethod);
 
                 Handler = Harness.Handler<IRegistrationCreatedEvent>();
             }

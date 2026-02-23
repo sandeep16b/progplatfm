@@ -10,7 +10,7 @@ namespace Abim.Platform.Program.App.Domain
     /// <summary>
     /// Use to set the CorrectiveActionResult of where the Certification data was derived from
     /// </summary>
-    public class CorrectiveActionResult : AggregateRoot<CorrectiveActionResult>
+    public class CorrectiveActionResult : AggregateRoot<CorrectiveActionResult>, IDomainValidationHandler<CorrectiveActionResult>
     {
         #region Properties
 

@@ -5,7 +5,7 @@ namespace Abim.Platform.Program.Tests.Setup.ResourceDataBuilders
 {
     public class RegistrationResourceDataBuilder : ResourceDataBuilder<RegistrationResource, RegistrationResourceDataBuilder>
     {
-        //private RegistrationResource _resource;
+        private RegistrationResource _resource;
 
         public RegistrationResourceDataBuilder(RegistrationResource registrationResource) : base(registrationResource)
         {

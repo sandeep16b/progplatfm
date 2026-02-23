@@ -137,7 +137,7 @@ namespace Abim.Platform.Program.Relational.Repository.Base
         #endregion
 
         #region Transaction Support
-
+        
         /// <summary>
         /// Begins the transaction
         /// </summary>
@@ -151,10 +151,11 @@ namespace Abim.Platform.Program.Relational.Repository.Base
         /// </summary>
         public void CommitTransaction()
         {
+            if(Transaction != null)
+                Transaction.Commit();
             if(Session != null)
                 Session.Flush();
-            if (Transaction != null)
-                Transaction.Commit();
+            
             //Transaction will be replaced with a new transaction by NHibernate, but we will close it to keep a consistent state.
             CloseTransaction();
         }
@@ -173,8 +174,8 @@ namespace Abim.Platform.Program.Relational.Repository.Base
         /// <param name="tx">The transaction.</param>
         protected void RollbackTransaction(ITransaction tx)
         {
-            //The Session must be closed and disposed after a transaction rollback to keep a consistent state. 
-            if (tx != null) tx.Rollback();  
+            //The Session must be closed and disposed after a transaction rollback to keep a consistent state.
+            tx.Rollback();
             CloseTransaction(tx);
             CloseSession(true);
         }
@@ -304,9 +305,9 @@ namespace Abim.Platform.Program.Relational.Repository.Base
         /// Frees the managed resources.
         /// </summary
         /// <returns>
-        /// void.
+        /// Success or failure.
         /// </returns>
-        private void FreeManagedResources()
+        private bool FreeManagedResources()
         {
             //Commit the last transaction by default
             try
@@ -323,10 +324,12 @@ namespace Abim.Platform.Program.Relational.Repository.Base
             {
                 CloseTransaction();
                 CloseSession(false);
+                return true;
             }
             catch(Exception ex)
             {
                 Log.Error(ex);
+                return false;
             }
         }
         
@@ -392,7 +395,7 @@ namespace Abim.Platform.Program.Relational.Repository.Base
         public virtual IEnumerable<TAggregateRoot> GetAll()
         {
             return Session.Query<TAggregateRoot>()
-                   .Cacheable().CacheMode<TAggregateRoot>(CacheMode.Normal)
+                   .Cacheable<TAggregateRoot>().CacheMode<TAggregateRoot>(CacheMode.Normal)
                    .ToList();
         }
 
@@ -621,7 +624,7 @@ namespace Abim.Platform.Program.Relational.Repository.Base
         /// <returns></returns>
         protected virtual AbimValidationResult Add(TAggregateRoot obj, string createdBy, bool wrapInTransactionAndCommit)
         {
-            AbimValidationResult result;
+            AbimValidationResult result = null;
             if(wrapInTransactionAndCommit)
             {
                 using(var tx = Session.BeginTransaction())
@@ -631,8 +634,8 @@ namespace Abim.Platform.Program.Relational.Repository.Base
                         result = PerformAdd(obj, createdBy);
                         if(result.Succeeded)
                         {
-                            Session.Flush();
                             tx.Commit();
+                            Session.Flush();
                         }
                         else RollbackTransaction(tx);
                         return result;
@@ -680,7 +683,7 @@ namespace Abim.Platform.Program.Relational.Repository.Base
             //... setting the identity column. Persist() would also do this, unless the entity generating strategy was changed from Identity to Sequence or Auto,
             //... which we don't want to do. However, this is ok, because the calling method, Add(), or the calling service, can still roll the transaction back
             Session.Save(obj);
-        
+            
             return result;
         }
 
@@ -752,7 +755,7 @@ namespace Abim.Platform.Program.Relational.Repository.Base
         /// <returns></returns>
         protected virtual AbimValidationResult Update(TAggregateRoot obj, string modifiedBy, bool wrapInTransactionAndCommit)
         {
-            AbimValidationResult result;
+            AbimValidationResult result = null;
             if(wrapInTransactionAndCommit)
             {
                 using(var tx = Session.BeginTransaction())
@@ -762,8 +765,8 @@ namespace Abim.Platform.Program.Relational.Repository.Base
                         result = PerformUpdate(obj, modifiedBy);
                         if(result.Succeeded)
                         {
-                            Session.Flush();
                             tx.Commit();
+                            Session.Flush();
                         }
                         else RollbackTransaction(tx);
                         return result;
@@ -834,8 +837,8 @@ namespace Abim.Platform.Program.Relational.Repository.Base
                     try
                     {
                         Session.Delete(obj);
-                        Session.Flush();
                         tx.Commit();
+                        Session.Flush();
                     }
                     catch (Exception e)
                     {
@@ -919,7 +922,7 @@ namespace Abim.Platform.Program.Relational.Repository.Base
         /// <param name="action"></param>
         protected virtual void Transact(Action action)
         {
-            Transact(() =>
+            Transact<bool>(() =>
             {
                 action.Invoke();
                 return false;

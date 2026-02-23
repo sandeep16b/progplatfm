@@ -4,7 +4,6 @@ using Abim.Platform.Program.Resources;
 using Abim.Platform.Program.Util;
 using Abim.Platform.Program.WebApi.Objects.Extensions;
 using AutoMapper;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http.Routing;
@@ -40,7 +39,6 @@ namespace Abim.Platform.Program.Host.ResourceMaps
                 //Details-Only:
                 .ForMember(dest => dest.Type, opt => opt.ResolveUsing(src => new EnumValueResponseResource<CertificationType>(src.Type)))
                 .ForMember(dest => dest.SourceName, opt => opt.MapFrom(src => src.Source.Name))
-                .ForMember(dest => dest.IsCertificateRetired, opt => opt.MapFrom(src => src.IsCertificateRetired && src.CertificateRetiredDate.HasValue && src.CertificateRetiredDate.Value.Date <= DateTime.Now.Date))
                 .AfterMap((src, dest, context) =>
                 {                    
                     var urlHelper = context.Options.Items["UrlHelper"] as UrlHelper;

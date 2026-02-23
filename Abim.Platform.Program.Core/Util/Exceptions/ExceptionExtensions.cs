@@ -57,7 +57,7 @@ namespace Abim.Platform.Program.Util.Extensions
                             }
                             str += string.Format("; EntityValidationErrors: [{0}]", validationText);
                         }
-                        else str += "; EntityValidationErrors: []";
+                        else str += string.Format("; EntityValidationErrors: []");
                     }
                     catch (Exception ex3)
                     {

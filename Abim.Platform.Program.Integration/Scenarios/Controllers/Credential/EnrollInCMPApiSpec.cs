@@ -105,7 +105,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PostSetup()
         {
-            Container.Inject(EnumService);
+            Container.Inject<IEnumService>(EnumService);
 
             DomainObject = ConstructDomainObject();
             memberId = Guid.NewGuid();
@@ -190,12 +190,12 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         protected override void PreSetup()
         {            
             EnumService = new EnumService();
-            OverrideAndInjectUnacceptableScope();
+            OverrideScope();
         }
 
         protected override void PostSetup()
         {
-            Container.Inject(EnumService);
+            Container.Inject<IEnumService>(EnumService);
 
             DomainObject = ConstructDomainObject();
             memberId = Guid.NewGuid();
@@ -301,7 +301,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PostSetup()
         {
-            Container.Inject(EnumService);
+            Container.Inject<IEnumService>(EnumService);
 
             My<ICredentialService>()
                 .Setup(o => o.Handle(It.IsAny<EnrollInCMPCommand>()))

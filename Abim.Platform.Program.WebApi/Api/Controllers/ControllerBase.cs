@@ -100,14 +100,11 @@ namespace Abim.Platform.Program.WebApi
             if(attr == null)
                 return;
 
-            if (attr.NamedArguments != null)
-            {
-                var name = attr.NamedArguments.FirstOrDefault(a => a.MemberName == "Name").TypedValue.Value as string;
-                if(string.IsNullOrEmpty(name))
-                    return;
+            var name = attr.NamedArguments.FirstOrDefault(a => a.MemberName == "Name").TypedValue.Value as string;
+            if(string.IsNullOrEmpty(name))
+                return;
 
-                InvalidateCache(name, type);
-            }
+            InvalidateCache(name, type);
         }
 
         #endregion Caching

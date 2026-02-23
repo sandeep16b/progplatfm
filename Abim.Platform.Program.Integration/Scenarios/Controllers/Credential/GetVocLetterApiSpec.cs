@@ -1,4 +1,4 @@
-﻿using Abim.Platform.Program.MembershipClient;
+﻿using Abim.Enterprise.Core.Profile.Resource;
 using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.Integration.Scenarios.Controllers.Credential.Base;
 using Abim.Platform.Program.Resources;
@@ -11,7 +11,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
-using TestStack.BDDfy; 
+using TestStack.BDDfy;
+using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
+
 
 namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 {
@@ -48,22 +50,21 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         }
         protected override void PostSetup()
         {
- 
+            My<IProfileInterservice>()
+                .Setup(o => o.GetProfileByABIMId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(new ProfileNestedResource() { Id = Guid.NewGuid()  }));
+
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(new List<App.Domain.Credential>());
-            
+                .Returns(Task.FromResult((IEnumerable <App.Domain.Credential>)new List<App.Domain.Credential>()));
+
             My<IHelperService>()
-                .Setup(o => o.GetVocLetterContent(It.IsAny<ProfileResource>(), It.IsAny<IEnumerable<App.Domain.Credential>>()))
-                .ReturnsAsync(new App.Domain.VocPdfData());
+                .Setup(o => o.GetVocLetterContent(It.IsAny<ProfileNestedResource>(), It.IsAny<IEnumerable<App.Domain.Credential>>()))
+                .Returns(new App.Domain.VocPdfData());
 
             My<IHelperService>()
                 .Setup(o => o.CreateVocLetter(It.IsAny<App.Domain.VocPdfData>()))
                 .Returns(new MemoryStream());
-
-            My<IMembershipClientService>()
-               .Setup(o => o.GetProfileByAbimIdAsync(It.IsAny<string>()))
-               .ReturnsAsync(new ProfileResource() { Id = Guid.NewGuid() });
         }
 
         public void GivenIPassTheCorrectUrl()
@@ -95,9 +96,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         protected async override Task<int> GetToken()
         {
             // use different test user name who is not admin (DevAdmin, QAAdmin, SG-G-PortalAdmin-Dev, SG-G-PortalAdmin-QA)
-            // UserKey = new KeyValuePair<string, string>("288545", "1Password#");
-            OverrideAndInjectUnacceptableScope();
-
+            UserKey = new KeyValuePair<string, string>("288545", "1Password#");
             return await base.GetToken();
         }
 

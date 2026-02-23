@@ -25,9 +25,9 @@ namespace Abim.Platform.Program.Tests.Setup.DomainBuilders
                 EnumAttributes.RandomEntry<MaintenanceRequirementType>(), MaintenanceStatusType.Maintained,
                 EnumAttributes.RandomEntry<OccurrenceType>(), IssuanceStatusType.Active, DateTimeBuilder.Random().Build(), RandomString.Build());
         }
-        public static Issuance BuildActiveMaintained( DateTime issuanceDate, DurationType durationType)
+        public static Issuance BuildActiveMaintained( DateTime issuanceDate)
         {
-            return Issuance.Create(SourceBuilder.Build(), durationType,
+            return Issuance.Create(SourceBuilder.Build(), EnumAttributes.RandomEntry<DurationType>(),
                 EnumAttributes.RandomEntry<MaintenanceRequirementType>(), MaintenanceStatusType.Maintained,
                 EnumAttributes.RandomEntry<OccurrenceType>(), IssuanceStatusType.Active, issuanceDate, RandomString.Build());
         }

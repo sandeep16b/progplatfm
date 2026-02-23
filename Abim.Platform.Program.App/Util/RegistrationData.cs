@@ -2,15 +2,14 @@
 using Abim.Enterprise.Core.Registration.Resources;
 using Abim.Platform.Program.App.Extensions.Registration;
 using System;
+using System.Linq;
 
 namespace Abim.Platform.Program.App.Util
 {
-    /// <summary>
-    /// RegistrationData
-    /// </summary>
     public class RegistrationData
     {
-        #region Properties 
+        #region Properties
+
         /// <summary>
         /// The ID of the registration
         /// </summary>
@@ -62,6 +61,11 @@ namespace Abim.Platform.Program.App.Util
         /// For CMPRegistrationResource, this is the exam date.
         /// </summary>
         public DateTime MinSeatOrDeliveryDate { get; }
+
+        /// <summary>
+        /// Specifies whether or not the exam was No Consequence.
+        /// </summary>
+        public bool NoConsequence { get; }
 
         /// <summary>
         /// Specifies whether or not the exam results are on hold due to lack of payment. Applies to CMP only.
@@ -121,6 +125,7 @@ namespace Abim.Platform.Program.App.Util
             IsCmp = false;
             MemberId = reg.MemberId;
             MinSeatOrDeliveryDate = reg.MinSeatOrDeliveryDate();
+            NoConsequence = reg.NoConsequence;
             PhysicianIsAbim = reg.PhysicianIsAbim;
             OnBehalfOf = reg.OnBehalfOf;
         }
@@ -147,6 +152,8 @@ namespace Abim.Platform.Program.App.Util
             MemberId = reg.MemberId;
 
             MinSeatOrDeliveryDate = reg.TestDate;
+            //NoConsequence = reg.CMPExam.NoConsequence;
+            NoConsequence = reg.CMPExam.NoConsequenceYears.Any(x => x == reg.TestDate.Year);
             OnHold = reg.OnHold;
             PhysicianIsAbim = reg.PhysicianIsAbim;
         }
@@ -154,8 +161,29 @@ namespace Abim.Platform.Program.App.Util
         #endregion Constructors
 
         /// <summary>
-        /// GetExamType
-        /// </summary> 
+        /// Returns the "effective" exam result. When an exam is a no-consequences exam, 
+        /// FAIL, INDETERMINATE, INCOMPLETE, and UNABLETOTEST are treated as PASS.
+        /// </summary>
+        /// <param name="credentialExamDueDate">The exam due date of the credential this exam registration applies to</param>
+        /// <param name="consecutiveKCIPassRequired">Specifies whether or not the diplomate is required to pass 2 consecutive KCI exams</param>
+        /// <returns>The "effective" exam result as determined by the business criteria</returns>
+        /// <remarks>
+        /// See PBI 134151 for more information. 
+        /// Note that the PBI does not explicitly mention that the exam was taken before it was due, but it is implied.
+        /// </remarks>
+        public ExamResultType GetEffectiveExamResult(
+            DateTime credentialExamDueDate,
+            bool consecutiveKCIPassRequired)
+        {
+            if (NoConsequence
+                && _effectivePassingResultTypes.Contains(ExamResult.Result.Value.ToUpper())
+                && AdministrationYear <= credentialExamDueDate.Year
+                && !consecutiveKCIPassRequired)
+                return ExamResultType.Pass;
+            else
+                return ExamResult.Result.ToEnum();
+        }
+
         public string GetExamType()
         {
             //CMPRegistrations don't have a corresponding exam type in our system, so here's our workaround
@@ -164,10 +192,7 @@ namespace Abim.Platform.Program.App.Util
             else
                 return _examType.Value.ToUpper();
         }
-        /// <summary>
-        /// GetExamResultFromCMPExamResult
-        /// </summary> 
-        /// <param name="cmpResult"></param>
+
         private ExamResultResource GetExamResultFromCMPExamResult(ExamResultType cmpResult)
         {
             var output = new ExamResultResource();

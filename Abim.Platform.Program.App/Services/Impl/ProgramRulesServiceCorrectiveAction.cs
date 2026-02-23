@@ -55,7 +55,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 // get all credentials for given memberId
                 var credentials = Credentials.ToList();
 
-                if (credentials.Count == 0)
+                if (credentials == null || credentials.Count == 0)
                 {
                     Log.Info($"No credentials were found for MemberId:'{MemberId}'");
                     return false;
@@ -94,7 +94,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 MemberId = memberId;
                 var credentials = Credentials.ToList();
 
-                if (credentials.Count == 0)
+                if (credentials == null || credentials.Count == 0)
                 {
                     Log.Info($"No credentials were found for MemberId:'{memberId}'");
                     return false;
@@ -133,7 +133,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 MemberId = memberId;
                 var credentials = Credentials.ToList();
 
-                if (credentials.Count == 0)
+                if (credentials == null || credentials.Count == 0)
                 {
                     Log.Info($"No credentials were found for MemberId:'{memberId}'");
                     return false;
@@ -197,7 +197,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 if (IsOnHoldCMPRegistration(registration))
                 {
                     Log.Info($"Not performing corrective action for registration {registration.Id} because it as CMPRegistration which is on hold.");
-                    return await Task.FromResult(allSucceeded);
+                    return await Task.FromResult<bool>(allSucceeded);
                 }
 
                 // filter only none-inactive issuances. 
@@ -212,7 +212,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 if (!credentials.Any())
                 {
                     Log.Info($"MemberId: '{memberId}' does not have any none-inactive credentials");
-                    return await Task.FromResult(allSucceeded);
+                    return await Task.FromResult<bool>(allSucceeded);
                 }
 
                 //PBI 183137 - Corrective Action should ignore deselected certs
@@ -223,7 +223,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 if (!credentials.Any())
                 {
                     Log.Info($"MemberId: '{memberId}' does not have any selected certs");
-                    return await Task.FromResult(allSucceeded);
+                    return await Task.FromResult<bool>(allSucceeded);
                 }
 
                 // PBI 223574 : (2.37) Process Exam Results for Cosponsored Certificates
@@ -234,7 +234,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                     if (credential == null)
                     {
                         Log.Warn($"ExamResultMocKci : No Credential found for MemberId: {registration.MemberId} and CertificationId: {registration.CertificationId}");
-                        return await Task.FromResult(false);
+                        return await Task.FromResult<bool>(false);
                     }
                     else if (credential.IsCosponsored) 
                     {
@@ -252,7 +252,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 if (!credentials.Any())
                 {
                     Log.Info($"MemberId: '{memberId}' has only cosponsored credentials.");
-                    return await Task.FromResult(allSucceeded);
+                    return await Task.FromResult<bool>(allSucceeded);
                 }
 
                 //-------------------------------------------------------------------------------------------------------------
@@ -281,7 +281,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                         */
 
                         if (credential.LookbackDate.HasValue &&
-                            !(credential.ExamDueDate?.Year == 2022 && credential.IsCovid4))
+                            credential.ExamDueDate?.Year != 2020 && credential.ExamDueDate?.Year != 2021 && !(credential.ExamDueDate?.Year == 2022 && credential.IsCovid4))
                         {
                             //** SetGracePeriod  (PBI 134113)
                             //```` All events ~~~~~~
@@ -311,7 +311,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                         if (credential == null)
                         {
                             Log.Warn($"ExamResultMocKci : No Credential found for MemberId: {registration.MemberId} and CertificationId: {registration.CertificationId}");
-                            return await Task.FromResult(false);
+                            return await Task.FromResult<bool>(false);
                         }
 
                         //**  Update exam fields (pbi 134151)
@@ -416,7 +416,31 @@ namespace Abim.Platform.Program.App.Services.Impl
                             .UpdateResult(r => UpdateTLCertStatusCredentials(r))
                             .LogCorrectiveActionResult(async (a) => await CorrectiveActionRunService.Add(a));
                 }
-              
+
+                //---------------------------------------------------------------------------------------------------------------------------------
+                //+++ PBI 73615 : Issue intial FPHM (Find Active/Expired IM certs)
+                //---------------------------------------------------------------------------------------------------------------------------------
+                var HasActiveOrExpiredIMCredentials = credentials
+                            .Where(c => c.HasIssuances &&
+                                (c.NewestIssuance.IssuanceStatus == IssuanceStatusType.Active || c.NewestIssuance.IssuanceStatus == IssuanceStatusType.Expired) &&
+                                 c.Certification.Code == ProgramResourceConstants.CertificationCode.InternalMedicine).Any();
+
+                if (HasActiveOrExpiredIMCredentials)
+                {
+                    var fphmCredential = credentials.Where(c => c.Certification.Type == CertificationType.FocusPractice
+                                                        && !c.HasIssuances).FirstOrDefault();
+
+                    if (fphmCredential != null)
+                    {
+                        await IssueNewCredentialForFPHM_(fphmCredential,
+                                                         memberId,
+                                                         eventDate,
+                                                         processingDate)
+                           .UpdateResult(c => UpdateFPHMCredential(c))
+                           .LogCorrectiveActionResult(async (a) => await CorrectiveActionRunService.Add(a));
+                    }
+                }
+
                 //--------------------------------------------------------------------------------------------------------------
                 //+++ Check for Not Maintained Certs ++++ PBI: 86857, 86853, 86855
                 //--------------------------------------------------------------------------------------------------------------
@@ -441,9 +465,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 var InactiveOrExpiredMBMCredentials = credentials
                                 .Where(a => a.IsMBM)
                                 .NewestIssuanceABIM()
-                                .Where(c => c.NewestIssuance.IssuanceStatus == IssuanceStatusType.Expired && c.SelectedToMaintain).ToList(); // only  SelectedToMaintain
-                // PBI 254149 : (2.45) When checking for Inactive or Expired MBM Certs, exclude SelectedToMaintain=0
-                // if diploymate has  IM cert and then pass FPHM init cert, then we expire IM and SelectedToMaintain to 0, but this above process can put them in activa status again.
+                                .Where(c => c.NewestIssuance.IssuanceStatus == IssuanceStatusType.Expired).ToList();
 
                 if (InactiveOrExpiredMBMCredentials.Any())
                 {
@@ -455,7 +477,21 @@ namespace Abim.Platform.Program.App.Services.Impl
                             .LogCorrectiveActionResult(async (a) => await CorrectiveActionRunService.Add(a));
                 }
 
-               
+                //--------------------------------------------------------------------------------------------------------------
+                //+++ Check for Grand Father ++++ Pbi: 87085. Corrective action - Print Grandfather certificate
+                //--------------------------------------------------------------------------------------------------------------
+                var GFCredentials = credentials.Where(a => a.IsGrandfather 
+                                                                         && !a.GrandfatherMOCPrintDate.HasValue).ToList();
+
+                if (GFCredentials.Any())
+                {
+                    await CorrectiveActionGFPrinting_(GFCredentials,
+                                                        memberId,
+                                                        eventDate,
+                                                        processingDate)
+                          .UpdateResult(r => UpdateGFCredential(r))
+                          .LogCorrectiveActionResult(async (a) => await CorrectiveActionRunService.Add(a));
+                }
 
             }
             catch (Exception ex)
@@ -464,6 +500,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 if (!ex.Message.StartsWith(Constants.StopFurtherExecutionMessage))
                 {
                     Logger.Error(ex);
+                    allSucceeded = false;
                     throw;
                 }
             }
@@ -632,6 +669,32 @@ namespace Abim.Platform.Program.App.Services.Impl
         }
 
         /// <summary>
+        /// Updates the FPHM credential.
+        /// </summary>
+        /// <param name="credential">The credential.</param>
+        public void UpdateFPHMCredential(CredentialToUpdate credential)
+        {
+            var command = new IssueFPHMCommand()
+            {
+                CredentialId = credential.CredentialId,
+                IssuanceDate = credential.IssuanceDate,
+                ScheduledUpdate = ProgramRulesHelpers.ComputeScheduleUpdateDateForIssuance(credential.ProcessingDate),
+                CreatedBy = "NewFP",
+                MaintenanceStatus = credential.MaintenanceStatus,
+                ReAttestationDueDate = new DateTime(credential.IssuanceDate.Year + 5, 12, 31),
+                ProcessingDate = credential.ProcessingDate
+            };
+
+            var result = (IssueFPHMCommandResult)(CredentialService.Handle(command));
+
+            if (result.Succeeded)
+                Logger.Debug($"[PBI:73615] Added New issuance To DB for credentialId:'{credential.CredentialId}' {command.Dump()}");
+            else if (result.Status == CommandStatus.Rejected)
+                Log.Error($"UpdateFPHMCredential's call to Handle(IssueFPHMCommand) failed with the following error:'{result.Message}'");
+
+        }
+
+        /// <summary>
         /// Updates the TLPC credential.
         /// </summary>
         /// <param name="credentialsToUpdate"></param>
@@ -698,7 +761,32 @@ namespace Abim.Platform.Program.App.Services.Impl
             }
         }
 
+        /// <summary>
+        /// Save List of Credential Guid to external source
+        /// </summary>
+        /// <param name="credentialsToUpdate"></param>
+        public void UpdateGFCredential(IEnumerable<Guid> credentialsToUpdate)
+        {
 
+            foreach (var credential in credentialsToUpdate)
+            {
+                var command = new UpdateGrandfatherMOCPrintDateCommand()
+                {
+                    CredentialId = credential,
+                    GrandfatherMOCPrintDate = DateTime.Now,
+                    ModifiedBy = "PrintGrandfatheredCertificate"
+                };
+
+                var result = (UpdateGrandfatherMOCPrintDateCommandResult)CredentialService.Handle(command);
+
+                if (result.Succeeded)
+                    Logger.Debug($"[PBI:87085] Successfully Updated GrandfatherMOCPrintDate field in credential:'{credential}'");
+                else if (result.Status == CommandStatus.Rejected)
+                    Log.Error($"UpdateGFCredential's call to Handle(UpdateGrandfatherMOCPrintDateCommand) failed with the following error:'{result.Message}'");
+
+            }
+
+        }
 
         /// <summary>
         /// TryUpdateLookBackDatesInfo
@@ -779,11 +867,7 @@ namespace Abim.Platform.Program.App.Services.Impl
             else
                 return "";
         }
-        /// <summary>
-        /// IsOnHoldCMPRegistration
-        /// </summary>
-        /// <param name="registration"></param>
-        /// <returns></returns>
+
         public bool IsOnHoldCMPRegistration(RegistrationData registration)
         {
             return registration != null

@@ -69,18 +69,18 @@ namespace Abim.Platform.Program.App.HangFireJobs
                 if (recordsToProcess.HasValue && recordsToProcess > 0)
                     expiringWindows = expiringWindows.Take(recordsToProcess.Value);
 
-                WindowsIntervalType? lookbackWindowType;
+                WindowsIntervalType? lookbackWindowType = null;
 
                 foreach (LookBackDatesInfo lookBackDatesInfo in expiringWindows)
                 {
                     // find what window we should re-calculate
-                    if ((lookBackDatesInfo.Lookback5YearEndDate?.Date <= eventDate.Value.Date &&
-                        lookBackDatesInfo.Lookback2YearEndDate?.Date <= eventDate.Value.Date) ||
+                    if ((lookBackDatesInfo.Lookback5YearEndDate?.Date <= eventDate?.Date &&
+                        lookBackDatesInfo.Lookback2YearEndDate?.Date <= eventDate?.Date) ||
                         (!lookBackDatesInfo.Lookback5YearEndDate.HasValue || !lookBackDatesInfo.Lookback2YearEndDate.HasValue))
                         lookbackWindowType = null;
-                    else if (lookBackDatesInfo.Lookback5YearEndDate?.Date <= eventDate.Value.Date)
+                    else if (lookBackDatesInfo.Lookback5YearEndDate?.Date <= eventDate?.Date)
                         lookbackWindowType = WindowsIntervalType.FiveYearLookBack;
-                    else if (lookBackDatesInfo.Lookback2YearEndDate?.Date <= eventDate.Value.Date)
+                    else if (lookBackDatesInfo.Lookback2YearEndDate?.Date <= eventDate?.Date)
                         lookbackWindowType = WindowsIntervalType.TwoYearLookBack;
                     else
                         lookbackWindowType = null;

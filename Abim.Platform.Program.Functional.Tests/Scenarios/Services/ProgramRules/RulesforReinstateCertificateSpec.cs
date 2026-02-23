@@ -8,16 +8,14 @@ using Abim.Platform.Product.Resources.Constants;
 using Abim.Platform.Product.Resources.Enums;
 using Abim.Platform.Program.App.Domain;
 using Abim.Platform.Program.App.Services;
-using Abim.Platform.Program.App.Services.CommandResults;
 using Abim.Platform.Program.App.Services.Commands;
 using Abim.Platform.Program.App.Services.Impl;
 using Abim.Platform.Program.Core.Identity;
-using Abim.Platform.Program.Relational.Validation;
 using Abim.Platform.Program.Resources;
 using Abim.Platform.Program.Testing.Setup.DataBuilders;
 using Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest.Base;
-using Abim.Platform.Program.Tests.Setup.ResourceBuilders;
 using Abim.Platform.Program.Tests.Setup.Responses;
+using Abim.Platform.Program.WebApi.Testing.Setup;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -44,20 +42,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         public void ReinstateCertificate_Success_For_TimeLimited_Issuance()
         {
             new ReinstateCertificateSuccess(DurationType.Timelimited).BDDfy();
-        }
-
-        [TestCase]
-        [WorkItem(254149)]
-        public void ReinstateCertificate_Success_ForExpiredMbmIssuance_SelectedToMaintain_SetToTrue()
-        {
-            new ReinstateCertificate_ForExpiredMbmIssuance_SelectedToMaintain_SetToInputValueSpec(true).BDDfy();
-        }
-
-        [TestCase]
-        [WorkItem(254149)]
-        public void ReinstateCertificate_Success_ForExpiredMbmIssuance_SelectedToMaintain_SetToFalse()
-        {
-            new ReinstateCertificate_ForExpiredMbmIssuance_SelectedToMaintain_SetToInputValueSpec(false).BDDfy();
         }
 
         [TestCase]
@@ -397,161 +381,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
                 .Verify(o => o.Handle(It.Is<UpdateCredentialFromObjectCommand>(
                     c => c.SetGracePeriod == false && 
                     c.ReistateCertificate==true)), Times.Once());
-        }
-    }
-
-
-    /// <summary>
-    /// The ReinstateCertificateSuccess
-    /// </summary>
-    public class ReinstateCertificate_ForExpiredMbmIssuance_SelectedToMaintain_SetToInputValueSpec : ProgramRulesServiceScenario
-    {
-        private bool _selectedToMaintain;
-
-        public ReinstateCertificate_ForExpiredMbmIssuance_SelectedToMaintain_SetToInputValueSpec(bool selectedToMaintain)
-        {
-            _selectedToMaintain = selectedToMaintain;
-        }
-
-        protected DateTime LookbackDate { get; set; }
-        //protected Guid CertificationId { get; set; }
-        protected Credential Credential { get; set; }
-        protected ProgramRulesService ProgramRulesService { get; set; }
-
-        /// <summary>
-        /// Primary setup
-        /// </summary>
-        protected override void PreSetup()
-        {
-            Log = new Mock<ILogger>();
-
-            IssuanceDataBuilder = new IssuanceDataBuilder();
-            SourceDataBuilder = new SourceDataBuilder();
-            
-            //****  staging data values  ++++++++++++++++++++++++++++++++++++
-            FirstIssuanceDate = new DateTime(DateTime.Now.Year - 3, 8, 3);
-            EventDate = new DateTime(DateTime.Now.Year, 9, 1);
-            ProcessingDate = new DateTime(DateTime.Now.Year + 1, 02, 02);
-            LookbackDate = new DateTime(DateTime.Now.Year, 12, 31);
-
-            // *********  creating domain data  *********
-            Source source = SourceDataBuilder
-                         .With(a => a.Code = "ABIM")
-                         .Build();
-
-            Certification certification = (new CertificationDataBuilder(source))
-                                            .Build();
-
-            Issuance issuance = IssuanceDataBuilder
-                                .With(a => a.Source = source)
-                                .With(b => b.IssuanceStatus = IssuanceStatusType.Expired)
-                                .With(b => b.Duration = DurationType.Continuous)
-                                .With(b => b.MaintenanceRequirement = MaintenanceRequirementType.Required)
-                                .With(b => b.ExpirationDate = LookbackDate) 
-                                .With(b => b.MaintenanceStatus = MaintenanceStatusType.NotMaintained)
-                                .Build();
-
-            Credential = (new CredentialDataBuilder(certification))
-                        .With(f => f.LookbackDate = LookbackDate) 
-                        .With(a => a.SelectedToMaintain = _selectedToMaintain) 
-                        .With(b=>b.AssessmentMet=true)
-                        .With(c=>c.AssessmentMetDate= FirstIssuanceDate)
-                        .Build();
-
-            Credential.AddIssuance(issuance);
-
-
-            ActivityFullCollectionResource = new ActivityFullCollectionResource();
-
-            var activity = 
-                new ActivityResourceBuilder ()
-                    .WithTotalMOCPoints(100)
-                    .WithCompletedDate(DateTime.Now.AddDays(-10))
-                    .WithActivityResult(ActivityResultType.Pass)
-                    .Build();
-
-            ActivityFullCollectionResource.Data = new List<ActivityResource>(1) { activity };
-        }
-
-        /// <summary>
-        /// Secondary setup (requiring the Container)
-        /// </summary>
-        protected override void PostSetup()
-        {
-            ProgramRulesService = Container.GetInstance<ProgramRulesService>();
-
-            //// ++++++++++++ Credential Service ++++++++++++
-            My<ICredentialService>().Setup(p => p.GetFirstIssuanceDate(It.IsAny<Guid>()))
-                  .Returns(FirstIssuanceDate);
-
-            My<ICredentialService>().Setup(p => p.Handle(It.IsAny<ReissueCommand>()))
-                    .Returns(new ReissueCommandResult(CommandStatus.Accepted, null, null));
-            
-            // ++++++++++++ ProductInterservice ++++++++++++
-            My<IProductInterservice>()
-                .Setup(p => p.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                .Returns(Task.FromResult(ActivityFullCollectionResource));
-
-            // ++++++++++++ RegistrationInterservice ++++++++++++
-            var registrationsMock = new UserRegistrationsAndCMPRegistrationsResource();
-
-            registrationsMock.Registrations = new List<RegistrationResource>(1);
-            registrationsMock.CMPRegistrations = new List<CMPRegistrationResource>(0);
-
-            registrationsMock.Registrations.Add(new RegistrationResource()
-            {
-                Result = ExamResultType.Fail.ToString(),
-                ExamType = new RegistrationEnumValueResponseResource<ExamType>(ExamType.Moc),
-                MemberId = new Guid(),
-                CertificationId = new Guid(),
-                Seats = new List<SeatRegistrationSummaryResource>() { new SeatRegistrationSummaryResource() { SeatDate = EventDate } }
-            });
-
-            // ***  AccessTokenServiceMock ---
-            My<IAccessTokenService>()
-               .Setup(o => o.GetAccessToken())
-               .Returns("--token--");
-
-            // ++++++++++++ Log ++++++++++++
-            ProgramRulesService.Log = Log.Object;
-            LogTest.Watch(Log);
-
-        }
-
-        public void WhenICallRunCorrectiveAction()
-        {
-            try
-            {
-                Result = ProgramRulesService.RunCorrectiveAction(
-                                credentialsIn: new List<Credential>() { Credential },
-                                memberId: new Guid(),
-                                eventDate: EventDate,
-                                processingDate: ProcessingDate).Result;
-            }
-            catch (Exception ex)
-            {
-                ExceptionCaught = ex;
-            }
-        }
-
-        public void ThenNoExceptionShouldHaveBeenThrown()
-        {
-            ExceptionCaught.Should().BeNull();
-        }
-
-        public void ThenResultShouldBeTrue()
-        {
-            Result.Should().Be(true);
-        }
-
-        public void AndThenHandleCredentialShouldBeCorrect()
-        {
-            if (_selectedToMaintain)
-                My<ICredentialService>()
-                    .Verify(o => o.Handle(It.IsAny<ReissueCommand>()), Times.Once());
-            else
-                My<ICredentialService>()
-                   .Verify(o => o.Handle(It.IsAny<ReissueCommand>()), Times.Never());
         }
     }
 

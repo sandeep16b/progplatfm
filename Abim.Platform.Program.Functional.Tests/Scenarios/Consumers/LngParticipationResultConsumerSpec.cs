@@ -66,7 +66,7 @@ namespace Abim.Platform.Program.Testing.Scenarios.Consumers
 
                 ConsumerFactoryMethod = () => new LngParticipationResultConsumer(CredentialService.Object);
 
-                Consumer = Harness.Consumer(ConsumerFactoryMethod);
+                Consumer = Harness.Consumer<LngParticipationResultConsumer>(ConsumerFactoryMethod);
 
                 Handler = Harness.Handler<ILngParticipationResultEvent>();
             }
@@ -161,7 +161,7 @@ namespace Abim.Platform.Program.Testing.Scenarios.Consumers
 
                 ConsumerFactoryMethod = () => new LngParticipationResultConsumer(CredentialService.Object);
 
-                Consumer = Harness.Consumer(ConsumerFactoryMethod);
+                Consumer = Harness.Consumer<LngParticipationResultConsumer>(ConsumerFactoryMethod);
 
                 Handler = Harness.Handler<ILngParticipationResultEvent>();
             }

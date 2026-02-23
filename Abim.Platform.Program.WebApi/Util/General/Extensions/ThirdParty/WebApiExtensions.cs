@@ -32,7 +32,7 @@ namespace Abim.Platform.Program.WebApi.Objects.Extensions
             if(message.Properties.ContainsKey("body"))
             {
                 var body = message.Properties["body"];
-                if((string)body == string.Empty) return null;
+                if(body == string.Empty) return null;
                 return null;
             }
             
@@ -40,7 +40,7 @@ namespace Abim.Platform.Program.WebApi.Objects.Extensions
             {
                 if(HttpContext.Current.Request.InputStream.CanSeek)
                     HttpContext.Current.Request.InputStream.Seek(0, System.IO.SeekOrigin.Begin);
-                string content;
+                string content = null;
                 using(var reader = new System.IO.StreamReader(HttpContext.Current.Request.InputStream))
                 {
                     content = reader.ReadToEnd();
@@ -237,7 +237,7 @@ namespace Abim.Platform.Program.WebApi.Objects.Extensions
                 lines.Add("\t\t\t{");
                 lines.Add("\t\t\t\tName = " + constName + ",");
                 lines.Add("\t\t\t\tHref = Url.Link(" + constName + ", null),");
-                lines.Add("\t\t\t\tMethod = HttpVerbs." + linkItem.Item1.Method + ".ToString().ToUpper()");
+                lines.Add("\t\t\t\tMethod = HttpVerbs." + linkItem.Item1.Method.ToString() + ".ToString().ToUpper()");
                 lines.Add("\t\t\t});");
             }
             if(warningEndpoints.Any())

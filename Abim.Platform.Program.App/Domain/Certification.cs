@@ -3,7 +3,6 @@ using Abim.Platform.Program.Relational.Domain.Types;
 using Abim.Platform.Program.Relational.Validation;
 using Abim.Platform.Program.Resources;
 using FluentValidation;
-using System;
 
 namespace Abim.Platform.Program.App.Domain
 {
@@ -15,7 +14,8 @@ namespace Abim.Platform.Program.App.Domain
     /// A certification can have many issuances over the course of its lifetime.
     /// </remarks>
     public class Certification :
-        AggregateRoot<Certification> 
+        AggregateRoot<Certification>,
+        IDomainValidationHandler<Certification>
     {
         #region Properties
 
@@ -75,15 +75,6 @@ namespace Abim.Platform.Program.App.Domain
         /// </value>
         public virtual Source Source { get; protected internal set; }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether this instance is certificate retired.
-        /// </summary>
-        public virtual bool IsCertificateRetired { get; set; }
-
-        /// <summary>
-        /// Gets or sets the certificate retired date.
-        /// </summary>
-        public virtual DateTime? CertificateRetiredDate { get; set; }
         #endregion
 
         #region Computed Properties
@@ -95,7 +86,7 @@ namespace Abim.Platform.Program.App.Domain
         {
             get
             {
-              return (Code == "IM");
+              return (Code == "IM") ? true : false;
             }
         }
 
@@ -106,7 +97,7 @@ namespace Abim.Platform.Program.App.Domain
         {
             get
             {
-                return Type.Equals(CertificationType.Subspecialty);
+                return (Type.Equals(CertificationType.Subspecialty)) ? true : false;
             }
         }
 
@@ -117,7 +108,7 @@ namespace Abim.Platform.Program.App.Domain
         {
             get
             {
-                return (Code == "ACHD");
+                return (Code == "ACHD") ? true : false;
             }
         }
 
@@ -128,7 +119,7 @@ namespace Abim.Platform.Program.App.Domain
         {
             get
             {
-                return (BaseCertification != null);
+                return (BaseCertification != null) ? true : false;
             }
         }
 

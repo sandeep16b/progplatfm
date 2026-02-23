@@ -3,6 +3,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using Abim.Platform.Program.Relational.Domain;
 using Abim.Platform.Program.Relational.Domain.Types;
+using Abim.Platform.Program.Relational.Validation;
 
 
 namespace Abim.Platform.Program.App.Domain
@@ -10,7 +11,8 @@ namespace Abim.Platform.Program.App.Domain
     /// <summary>
     /// LookbackLog Class.
     /// </summary>
-    public class LookbackLog : AggregateRoot<LookbackLog>
+    public class LookbackLog : AggregateRoot<LookbackLog>,
+        IDomainValidationHandler<LookbackLog>
     {
         #region Propeties
         /// <summary>

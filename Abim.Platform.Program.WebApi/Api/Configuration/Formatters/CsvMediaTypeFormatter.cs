@@ -154,7 +154,7 @@ namespace Abim.Platform.Program.WebApi.Formatters
             var columnNames = new Dictionary<string, string>();
             var type = typeof(CsvColumnAttribute);
 
-            foreach (var propertyInfo in t.GetProperties().Where(propertyInfo => Fields.IndexOf(propertyInfo.Name, StringComparison.OrdinalIgnoreCase) >= 0 || Fields == "*"))
+            foreach (var propertyInfo in t.GetProperties().Where(propertyInfo => propertyInfo != null && Fields.IndexOf(propertyInfo.Name, StringComparison.OrdinalIgnoreCase) >= 0 || Fields == "*"))
             {
 
                 if(Attribute.IsDefined(propertyInfo, type))

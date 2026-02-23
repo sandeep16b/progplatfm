@@ -67,7 +67,12 @@ namespace Abim.Platform.Program.Jobs.Config
                 {
                     ec.Consumer<CorrectiveActionConsumer>(container);
                 });
-                
+
+                busConfigurator.ReceiveEndpoint(host, rabbitMqFPHMAttestInitialQueue, ec =>
+                {
+                    ec.Consumer<FPHMAttestInitialEventConsumer>(container);
+                });
+
                 busConfigurator.ReceiveEndpoint(host, rabbitMqExamResultRelayQueue, ec =>
                 {
                     ec.Consumer<ExamResultRelayConsumer>(container);

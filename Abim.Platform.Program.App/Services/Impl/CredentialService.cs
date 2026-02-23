@@ -6,7 +6,6 @@ using Abim.Platform.Program.App.DTOs;
 using Abim.Platform.Program.App.Services.CommandResults;
 using Abim.Platform.Program.App.Services.Commands;
 using Abim.Platform.Program.App.Util;
-using ServiceBus.Events;
 using Abim.Platform.Program.Relational;
 using Abim.Platform.Program.Relational.Services;
 using Abim.Platform.Program.Relational.Services.Impl;
@@ -286,11 +285,6 @@ namespace Abim.Platform.Program.App.Services.Impl
             return Repository.GetNonAbimIssuanceCount();
         }
 
-        /// <summary>
-        /// GetCurrentIssuance
-        /// </summary>
-        /// <param name="credential"></param> 
-        /// <returns></returns>
         public Issuance GetCurrentIssuance(Credential credential)
         {
             return credential.Issuances.OrderByDescending(i => i.IssuanceDate).First();
@@ -331,7 +325,7 @@ namespace Abim.Platform.Program.App.Services.Impl
         /// <returns>ICommandResult</returns>
         public async Task<UpdateLngAssessmentDueDateCommandResult> Handle(UpdateLngAssessmentDueDateCommand command)
         {
-            Log.Info($"Start Handle UpdateLngAssessmentDueDateCommand for Credential:'{command.CredentialId}' with Cmd Args:'{command.Dump()}'");
+            Log.Debug("Command Args for UpdateLngAssessmentDueDateCommand: {0}", command.Dump());
             try
             {
                 var cmdValidation = ((ICommandValidationHandler<UpdateLngAssessmentDueDateCommand>)this).Validate(command);
@@ -363,10 +357,10 @@ namespace Abim.Platform.Program.App.Services.Impl
                */
 
                 if (command.MetParticipationStatus.HasValue && command.MetParticipationStatus.Value &&
-                   // Rule 63.1 don't have to be on LKA path, can be any. For example, they register for MOC exam before we get participation results for the year.
+                   credential.Pathway == Resources.PathwayType.LNG &&
                    !command.IsSummativeDecisionYear &&
-                   ((credential.IsCosponsored) || // updated rule 63.2 , don't have to be in due year for co-sponsored diplomates
-                   (!credential.IsCosponsored && credential.IsNotLapsedDueToAssessment))) // NoneCosponsored:  is not lapsed due to Assessment requirment : PBI 287070 : (3.1) Update Program Rule 63 – LKA Assessment Due Date
+                   ((credential.IsCosponsored && credential.ExamDueDate?.Year == command.Year) || // in asssessment due year for Cosponsored cert
+                   (!credential.IsCosponsored && credential.IsNotLapsedCredential))) // is not lapsed for non-CoSponsored and NoneCosponsored
                 {
 
                     credential.ExamDueDate = new DateTime(command.Year + 1, 12, 31);
@@ -375,21 +369,18 @@ namespace Abim.Platform.Program.App.Services.Impl
 
                     // Rule 64: Longitudinal Assessment Requirement Met : The certificate is not lapsed and meets their annual longitudinal participation requirement and is not in summative decision year  OR
                     if (!credential.AssessmentMet)
-                    {
                         credential.AssessmentMet = true;
-                        credential.AssessmentMetDate = new DateTime(command.Year, 12, 31); // bug 246471 : New Issuance not being created after KickOffLkaParticipationMet Job
-                    }
 
                     credential.SetModified($"{command.UserName}:MetParticipationIn{command.Year}");
 
                     credentialWasUpdated = true;
 
-                    Log.Info($"Credential='{credential.Id}' meets  participation requirements to increment ExamDueDate to {credential.ExamDueDate.Value.Year} in Handle UpdateLngAssessmentDueDateCommand");
+                    Log.Info($"Credential='{credential.Id}' meets  participation requirements to increment ExamDueDate to {credential.ExamDueDate.Value.Year}");
 
                 }
                 // if pass summative decision then incremenent by one for both CoSponsored and NoneCosponsored regardless of cred status (Lapsed or not)
                 else if (command.PassSummativeDecision.HasValue && command.PassSummativeDecision.Value &&
-                         // Rule 63.1 don't have to be on LKA path, can be any. For example, they register for MOC exam before we get Summative Decision results for the year.
+                         credential.Pathway == Resources.PathwayType.LNG &&
                          command.IsSummativeDecisionYear)
                 {
                     credential.ExamDueDate = new DateTime(command.Year + 1, 12, 31);
@@ -410,12 +401,11 @@ namespace Abim.Platform.Program.App.Services.Impl
 
                     credentialWasUpdated = true;
 
-                    Log.Info($"Credential='{credential.Id}' pass summative decision and ExamDueDate was incremented to {credential.ExamDueDate.Value.Year} in Handle UpdateLngAssessmentDueDateCommand");
+                    Log.Info($"Credential='{credential.Id}' pass summative decision and ExamDueDate was incremented to {credential.ExamDueDate.Value.Year}");
                 }
                 else
                 {
-                    Log.Info($"Credential='{credential.Id}' didn't meet participation or summative decision requirement or was updated before, no change to credential in in Handle UpdateLngAssessmentDueDateCommand"); // nothing here 
-
+                    Log.Info($"Credential='{credential.Id}' didn't meet participation or summative decision requirement, no change to credential"); // nothing here 
                 }
 
 
@@ -438,14 +428,9 @@ namespace Abim.Platform.Program.App.Services.Impl
                 return cmdValidation.ToCommandResult<UpdateLngAssessmentDueDateCommandResult, Credential>(credential);
 
             }
-            catch (Exception ex)
-            {
-                Logger.Error(ex);
-                throw;
-            }
             finally
             {
-                Log.Trace($"Returning from Handle UpdateLngAssessmentDueDateCommand for Credential:'{command.CredentialId}'");
+                Log.Trace("Returning from Handle for UpdateLngAssessmentDueDateCommand");
             }
         }
 
@@ -612,7 +597,6 @@ namespace Abim.Platform.Program.App.Services.Impl
             Log.Trace("Started Handle for DeselectCertificateCommand");
             Log.Debug("Command Args for DeselectCertificateCommand: {0}", command.Dump());
             AbimValidationResult validationResult = null;
-            bool publishCMPUnEnrolledEvent = false;
 
             try
             {
@@ -632,9 +616,9 @@ namespace Abim.Platform.Program.App.Services.Impl
                 if (!credential.DeselectionElected)
                     throw new ApplicationException($"Credential {command.CredentialId} has a latest issuance not marked for deselection.");
 
-                //If already deselected, throw Warning
+                //If already deselected, throw exception
                 if (credential.DeselectionProcessed)
-                    return Warning<DeselectCertificateCommandResult>($"Credential {command.CredentialId} has already been processed for deselection.", validationResult);
+                    throw new ApplicationException($"Credential {command.CredentialId} has already been processed for deselection.");
 
                 /*
                 If Credential is IM or FPHM, we'll know which one was the 
@@ -645,32 +629,9 @@ namespace Abim.Platform.Program.App.Services.Impl
                 //Update credential
                 credential.Deselect(command.Username, command.ExpiredDate);
 
-                // Pbi 322411 : Unenroll from CMP during the deactivation process
-                if (credential.IsInCMP)
-                {
-                    credential.SetUnEnrollInCMP(modifiedBy: command.Username + "_KickOutFromCmp",
-                                                priviousPathway: Resources.PathwayType.MOC, // always MOC since no more KCI
-                                                UnEnrollmentDate: DateTime.Now);
-
-                    publishCMPUnEnrolledEvent = true;
-                }
-
                 //Save to the database
                 var repoResult = TryUpdate<DeselectCertificateCommandResult>(credential, validationResult, command.Username);
-                
                 if (repoResult != null) return repoResult;
-
-                // successfully updated the credential and if we unelled then we need to publish the event
-                if (publishCMPUnEnrolledEvent)
-                {
-                    Task.Run(async () =>
-                    {
-                        // It would voluntary (voluntary = true) since diplomate is making the choice to no longer maintain certification.  
-                        await Task.Run(() => PublishCMPUnEnrolledEvent(credential: credential,
-                                                                        UnEnrollmentDate: DateTime.Now,
-                                                                        Voluntary: true));
-                    });
-                }
 
                 return validationResult.ToCommandResult<DeselectCertificateCommandResult, Credential>(credential);
             }
@@ -720,13 +681,13 @@ namespace Abim.Platform.Program.App.Services.Impl
                 if (!credential.HasIssuances)
                     throw new ApplicationException($"Credential {command.CredentialId} is not eligible for to be marked for deselection because it has no issuances.");
 
-                //If already marked for deselection, throw Warning
+                //If already marked for deselection, throw an exception
                 if (credential.DeselectionElected)
                 {
                     if (credential.DeselectionProcessed)
-                        return Warning<MarkCertificateForDeselectCommandResult>($"Credential {credential.ExternalId} was already marked for deselection, and processed on {credential.DeselectionProcessedDate}.", validationResult);
+                        throw new ApplicationException($"Credential {credential.ExternalId} was already marked for deselection, and processed on {credential.DeselectionProcessedDate}.");
                     else
-                        return Warning<MarkCertificateForDeselectCommandResult>($"Credential {credential.ExternalId} has already marked for deselection.", validationResult);
+                        throw new ApplicationException($"Credential {credential.ExternalId} has already marked for deselection.");
                 }
 
                 var newestIssuance = credential.NewestIssuance;
@@ -953,14 +914,14 @@ namespace Abim.Platform.Program.App.Services.Impl
                 //Publish CertificateDeselectedEvents for each deselected credential
                 foreach (var result in deselectCommandResults)
                 {
-                    Task.Run(() => PublishCertDeselected(result.Data)).Wait();
+                    Task.Run(() => PublishCertificateDeselectedEvent(result.Data)).Wait();
                 }
 
                 //PBI 187665
-                //Publish CertSelected for each selected credential
+                //Publish CertificateSelectedEvent for each selected credential
                 foreach (var result in selectCommandResults)
                 {
-                    Task.Run(() => PublishCertSelected(result.Data)).Wait();
+                    Task.Run(() => PublishCertificateSelectedEvent(result.Data)).Wait();
                 }
 
                 //If we've made it this far, everything was successful. :)
@@ -1085,13 +1046,10 @@ namespace Abim.Platform.Program.App.Services.Impl
                 //older code: var errorResult = TryUpdate<ExpireAndReissueCommandResult>(credential, cmdValidation, command.CreatedBy);
                 var errorResult = Repository.UpdateCredential(credential, command.CreatedBy);
 
-                Log.Info($"Updated credentials with AbimValidationResult: {errorResult?.Dump()}");
-
                 if (errorResult.Succeeded)
                 {
-                    Log.Info($"Calling PublishIssueChangedEvent for memberId: {credential?.MemberId}");
                     // PBI 95348: MOCP - Earned a new must-be-maintained MOC certificate
-                    Task.Run(() => PublishIssueChangedEvent(credential, TriggeredCommunication.EarnedMBMCertLetter, credential.MemberId));
+                    Task.Run(() => PublishIssueChangedEvent(credential, TriggeredCommunication.EarnedMBMCertLetter, command.UserInfo.ProfileId));
                 }
                 else
                 {
@@ -1156,10 +1114,8 @@ namespace Abim.Platform.Program.App.Services.Impl
 
                 //save to the database
                 var errorResult = TryUpdate<ReissueCommandResult>(credential, cmdValidation, command.CreatedBy);
-
                 if (errorResult != null) return errorResult;
 
-                Log.Info($"Calling PublishIssueChangedEvent for memberId: {credential?.MemberId}");
                 Task.Run(() => PublishIssueChangedEvent(credential));
 
                 return cmdValidation.ToCommandResult<ReissueCommandResult, Credential>(credential);
@@ -1274,6 +1230,107 @@ namespace Abim.Platform.Program.App.Services.Impl
         }
 
         #endregion
+
+        #region IssueFPHMCommand
+
+        /// <summary>
+        /// Handles an IssueFPHMCommand command.
+        /// </summary>
+        /// <param name="command"></param>
+        public ICommandResult Handle(IssueFPHMCommand command)
+        {
+            Log.Trace("Started Handle for IssueFPHMCommand");
+            Log.Debug("Command Args for IssueFPHMCommand: {0}", command.Dump());
+            try
+            {
+                var cmdValidation = ((ICommandValidationHandler<IssueFPHMCommand>)this).Validate(command);
+
+                if (!cmdValidation.Succeeded) return Warning<IssueFPHMCommandResult>($"Validation Failed: '{cmdValidation.Results.Dump()}'", cmdValidation);
+
+                //fetch the certification for FPHM ( "HOSP" )
+                var credential = Repository.Load(command.CredentialId);
+
+                var source = SourceService.GetAbimSource();
+                if (source == null) return Warning<ReissueCommandResult>($"Default {typeof(Source).Name} of code 'ABIM' not found", cmdValidation);
+
+                //apply the changes
+                credential.Reissue(source, command.IssuanceDate, command.ScheduledUpdate, command.CreatedBy, command.MaintenanceStatus);
+
+                credential.ReAttestationDueDate = command.ReAttestationDueDate;
+
+                //PSR 192720 - FPHM credential should have its SelectedToMaintain value set to true
+                credential.SelectedToMaintain = true;
+
+                //save to the database
+                var errorResult = TryUpdate<IssueFPHMCommandResult>(credential, cmdValidation, command.CreatedBy);
+                if (errorResult != null) return errorResult;
+
+                Task.Run(() => PublishIssueChangedEvent(credential));
+
+                UpdateIMCredentialSelectedToMaintain(credential.MemberId, command);
+
+                return cmdValidation.ToCommandResult<IssueFPHMCommandResult, Credential>(credential);
+            }
+            finally
+            {
+                Log.Trace("Returning from Handle for IssueFPHMCommand");
+            }
+
+        }
+        /// <summary>
+        /// PSR 140302 which is for PBI 93299 that originally mentions when someone earns their FPHM cert
+        /// we are supposed to flop SelectedToMaintain on their IM cert to false.
+        /// </summary>
+        /// <param name="memberId"></param>
+        /// <param name="command"></param>
+        private void UpdateIMCredentialSelectedToMaintain(Guid memberId, IssueFPHMCommand command)
+        {
+            Log.Trace("Entering UpdateIMCredentialSelectedToMaintain");
+
+            var imCred = GetIMCredentialByMember(memberId);
+
+            //If there is no IM credential just log at the info level and return
+            if (imCred == null)
+            {
+                Log.Debug("UpdateIMCredentialSelectedToMaintain - No IM Credential Found for memberId {0} . IssueFPHMCommand: {1}", memberId, command.Dump());
+                Log.Trace("Leaving UpdateIMCredentialSelectedToMaintain");
+                return;
+            }
+
+            //set the IM Cred SelectedToMaintain to false
+            imCred.SetSelectedToMaintain(false, command.CreatedBy);
+
+            var isDeactivatedNow = DeactivateIMCredential(imCred, command.CreatedBy);
+
+            var cmdValidation = new AbimValidationResult();
+            //Issue update to the credential
+            var errorResult = TryUpdate<UpdateSelectedToMaintainCommandResult>(imCred, cmdValidation, command.CreatedBy);
+            if (errorResult != null)
+            {
+                Log.Error("UpdateIMCredentialSelectedToMaintain - Unable to update IM Credential {0} . Error result: {1}", imCred.Dump(), errorResult.Dump());
+                Log.Trace("Leaving UpdateIMCredentialSelectedToMaintain");
+                return;
+            }
+
+            if (isDeactivatedNow)
+            {
+                Log.Trace("Publishing IMCertificate isssuance changed event.");
+                // Publish IM Issuance changed Event to the bus, as it's required for billing calculation by Finance Platform.
+                Task.Run(() => PublishIssueChangedEvent(imCred));
+            }
+            Log.Trace("Leaving UpdateIMCredentialSelectedToMaintain");
+
+        }
+
+        /// <summary>
+        /// Validates the command
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public AbimValidationResult Validate(IssueFPHMCommand command)
+        {
+            return base.Validate<IssueFPHMCommand>(command);
+        }
 
         #endregion
 
@@ -1473,11 +1530,6 @@ namespace Abim.Platform.Program.App.Services.Impl
 
                 return cmdValidation.ToCommandResult<UpdatePathwayCommandResult, Credential>(credential);
             }
-            catch (Exception ex)
-            {
-                Logger.Error(ex);
-                throw;
-            }
             finally
             {
                 Log.Trace("Returning from Handle for UpdatePathwayCommand");
@@ -1550,6 +1602,46 @@ namespace Abim.Platform.Program.App.Services.Impl
 
         #endregion
 
+        #region UpdateGrandfatherMOCPrintDateCommand
+
+        /// <summary>
+        /// Handles an UpdateGrandfatherMOCPrintDateCommandResult command
+        /// </summary>
+        /// <param name="command">The command</param>
+        /// <returns>ICommandResult</returns>
+        public ICommandResult Handle(UpdateGrandfatherMOCPrintDateCommand command)
+        {
+            Log.Trace("Started Handle for UpdateGrandfatherMOCPrintDateCommand");
+            Log.Debug("Command Args for UpdateGrandfatherMOCPrintDateCommand: {0}", command.Dump());
+
+            var cmdValidation = ((ICommandValidationHandler<UpdateGrandfatherMOCPrintDateCommand>)this).Validate(command);
+
+            if (!cmdValidation.Succeeded) return Warning<UpdateGrandfatherMOCPrintDateCommandResult>($"Validation Failed: '{cmdValidation.Results.Dump()}'", cmdValidation);
+
+            Credential credential = Load(command.CredentialId);
+
+            if (credential == null)
+                return Warning<UpdateGrandfatherMOCPrintDateCommandResult>(ErrorMessages.NotFound("Credential", command.CredentialId), cmdValidation);
+
+            // apply changes to credential domain
+            credential.SetGrandfatherMOCPrintDate(command.GrandfatherMOCPrintDate, command.ModifiedBy);
+
+            //save to the database
+            return Update<UpdateGrandfatherMOCPrintDateCommandResult>(credential, cmdValidation, command.ModifiedBy);
+
+        }
+
+        /// <summary>
+        /// Validate a UpdateGrandfatherMOCPrintDateCommand command
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public AbimValidationResult Validate(UpdateGrandfatherMOCPrintDateCommand command)
+        {
+            return Validate<UpdateGrandfatherMOCPrintDateCommand>(command);
+        }
+
+        #endregion
 
         #region Publish (Issue, ICardCertCancelToMaintain) ChangedEvent
         /// <summary>
@@ -1559,28 +1651,23 @@ namespace Abim.Platform.Program.App.Services.Impl
         /// <returns></returns>
         internal async Task PublishIssueChangedEvent(Credential credential)
         {
-            Log.Info($"Called PublishIssueChangedEvent with Issuances {credential.Issuances?.Dump()}");
+
             var updatedIssuances = credential.Issuances.Where(a => a.HasChanged || a.HasAdded);
 
             foreach (var issuance in updatedIssuances)
             {
-                Log.Info($"Event Publishing with IssuanceDate: {issuance.IssuanceDate} and ExpirationDate: {issuance.ExpirationDate}");
-
-                await Bus.Publish(new IssuanceChanged()
+                await Bus.Publish(new IssuanceChangedEvent()
                 {
-                    MemberId = issuance.Credential.MemberId,
-                    CredentialGuid = credential.ExternalId,
-                    Code = issuance.Credential.Certification.Code,
-                    Status = issuance.IssuanceStatus.ToString(),
-                    Occurrence = issuance.Occurrence.ToString(),
-                    IssuanceDate = issuance.IssuanceDate,
+                    CertificationCode = issuance.Credential.Certification.Code,
+                    CertificationGuid = issuance.Credential.Certification.ExternalId,
                     ExpirationDate = issuance.ExpirationDate,
-                    New = issuance.HasAdded ? true : false,
-                    Cosponsored = credential.IsCosponsored,
+                    IssuanceDate = issuance.IssuanceDate,
+                    IssuanceStatus = issuance.IssuanceStatus.ToString(),
+                    MemberId = issuance.Credential.MemberId,
+                    IsNew = issuance.HasAdded ? true : false,
+                    Occurrence = issuance.Occurrence.ToString(),
                     ProcessingDate = DateTime.Now
                 });
-
-                Log.Info($"Event Published with IssuanceDate: {issuance.IssuanceDate} and ExpirationDate: {issuance.ExpirationDate}");
             }
         }
 
@@ -1615,84 +1702,39 @@ namespace Abim.Platform.Program.App.Services.Impl
         }
 
         /// <summary>
-        /// Publishes a CertDeselected
+        /// Publishes a CertificateDeselectedEvent
         /// </summary>
         /// <param name="credential">The Credential the Certificate Deselection affects</param>
         /// <returns></returns>
-        internal async Task PublishCertDeselected(Credential credential)
+        internal async Task PublishCertificateDeselectedEvent(Credential credential)
         {
-            var busEvent = new CertDeselected
-            {
-                MemberId = credential.MemberId,
-                CredentialId = credential.ExternalId,
-                CertificationId = credential.Certification.ExternalId,
-                CertificationCode = credential.Certification.Code,
-                Cosponsored = credential.IsCosponsored
-            };
-
-            await Bus.Publish<CertDeselected>(busEvent);
-        }
-
-        /// <summary>
-        /// Publishes a CertSelected
-        /// </summary>
-        /// <param name="credential">The Credential the Certificate Selection affects</param>
-        /// <returns></returns>
-        internal async Task PublishCertSelected(Credential credential)
-        {
-            var busEvent = new CertSelected
-            {
-                MemberId = credential.MemberId,
-                CredentialId = credential.ExternalId,
-                CertificationId = credential.Certification.ExternalId,
-                CertificationCode = credential.Certification.Code,
-                Cosponsored = credential.IsCosponsored,
-                InitialCertificationDate = credential.OldestIssuance.IssuanceDate
-            };
-
-            await Bus.Publish<CertSelected>(busEvent);
-        }
-
-        /// <summary>
-        /// Publishes a CMP Enrolled Event
-        /// </summary>
-        /// <param name="credential">The Credential the Certificate Selection affects</param>
-        /// <param name="EnrollmentDate">The Enrollment Date </param>
-        /// <returns></returns>
-        internal async Task PublishCMPEnrolled(Credential credential, DateTime EnrollmentDate)
-        {
-            var busEvent = new CMPEnrolled
+            var busEvent = new CertificateDeselectedEvent
             {
                 MemberId = credential.MemberId,
                 CredentialGuid = credential.ExternalId,
-                EnrollmentDate = EnrollmentDate,
-                ProcessingDate = DateTime.Now
+                CertificationGuid = credential.Certification.ExternalId
             };
 
-            await Bus.Publish<CMPEnrolled>(busEvent);
+            await Bus.Publish<CertificateDeselectedEvent>(busEvent);
         }
 
         /// <summary>
-        /// Publish a CMP Un Enrolled Event
+        /// Publishes a CertificateSelectedEvent
         /// </summary>
-        /// <param name="credential"></param>
-        /// <param name="UnEnrollmentDate"></param>
-        /// <param name="Voluntary"></param>
+        /// <param name="credential">The Credential the Certificate Selection affects</param>
         /// <returns></returns>
-        internal async Task PublishCMPUnEnrolledEvent(Credential credential, DateTime UnEnrollmentDate, bool Voluntary)
+        internal async Task PublishCertificateSelectedEvent(Credential credential)
         {
-            var busEvent = new CMPUnEnrolled
+            var busEvent = new CertificateSelectedEvent
             {
                 MemberId = credential.MemberId,
                 CredentialGuid = credential.ExternalId,
-                UnEnrollmentDate = UnEnrollmentDate,
-                Voluntary = Voluntary,
-                ProcessingDate = DateTime.Now
+                CertificationGuid = credential.Certification.ExternalId,
+                InitialCertDate = credential.OldestIssuance.IssuanceDate
             };
 
-            await Bus.Publish<CMPUnEnrolled>(busEvent);
+            await Bus.Publish<CertificateSelectedEvent>(busEvent);
         }
-
         #endregion
 
         #region WithdrawCredential
@@ -1756,6 +1798,8 @@ namespace Abim.Platform.Program.App.Services.Impl
         {
             Log.Debug("Command Args for ReinstateCredentialCommand: {0}", command.Dump());
 
+            //AbimValidationResult objValidation = null;
+
             var cmdValidation = ((ICommandValidationHandler<ReinstateCredentialCommand>)this).Validate(command);
 
             if (!cmdValidation.Succeeded)
@@ -1767,13 +1811,12 @@ namespace Abim.Platform.Program.App.Services.Impl
             if (credential == null)
                 return Warning<ReinstateCredentialCommandResult>(ErrorMessages.NotFound("Credential", command.CredentialId), cmdValidation);
 
-            // make sure most recent issuance is Inactive or Revoked or Surrendered or Suspended
-            if (!(credential.NewestIssuance.IssuanceStatus == IssuanceStatusType.Inactive ||
-                    credential.NewestIssuance.IssuanceStatus == IssuanceStatusType.Revoked ||
+            // make sure most recent issuance is Revoked or Surrendered or Surrendered
+            if (!(credential.NewestIssuance.IssuanceStatus == IssuanceStatusType.Revoked ||
                     credential.NewestIssuance.IssuanceStatus == IssuanceStatusType.Surrendered ||
                     credential.NewestIssuance.IssuanceStatus == IssuanceStatusType.Suspended))
             {
-                return Warning<ReinstateCredentialCommandResult>($"CredentialId '{credential.ExternalId}' is NOT in Inactive, Revoked, Surrendered or Suspended status.", cmdValidation);
+                return Warning<ReinstateCredentialCommandResult>($"CredentialId '{credential.ExternalId}' is NOT in Revoked, Surrendered or Suspended status.", cmdValidation);
             }
 
             credential.SetReinstate(command.Username);
@@ -2222,10 +2265,6 @@ namespace Abim.Platform.Program.App.Services.Impl
                 var errorResult = TryUpdate<EnrollInCMPCommandResult>(credential, cmdValidation, command.RequestingUserName);
                 if (errorResult != null) return errorResult;
 
-                // pbi 278052 : (HF after 2.50)Cert Fees for pre-1990 CMP enrollees - team 4 work
-                // *** Enrollment in CMP from the data feed ACC.
-                await Task.Run(() => PublishCMPEnrolled(credential, command.EnrollmentDate));
-
                 return cmdValidation.ToCommandResult<EnrollInCMPCommandResult, Credential>(credential);
             }
             finally
@@ -2290,13 +2329,6 @@ namespace Abim.Platform.Program.App.Services.Impl
                 var errorResult = TryUpdate<UnEnrollInCMPCommandResult>(credential, cmdValidation, command.RequestingUserName);
                 if (errorResult != null) return errorResult;
 
-                // *** scenario 1 : Unenrollment in CMP should be considered voluntary when the status change is due to the data feed from ACC.
-                // *** scenario 2 : It would involuntary (voluntary = false) if the status change is made by ABIM, such as being removed from CMP due to Year End Look Back.
-                bool voluntary = command.RequestingUserName == "KickCMP" ? false : true; // set in KickOutOfCMPIfApplicable() {ProgramRulesServiceYearEndLookback.cs}
-
-                // pbi 278052 : (HF after 2.50)Cert Fees for pre-1990 CMP enrollees - team 4 work
-                await Task.Run(() => PublishCMPUnEnrolledEvent(credential, UnEnrollmentDate: command.UnEnrollmentDate, Voluntary: voluntary));
-
                 return cmdValidation.ToCommandResult<UnEnrollInCMPCommandResult, Credential>(credential);
             }
             finally
@@ -2314,6 +2346,8 @@ namespace Abim.Platform.Program.App.Services.Impl
         {
             return Validate<UnEnrollInCMPCommand>(command);
         }
+
+        #endregion
 
         #endregion
 
@@ -2347,30 +2381,22 @@ namespace Abim.Platform.Program.App.Services.Impl
         private DateTime GetEffectiveDateForCertDeSelect(DateTime submittedDate)
         {
             /*
-            From PBI 187664 - obsolete
+            From PBI 187664
             All deselect requests made between February 1st and January 31st shall 
             be changed on February 1st of the new year.
 
-            From PBI 286279 - Oct 24 2024 
-            All deselect requests made between April 1st and March 31st shall 
-            be changed on April 1st of the new year. 
-
             Example 1 (request made any time during the year): The deselect request 
-            is made on May 10, 2024. The certificate status shall be changed on 
-            April 1, 2025.
+            is made on May 10, 2022. The certificate status shall be changed on 
+            February 1, 2023.
 
             Example 2 (IM with FPHM): The deselect request is made on 
-            November 10, 2025. The certificate status of both IM and FPHM shall be 
-            changed on April 1, 2026.
-
-            Example 3 (request made any time during the year): The deselect request 
-            is made on March 10, 2025. The certificate status shall be changed on 
-            April 1, 2025.
+            November 10, 2023. The certificate status of both IM and FPHM shall be 
+            changed on February 1, 2024.
             */
-            if (submittedDate.Month == 1 || submittedDate.Month == 2 || submittedDate.Month == 3) //If submitted in January, Feb, Or March effective date is 4/1 of the same year
-                return new DateTime(submittedDate.Year, 4, 1);
-            else //If submitted anytime between April 1 and December 31, effective date is 4/1 of the following year
-                return new DateTime(submittedDate.Year + 1, 4, 1);
+            if (submittedDate.Month == 1) //If submitted in January, effective date i 2/1 of the same year
+                return new DateTime(submittedDate.Year, 2, 1);
+            else //If submitted anytime between Feb 1 and December 31, effective date is 2/1 of the following year
+                return new DateTime(submittedDate.Year + 1, 2, 1);
         }
 
         private IList<string> GetCertNamesByCredentialExternalId(Guid memberId, IEnumerable<Guid> credentialIds)

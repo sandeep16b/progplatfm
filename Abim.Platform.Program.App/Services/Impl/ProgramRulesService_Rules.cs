@@ -27,8 +27,8 @@ namespace Abim.Platform.Program.App.Services.Impl
                                                                    DateTime processingDate)
         {
             #region declarations
-            DateTime? BatchProcessingEvent;
-            RuleResults rulesResult;
+            DateTime? BatchProcessingEvent = null;
+            RuleResults rulesResult = null;
             IList<RuleResults> rulesResults = new List<RuleResults>();
 
             Log.Info($"IssueNewCredentialForTLPC_ CredenitalIds:{string.Join(", ", credentials.Select(r => r.Id).ToArray())} on Thread:{Thread.CurrentThread.ManagedThreadId}");
@@ -97,7 +97,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                                                                    DateTime processingDate)
         {
             #region declarations
-            RuleResults rulesResult;
+            RuleResults rulesResult = null;
             IList<RuleResults> rulesResults = new List<RuleResults>();
             Log.Info($"IssueMBMIssuanceForExpiredGF CredenitalIds:{string.Join(", ", credentials.Select(r => r.Id).ToArray())} on Thread:{Thread.CurrentThread.ManagedThreadId}");
             #endregion
@@ -126,7 +126,41 @@ namespace Abim.Platform.Program.App.Services.Impl
 
             return rulesResults;
         }
-      
+
+        /// <summary>
+        /// pbi: 73615 - Issue Initial FPHM MBM certificate
+        /// </summary>
+        /// <param name="credential"></param>
+        /// <param name="memberId"></param>
+        /// <param name="eventDate"></param>
+        /// <param name="processingDate"></param>
+        /// <returns></returns>
+        private RuleResults IssueNewCredentialForFPHM_(Credential credential,
+                                                                   Guid memberId,
+                                                                   DateTime eventDate,
+                                                                   DateTime processingDate)
+        {
+
+            var eventDateList = ComputeEventDateList(eventDate);
+
+            RuleResults rulesResult = new RuleResults(credential.ExternalId, MemberId, eventDate, credential.CredentialCategory, "73615", "NewFP");
+
+            // would contain only one record for all none back-dated events
+            foreach (var evaluationDate in eventDateList)
+            {
+                rulesResult.BeginStep(() => AttestationFPHMInitial(credential, evaluationDate))
+                            .OnMeetStep(() => FiveYearsLookBackFPHM(credential, evaluationDate))
+                            .OnMeetStep(() => ExamFPHM(credential, evaluationDate))
+                            .OnMeetStep(() => MaintenanceStatus(credential, processingDate, false)) // [P031] 2 years lookback Requirements
+                            .MapStepsToCorrectiveActionResults(isLastIteration: evaluationDate == eventDateList.Last());                                                                                              
+
+                if (rulesResult.MeetRuleRequirement)
+                    break;
+            }
+
+            return rulesResult;
+        }
+
         private IList<RuleResults> CorrectiveActionParticipationStatus_(IEnumerable<Credential> credentials,
                                             Guid memberId,
                                             DateTime eventDate,
@@ -247,7 +281,49 @@ namespace Abim.Platform.Program.App.Services.Impl
             return rulesResults;
         }
 
-       
+        /// <summary>
+        /// PBI: 87085	Initiate grandfather certificate printing	
+        /// Determine if grandfather is eligible and then queue the information to the program that prints certificates
+        /// </summary>
+        /// <param name="grandFathercredentials"></param>
+        /// <param name="memberId"></param>
+        /// <param name="eventDate"></param>
+        /// <param name="processingDate"></param>
+        private IList<RuleResults> CorrectiveActionGFPrinting_(IEnumerable<Credential> grandFathercredentials,
+                                                  Guid memberId,
+                                                  DateTime eventDate,
+                                                  DateTime processingDate)
+        {
+            #region declarations
+            IList<RuleResults> rulesResults = new List<RuleResults>();
+            #endregion
+
+            var eventDateList = ComputeEventDateList(eventDate);
+
+            foreach (var credential in grandFathercredentials)
+            {
+
+                // PBI: 87085 ***  Corrective action: Grand Father printing certificate ***
+                RuleResults rulesResult = new RuleResults(credential.ExternalId, MemberId, eventDate, credential.CredentialCategory, "87085", "PrintGrandfatheredCertificate");
+
+                rulesResults.Add(rulesResult);
+
+                // would contain only one record for all none back-dated events
+                foreach (var evaluationDate in eventDateList)
+                {
+
+                    rulesResult.BeginStep(() => FiveYearsLookBackGFPrinting(credential, evaluationDate))
+                                .OnMeetStep(() => ExamGFPrinting(credential, evaluationDate))
+                                .MapStepsToCorrectiveActionResults(isLastIteration: evaluationDate == eventDateList.Last());
+
+                    if (rulesResult.MeetRuleRequirement)
+                        break;
+                } // loop eventDateList
+
+            } // loop grandFathercredentials
+
+            return rulesResults;
+        }
 
         #region  Two Five Year LookBack Evaluation
 
@@ -273,11 +349,11 @@ namespace Abim.Platform.Program.App.Services.Impl
             Tuple<DateTime, DateTime> calculatedFiveYearLookBackWindow = null;
 
             // 2 year look back: process if current value is empty or expired
-            if (currentLookBackDatesInfo == null || currentLookBackDatesInfo.Lookback2YearEndDate == null || ProcessingDate.Date >= currentLookBackDatesInfo?.Lookback2YearEndDate?.Date)
+            if (currentLookBackDatesInfo == null || currentLookBackDatesInfo?.Lookback2YearEndDate == null || ProcessingDate.Date >= currentLookBackDatesInfo?.Lookback2YearEndDate?.Date)
                 calculatedTwoYearLookBackWindow = CalculateLookBackWindow(WindowsIntervalType.TwoYearLookBack);
 
             // 5 year look back: process if current value is empty or expired
-            if (currentLookBackDatesInfo == null || currentLookBackDatesInfo.Lookback5YearEndDate == null || ProcessingDate.Date >= currentLookBackDatesInfo?.Lookback5YearEndDate?.Date)
+            if (currentLookBackDatesInfo == null || currentLookBackDatesInfo?.Lookback5YearEndDate == null || ProcessingDate.Date >= currentLookBackDatesInfo?.Lookback5YearEndDate?.Date)
                 calculatedFiveYearLookBackWindow = CalculateLookBackWindow(WindowsIntervalType.FiveYearLookBack);
 
             // cannot calculate windows then log warning
@@ -304,8 +380,8 @@ namespace Abim.Platform.Program.App.Services.Impl
             if (cycle < 1)
                 cycle = 1;
            
-            bool meetReq;
-            Tuple<DateTime, DateTime> backEndlookBackWindow;
+            bool meetReq = false;
+            Tuple<DateTime, DateTime> backEndlookBackWindow = null;
 
             do
             {
@@ -354,7 +430,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 // 100 Total points or more
                 if (UserActivities.totalMOCpoints(loopBackWindow.Item1, processingDate) >= 100 ||
                     // OR in MOC Reciprocity attestation | Pbi 134025 reciprocity requirement (ar@2/16/2019)
-                    UserActivities.IsEnrolledInReciprocity_5yearLookBack(ExecutingProcess, processingDate, loopBackWindow.Item2) || // pbi 274137 : (2.50) Update Program Rule 35 - 5-year Lookback Requirements
+                    UserActivities.IsEnrolledInReprocity(ExecutingProcess, processingDate, loopBackWindow.Item2) ||
                 // OR  earned an initial subspecialty Certificate
                     Credentials.isEarnedNewSubspecialtyInitialCertOk(loopBackWindow.Item1, processingDate))
                         return true;
@@ -366,7 +442,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 // any points OR in MOC Reciprocity attestation 
                 if (UserActivities.totalMOCpoints(loopBackWindow.Item1, processingDate) > 0 ||
                     // OR in MOC Reciprocity attestation | Pbi 134025 reciprocity requirement (ar@2/16/2019)
-                    UserActivities.IsEnrolledInReciprocity_2yearLookBack( ExecutingProcess, processingDate, startOfTheWindowDate: loopBackWindow.Item1, endOfTheWindowDate: loopBackWindow.Item2)) // pbi 274136 : Update Program Rule 32 - 2-year Lookback Requirement
+                    UserActivities.IsEnrolledInReprocity(ExecutingProcess, processingDate, loopBackWindow.Item2))
 
                     return true;
             }

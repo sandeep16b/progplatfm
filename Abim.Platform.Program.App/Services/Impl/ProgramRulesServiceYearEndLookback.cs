@@ -51,18 +51,31 @@ namespace Abim.Platform.Program.App.Services.Impl
                      * METHOD AS NEEDED. THANKS!
                     */
 
+                    
 
-
-                    bool fiveYearReqMet;
-                    bool assessmentReqMet;
-                    bool attestationReqMet;
+                    bool fiveYearReqMet = false;
+                    bool assessmentReqMet = false;
+                    bool attestationReqMet = false;
                     var participationStatusLogStatements = new List<AddParticipationLookbackLog>();
 
                     var credStartingIssuanceStatus = cred.NewestIssuance?.IssuanceStatus;
                     var credStartingMaintStatus = cred.NewestIssuance?.MaintenanceStatus;
 
-                    ClearGracePeriod(cred, lookBackDate);               //PBI 134885
-                    SetGracePeriodIfApplicable(cred, lookBackDate, processingDate); //PBI 134113
+                    // PBI 175873: (Proj 1474) Certification & Participation Status Changes for 2020 MOC Requirements
+                    // PBI 208254 Certification & Participation Status Changes for 2020 and 2021 MOC Requirements(Not COVID 4)
+                    // PBI 216370 Certification & Participation Status Changes for 2020 and 2021 MOC Requirements(COVID 4)
+                    // *** For 2020 and 2021 only 
+                    //  2) Diplomates currently in the grace period in 2020 will have their grace period term extended to 12/31/2021.
+                    //  3) Diplomates with an assessment due in 2020 who do not meet the assessment requirement in 2020 will not be put in the grace period in 2021.
+                    if (IsEligibleForCOVIDExtension(lookBackDate, cred.IsCovid4))
+                    {
+                        ExtendGracePeriodIn2021Only(cred);
+                    }
+                    else
+                    {
+                        ClearGracePeriod(cred, lookBackDate);               //PBI 134885
+                        SetGracePeriodIfApplicable(cred, lookBackDate, processingDate); //PBI 134113
+                    }
 
                     SetConsecutiveKCIPassRequired(cred, lookBackDate);  //PBI 134114 : Set 2 Year Pass Due (Technical)
                     await KickOutOfCMPIfApplicable(cred, lookBackDate);       //PBI 159160 : Kick of out CMP Pathway
@@ -84,8 +97,8 @@ namespace Abim.Platform.Program.App.Services.Impl
                             credStartingMaintStatus,
                             cred.NewestIssuance?.MaintenanceStatus))
                         await RunCorrectiveAction(
-                            credentialsIn: new List<Credential> { cred }, //Running corrective action just for this credential
-                            memberId: memberId,
+                            credentialsIn : new List <Credential> { cred }, //Running corrective action just for this credential
+                            memberId : memberId,
                             eventDate: lookBackDate,
                             processingDate: processingDate,
                             triggeringEvent: TriggeringEvent.YearEndLookBack); //TODO: Change processing date?
@@ -102,7 +115,7 @@ namespace Abim.Platform.Program.App.Services.Impl
 
         private void LogAllParticipationStatusEntries(List<AddParticipationLookbackLog> logList)
         {
-            logList.ForEach(logEntry =>
+            logList.ForEach(logEntry => 
             {
                 var result = (AddLookbackLogCommandResult)LookbackLogService.Handle(logEntry);
                 if (!result.Succeeded)
@@ -121,7 +134,7 @@ namespace Abim.Platform.Program.App.Services.Impl
             if (creds == null)
                 return new List<Credential>(0);
 
-            return creds.Where(x =>
+            return creds.Where(x => 
                 x.Certification.Source.Code.ToUpper() == "ABIM"
                 && !x.IsCosponsored) //PBI 210153 - Don't run YELB for cosponsored credentials
                 .ToList();
@@ -150,16 +163,17 @@ namespace Abim.Platform.Program.App.Services.Impl
         {
             //PBI 134113
             if (!cred.ExamDueDate.HasValue) return false;
+            var examDueDateYear = cred.ExamDueDate.Value.Year;
 
             //This PBI relies on PBI 135009 Non-Exam Requirements
-            var meetsNonExamsRequirement = NonExamRequirement(cred, lookbackDate, processingDate, true);
-            var hasCorrespondingRegOrLka = CorrespondingRegistration(cred, lookbackDate.Date.Year);
+            var meetsNonExamsRequirement = NonExamRequirement(cred, lookbackDate, processingDate,true);
+            var hasCorrespondingRegOrLka = CorrespondingRegistration(cred, examDueDateYear);
 
             // pbi 179929 : Update Program Rule 12 Assessment Grace Period to Include LNG
             if (!hasCorrespondingRegOrLka)
                 hasCorrespondingRegOrLka = CorrespondingLkaEnrollment(cred);
 
-            if (ShouldGoIntoGracePeriod(cred, lookbackDate, meetsNonExamsRequirement, hasCorrespondingRegOrLka))
+            if (ShouldGoIntoGracePeriod(cred, lookbackDate, meetsNonExamsRequirement, examDueDateYear, hasCorrespondingRegOrLka))
             {
                 cred.GracePeriodStartDate = new DateTime(lookbackDate.Year + 1, 1, 1);
                 cred.GracePeriodEndDate = new DateTime(lookbackDate.Year + 1, 12, 31);
@@ -171,33 +185,51 @@ namespace Abim.Platform.Program.App.Services.Impl
         }
 
         private bool ShouldGoIntoGracePeriod(
-            Credential cred,
-            DateTime lookbackDate,
-            bool meetsNonExamRequirement,
+            Credential cred, 
+            DateTime lookbackDate, 
+            bool meetsNonExamRequirement, 
+            int examDueDateYear, 
             bool hasCorrespondingExamRegistrationOrLkaEnrollment)
         {
             // going back to original version of this function (before Pbi 179929) since I moved the functionality to CorrespondingLkaEnrollment()
-            return (!cred.IsGrandfather
-                   && (cred.IsActiveParticipating ||
+            return ((cred.IsActiveParticipating ||
                   // Certificate expired and expiration date=current lookback date and Met 2 year requirement (pbi 135236)
                   (cred.NewestIssuance?.IssuanceStatus == IssuanceStatusType.Expired
                   && cred.LookbackDate?.Date == lookbackDate.Date  // could only be true during CA -- would still be previous year end date during YELB
                   && MaintenanceStatus(cred, ProcessingDate, true, true).MeetStepRule))
               && meetsNonExamRequirement
-              && cred.ExamDueDate?.Year == lookbackDate.Date.Year
+              && lookbackDate.Date.Year == examDueDateYear
               && hasCorrespondingExamRegistrationOrLkaEnrollment);
         }
 
-        private bool CorrespondingRegistration(Credential cred, int lookbackDateYear)
+        /* 
+         Pbi 216370 : Certification & Participation Status Changes for 2020 and 2021 MOC Requirements(COVID 4)
+            Diplomates in one of the COVID 4 disciplines (Infectious Disease, Hospital Medicine, Critical Care, Pulmonary Disease) currently in the grace period in 2020 
+            will have their grace period term extended to 12/31/2023.
+         ============================================================================================================================================================================================
+          Pbi 208254 : (Release 2.35) Certification & Participation Status Changes for 2020 and 2021 MOC Requirements (Not COVID 4)
+            Diplomates  currently in the grace period in 2020 will have their grace period term extended to 12/31/2022.
+        ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        */
+        private void ExtendGracePeriodIn2021Only(Credential cred)
+        {
+            if (cred.GracePeriodStartDate?.Year == 2020)
+            {
+                cred.GracePeriodEndDate = cred.IsCovid4 ? new DateTime(2023, 12 , 31) : new DateTime(2022, 12, 31); // literally as in requirements above
+                cred.SetModified("ExtendGracePeriod");
+            }
+
+        }
+
+        private bool CorrespondingRegistration(Credential cred, int examDueDateYear)
         {
             var result = Registrations.Any(r => (r.ExamType != null && r.ExamType.ToEnum() == ExamType.Moc)
-                                        && (!r.IsOnHold) //PBI 254150 : (2.45) Skip Corresponding onhold Registrations during Grace Period prcessing     
                                         && (r.CertificationId == cred.Certification.ExternalId)
                                         && (r.Result == ExamResultType.Fail.ToString()
                                                 || r.Result == ExamResultType.Indeterminate.ToString()
                                                 || r.Result == ExamResultType.Incomplete.ToString()
                                                 || r.Result == ExamResultType.UnableToTest.ToString())
-                                        && (r.AdministrationYear == lookbackDateYear));
+                                        && (r.AdministrationYear == examDueDateYear));
 
             // if still false then we need to check CMPRegistrations
             if (!result && CMPRegistrations != null)
@@ -207,21 +239,8 @@ namespace Abim.Platform.Program.App.Services.Impl
                 // Has a result of fail or unable to test(indeterminate / incomplete not valid results for CMP exam)
                 // Year of the CMPRegistration = year of credential.ExamDueDate
                 result = CMPRegistrations.Any(r => (r.CMPExam != null && r.CMPExam.CertificationId == cred.Certification.ExternalId)
-                                && (r.ExamResult.ToEnum() == ExamResultType.Fail || r.ExamResult.ToEnum() == ExamResultType.UnableToTest || r.OnHold) // any results which on hold (Pbi 344378)
-                                && (r.TestDate.Year == lookbackDateYear));
-            }
-            // if still false then we need to check if the credential was in CMP during their due year at any moment (they can even unenroll on the same day, it does not matter)
-            // pbi 329294 : Update Program Rule 12 Grace Period to Include New CMP Criteria
-            // " The certificate was enrolled for the one-year assessment (CMP) during their due year and the result of the CMP assessment is not a pass or no result is provided
-            //  (diplomate did not take the assessment).
-            // *** Pbi 344378 : (2.52) Update Program Rule 12 Grace Period to Include New CMP Criteria - 
-            if (!result && (cred.CMPEnrollmentDate?.Year < cred.ExamDueDate?.Year && (cred.CMPUnenrollmentDate == null || cred.CMPUnenrollmentDate?.Year > cred.ExamDueDate?.Year)) // before  or  after ExamDueDate year
-                || cred.CMPEnrollmentDate?.Year == cred.ExamDueDate?.Year // Enrolled the same year as ExamDueDate
-                || cred.CMPUnenrollmentDate?.Year == cred.ExamDueDate?.Year // UnEnrolled the same year as ExamDueDate
-                || (cred.IsInCMP && cred.CMPEnrollmentDate?.Year < cred.ExamDueDate?.Year) // IsInCMP flag set and it is before ExamDueDate Year
-                )
-            {
-                result = true;
+                                && (r.ExamResult.ToEnum() == ExamResultType.Fail || r.ExamResult.ToEnum() == ExamResultType.UnableToTest)
+                                && (r.TestDate.Year == examDueDateYear));
             }
 
             return result;
@@ -240,8 +259,8 @@ namespace Abim.Platform.Program.App.Services.Impl
             {
                 var findDontMeetParticipation = currentEnrollment
                                                     .Where(a => (a.CurrentlyMeetingParticipation == false ||
-                                                        (a.EnrollmentStatus != null && a.SuspensionReason != null &&
-                                                            a.EnrollmentStatus.ToEnum() == EnrollmentStatusType.Suspended &&
+                                                        ( a.EnrollmentStatus != null && a.SuspensionReason != null &&
+                                                            a.EnrollmentStatus.ToEnum() == EnrollmentStatusType.Suspended &&                                                         
                                                             a.SuspensionReason.ToEnum() == SuspensionReasonType.FailedToMeetParticipation)))
                                                     .FirstOrDefault();
 
@@ -253,7 +272,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 {
                     var findFailOnSummativeDecision = currentEnrollment
                                                     .Where(a => a.LongitudinalParticipations.Last().SummativeDecision.ToEnum() == SummativeDecisionType.Fail ||
-                                                    (a.EnrollmentStatus != null && a.SuspensionReason != null &&
+                                                    ( a.EnrollmentStatus != null && a.SuspensionReason != null &&
                                                     a.EnrollmentStatus.ToEnum() == EnrollmentStatusType.Suspended && a.SuspensionReason.ToEnum() == SuspensionReasonType.FailedSummativeDecision))
                                                     .FirstOrDefault();
 
@@ -293,10 +312,10 @@ namespace Abim.Platform.Program.App.Services.Impl
         /// <param name="calledFromGrace">True if caled from SetGracePeriod; false otherwise</param>
         /// <returns></returns>
         private bool NonExamRequirement(
-            Credential cred,
-            DateTime lookbackDate,
-            DateTime processingDate,
-            out bool fiveYearReqMet,
+            Credential cred, 
+            DateTime lookbackDate, 
+            DateTime processingDate, 
+            out bool fiveYearReqMet, 
             out bool attestationReqMet,
             bool calledFromGrace)
         {
@@ -349,7 +368,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 credential.HasChanged = true;
                 return true;
             }
-            return false;
+            return false;      
         }
 
         /// <summary>
@@ -363,8 +382,9 @@ namespace Abim.Platform.Program.App.Services.Impl
         /// <param name="lookbackDate"></param>
         private void ClearAssessmentMetWhenApplicable(Credential credential, DateTime lookbackDate)
         {
-            if (credential.AssessmentMet
-                && lookbackDate.Date >= credential.ExamDueDate?.Date)
+            if (credential.AssessmentMet 
+                && lookbackDate.Date >= credential.ExamDueDate?.Date
+                && !IsEligibleForCOVIDExtension(lookbackDate, credential.IsCovid4))
             {
                 credential.AssessmentMet = false;
                 credential.SetModified("ClearAssessment");
@@ -381,20 +401,41 @@ namespace Abim.Platform.Program.App.Services.Impl
             out bool attestationReqMet)
         {
 
+            /* 
+             Pbi 216370 : Certification & Participation Status Changes for 2020 and 2021 MOC Requirements(COVID 4)
+                For 2020, 2021, and 2022, a diplomate will not experience a negative status change (from certified to not certified or participating to not participating) for any of the following reasons:           
+                *** Diplomate does not meet an MOC assessment requirement that is due in 2020 or 2021 or 2022
+                *** Diplomate does not meet an MOC attestation requirement that is due in 2020 or 2021 or 2022
+                *** Diplomate does not meet the two or five year point requirement due in 2020 or 2021 or 2022
+             ============================================================================================================================================================================================
+              Pbi 208254 : (Release 2.35) Certification & Participation Status Changes for 2020 and 2021 MOC Requirements (Not COVID 4)
+                  For 2020 and 2021, a diplomate will not experience a negative status change (from certified to not certified or participating to not participating) for any of the following reasons:           
+                  *** Diplomate does not meet an MOC assessment requirement that is due in 2020 or 2021
+                  *** Diplomate does not meet an MOC attestation requirement that is due in 2020 or 2021
+                  *** Diplomate does not meet the two or five year point requirement due in 2020 or 2021
+            ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            */
+            if (IsEligibleForCOVIDExtension(lookbackDate, cred.IsCovid4))
+            {
+                //NOTE: These are output variables only! These are not modifications to the credential.
+                fiveYearReqMet = true;
+                assessmentReqMet = true;
+                attestationReqMet = true;
+                return false;
+            }
+
             //PBI 134116
             bool meetsExamReqs = MeetsExamRequirements(cred, memberId, lookbackDate, out assessmentReqMet);
             bool meetsNonExamReqs = NonExamRequirement(cred, lookbackDate, processingDate, out fiveYearReqMet, out attestationReqMet, false);
 
-            if (meetsExamReqs & meetsNonExamReqs)
+            if (meetsExamReqs & meetsNonExamReqs) 
             {
                 Log.Debug($"Cert requirements met for member {memberId}, credential {cred.ExternalId}, lookback date {lookbackDate.ToShortDateString()}, processing date {processingDate.ToShortDateString()}.");
                 return false;
             }
             //Bug 144627: Task 144628 : Do not expire issuances that have an issuance date > lookback date in pbi 142264
             // If found new issuance after lookback date during YELB, just stop further evaluation
-            // correction to above Bug fix: PBI 281204: (Technical - Hotfix w/2.50) Add a condition to check AssessmentMet when skipping expiring issuances that have an issuance date > lookback date in YELB processing  
-            // It is a rare scenario, but we have to check if the newly created issuance is valid and still has a positive AssessmentMet flag. (AbimId 221700 was an example during the test run YELB 2023).
-            else if (ExecutingProcess == ExecutingProcessType.YearEndLookBack && cred.NewestIssuance?.IssuanceDate.Date > lookbackDate.Date && cred.AssessmentMet == true)
+            else if (ExecutingProcess == ExecutingProcessType.YearEndLookBack && cred.NewestIssuance?.IssuanceDate.Date > lookbackDate.Date)
             {
                 Log.Debug($"YELB found new issuance {cred.NewestIssuance?.IssuanceDate.Date.ToShortDateString()} since lookback date {lookbackDate.ToShortDateString()} with processing date {processingDate.ToShortDateString()}.");
                 return false;
@@ -403,7 +444,7 @@ namespace Abim.Platform.Program.App.Services.Impl
             Log.Debug($"Cert requirements NOT met for member {memberId}, credential {cred.ExternalId}, lookback date {lookbackDate.ToShortDateString()}, processing date {processingDate.ToShortDateString()}. Meets Exam Reqs = {meetsExamReqs}, Meets Non Exam Reqs = {meetsNonExamReqs}.");
 
             //Requirements not met. Get the issuances to update.
-            var issuancesToUpdate =
+            var issuancesToUpdate = 
                 cred.Issuances.Where(
                     x =>
                     ((x.Duration == DurationType.Timelimited && lookbackDate >= x.ExpirationDate)
@@ -436,11 +477,11 @@ namespace Abim.Platform.Program.App.Services.Impl
         }
 
         private void LogCertStatus(
-            Credential cred,
-            bool fiveYearReqMet,
-            bool assessmentReqMet,
-            bool attestationReqMet,
-            DateTime lookbackDate,
+            Credential cred, 
+            bool fiveYearReqMet, 
+            bool assessmentReqMet, 
+            bool attestationReqMet, 
+            DateTime lookbackDate, 
             Guid memberId)
         {
             //PBI 134886 / 137216
@@ -449,7 +490,7 @@ namespace Abim.Platform.Program.App.Services.Impl
             bool potentiallyGoingIntoGracePeriod = //Yeah, it's a long variable name, but it's descriptive...
                 IsPotentiallyGoingIntoGracePeriod(cred, lookbackDate, memberId);
 
-            bool pendingResultsExist =
+            bool pendingResultsExist = 
                 DoPendingExamResultsExistForCertification(cred.Certification.ExternalId, lookbackDate);
 
             Log.Debug($"Logging cert status for member {memberId}, credential {cred.ExternalId}. fiveYearReqMet = {fiveYearReqMet}, assessmentReqMet = {assessmentReqMet}, attestationReqMet = {attestationReqMet}, potentiallyGoingIntoGracePeriod = {potentiallyGoingIntoGracePeriod}, pendingResultsExist = {pendingResultsExist}.");
@@ -475,7 +516,7 @@ namespace Abim.Platform.Program.App.Services.Impl
         /// <param name="lookbackDate"></param>
         /// <param name="logList">logList is used to build logging statements used by YearEndLookback for anyone who fails the criteria in this method.  
         /// Currently corrective action is not required to log, so does nothing with logList upon return from this method</param>
-        private bool EvaluateParticipationStatus(Credential credential, DateTime lookbackDate, List<AddParticipationLookbackLog> logList)
+        private bool EvaluateParticipationStatus(Credential credential, DateTime lookbackDate, List<AddParticipationLookbackLog> logList )
         {
 
             /* 
@@ -492,6 +533,9 @@ namespace Abim.Platform.Program.App.Services.Impl
                   *** Diplomate does not meet the two or five year point requirement due in 2020 or 2021
             ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
             */
+            if (IsEligibleForCOVIDExtension(lookbackDate, credential.IsCovid4))
+                return false;
+
             if (logList == null)
                 logList = new List<AddParticipationLookbackLog>();
 
@@ -505,7 +549,7 @@ namespace Abim.Platform.Program.App.Services.Impl
             //          Met the exam requirements (pbi 135089) and
             //          Met all the non - exam requirements(pbi 135009) and
             //          Met the 2 year requirement (pbi 135236)
-            if (credential.IsGrandfather) // active and grandfather
+            if (credential.IsGrandfather  ) // active and grandfather
             {
                 var meetsExamRequirements = MeetsExamRequirements(credential, MemberId, lookbackDate, out assessmentReqMet);
                 var meetsNonExamRequirements = NonExamRequirement(credential, lookbackDate, ProcessingDate, out fiveYearReqMet, out attestationReqMet, false);
@@ -516,8 +560,8 @@ namespace Abim.Platform.Program.App.Services.Impl
                     Log.Debug($"Grandfather requirements met for member '{MemberId}', credential '{credential.ExternalId}', lookback date '{lookbackDate.ToShortDateString()}', processing date '{ProcessingDate.ToShortDateString()}'.");
                     return false;
                 }
-                LogParticipationStatusFailureReasons(assessmentReqMet: assessmentReqMet, fiveYearReqMet: fiveYearReqMet, twoYearReqMet: meets2YearRequirements.MeetStepRule,
-                    attestationReqMet: attestationReqMet, activeCredentialReqMet: true, credential: credential, lookbackDate: lookbackDate, logList: logList);
+                LogParticipationStatusFailureReasons(assessmentReqMet:assessmentReqMet, fiveYearReqMet: fiveYearReqMet, twoYearReqMet: meets2YearRequirements.MeetStepRule, 
+                    attestationReqMet:attestationReqMet, activeCredentialReqMet:true, credential:credential, lookbackDate:lookbackDate, logList:logList);
             }
             /*
              For time-limited certificates to be considered meeting the participation status
@@ -535,14 +579,14 @@ namespace Abim.Platform.Program.App.Services.Impl
                 //  Met 2 year requirement (pbi 135236)
                 var meets2YearRequirements = MaintenanceStatus(credential, ProcessingDate, true, true);
                 // Met all the non-exam requirements(pbi 135009)
-                var meetsNonExamRequirements = NonExamRequirement(credential, lookbackDate, ProcessingDate, out fiveYearReqMet, out attestationReqMet, false);
+                var meetsNonExamRequirements = NonExamRequirement(credential, lookbackDate, ProcessingDate, out fiveYearReqMet, out attestationReqMet,false);
                 if (meets2YearRequirements.MeetStepRule && meetsNonExamRequirements)
                 {
                     Log.Debug($"TL requirements met for member '{MemberId}', credential '{credential.ExternalId}', lookback date '{lookbackDate.ToShortDateString()}', processing date '{ProcessingDate.ToShortDateString()}'.");
                     return false;
                 }
-                LogParticipationStatusFailureReasons(assessmentReqMet: true, fiveYearReqMet: fiveYearReqMet, twoYearReqMet: meets2YearRequirements.MeetStepRule,
-                    attestationReqMet: attestationReqMet, activeCredentialReqMet: credential.IsActive, credential: credential, lookbackDate: lookbackDate, logList: logList);
+                LogParticipationStatusFailureReasons(assessmentReqMet:true, fiveYearReqMet:fiveYearReqMet, twoYearReqMet:meets2YearRequirements.MeetStepRule, 
+                    attestationReqMet:attestationReqMet, activeCredentialReqMet:credential.IsActive,credential: credential, lookbackDate: lookbackDate, logList: logList);
             }
             /*
             For mbm certificates to be considered meeting the participation status 
@@ -562,16 +606,16 @@ namespace Abim.Platform.Program.App.Services.Impl
                     Log.Debug($"MBM requirements met for member '{MemberId}', credential '{credential.ExternalId}', lookback date '{lookbackDate.ToShortDateString()}', processing date '{ProcessingDate.ToShortDateString()}'.");
                     return false;
                 }
-                LogParticipationStatusFailureReasons(assessmentReqMet: true, fiveYearReqMet: true, twoYearReqMet: meets2YearRequirements.MeetStepRule,
-                    attestationReqMet: true, activeCredentialReqMet: credential.IsActive, credential: credential, lookbackDate: lookbackDate, logList: logList);
+                LogParticipationStatusFailureReasons(assessmentReqMet: true, fiveYearReqMet:true, twoYearReqMet:meets2YearRequirements.MeetStepRule, 
+                    attestationReqMet:true, activeCredentialReqMet:credential.IsActive, credential:credential, lookbackDate: lookbackDate, logList: logList);
             }
             //PBI 137217: For Time-limited (with no lifetime) and must-be-maintained: Log certification when NOT certified
             //This added clause is just for logging.  InActive MBM/TL creds would fall through to the issuance update below but 
             //we detect the specific case for an inactive cred here and log as such.
             else if ((credential.IsMBM || credential.IsTimelimited) && !credential.IsActive)
             {
-                LogParticipationStatusFailureReasons(assessmentReqMet: true, fiveYearReqMet: true, twoYearReqMet: true, attestationReqMet: true,
-                    activeCredentialReqMet: credential.IsActive, credential: credential, lookbackDate: lookbackDate, logList: logList);
+                LogParticipationStatusFailureReasons(assessmentReqMet:true, fiveYearReqMet:true, twoYearReqMet:true, attestationReqMet:true, 
+                    activeCredentialReqMet:credential.IsActive, credential:credential, lookbackDate:lookbackDate, logList: logList);
             }
 
             /*
@@ -582,14 +626,14 @@ namespace Abim.Platform.Program.App.Services.Impl
              */
             // * Requirements not met. Update any active issuance (issuance.issuancestatus=’Active’) that matches the credential being checked
 
-            var issuancesToUpdate = credential.Issuances.Where(x => (x.IssuanceStatus == IssuanceStatusType.Active
-                        && x.MaintenanceStatus != MaintenanceStatusType.NotMaintained));
+            var issuancesToUpdate = credential.Issuances.Where(x => ( x.IssuanceStatus == IssuanceStatusType.Active 
+                        && x.MaintenanceStatus!= MaintenanceStatusType.NotMaintained));
 
             foreach (var issuance in issuancesToUpdate)
             {
-                issuance.MaintenanceStatus = MaintenanceStatusType.NotMaintained;
-                issuance.SetModified("ClearMaint");
-                issuance.HasChanged = true;
+               issuance.MaintenanceStatus= MaintenanceStatusType.NotMaintained;
+               issuance.SetModified("ClearMaint");
+               issuance.HasChanged = true;
             }
 
             return credential.Issuances.Any(i => i.HasChanged);
@@ -608,7 +652,7 @@ namespace Abim.Platform.Program.App.Services.Impl
         /// <param name="credential"></param>
         /// <param name="lookbackDate"></param>
         /// <param name="logList"></param>
-        private void LogParticipationStatusFailureReasons(bool assessmentReqMet, bool fiveYearReqMet, bool twoYearReqMet, bool attestationReqMet,
+        private void LogParticipationStatusFailureReasons(bool assessmentReqMet, bool fiveYearReqMet, bool twoYearReqMet, bool attestationReqMet, 
             bool activeCredentialReqMet, Credential credential, DateTime lookbackDate, List<AddParticipationLookbackLog> logList)
         {
             if (!assessmentReqMet)
@@ -624,9 +668,9 @@ namespace Abim.Platform.Program.App.Services.Impl
         }
 
         private bool ShouldWeRunCorrectiveAction(
-            IssuanceStatusType? startingIssuanceStatus,
-            IssuanceStatusType? revisedIssuanceStatus,
-            MaintenanceStatusType? startingMaintStatus,
+            IssuanceStatusType? startingIssuanceStatus, 
+            IssuanceStatusType? revisedIssuanceStatus, 
+            MaintenanceStatusType? startingMaintStatus, 
             MaintenanceStatusType? revisedMaintStatus)
         {
             //PBI 134881
@@ -671,7 +715,7 @@ namespace Abim.Platform.Program.App.Services.Impl
         /// after the implementing methods have been completed, or left public 
         /// if it is deemed useful for other purposes.</remarks>
         private bool DoPendingExamResultsExistForCertification(
-            Guid certificationId,
+            Guid certificationId, 
             DateTime lookbackDate)
         {
             //PBI 134903
@@ -692,7 +736,7 @@ namespace Abim.Platform.Program.App.Services.Impl
             //A note about RegistrationResource.Result shown below: Registration Platform's AutoMapper mapping for this 
             //property sets it to the value of the domain Registration object's Result.Result (dest.Result = src.Result.Result.Value.ToString();).
             //There's also an ExamResult property on RegistrationResource which is a more complex type.
-            var output =
+            var output = 
                 Registrations
                     .Where(reg => reg.CertificationId == certificationId)
                     .Any(reg =>
@@ -812,7 +856,7 @@ namespace Abim.Platform.Program.App.Services.Impl
             {
                 if (credential.Pathway == Resources.PathwayType.OneYear && credential.IsInCMP && credential.ExamDueDate <= lookbackDate
                     // Keep lookbackDate as 2020 even it is in the past just in case we would re-run for some diplomates
-                    && !((credential.ExamDueDate?.Year == 2020 || credential.ExamDueDate?.Year == 2021) && (lookbackDate.Year == 2020 || lookbackDate.Year == 2021)))  //PBI 209119 : (Release 2.35) CMP (ACC) Pathway – COVID Extension
+                    && !(( credential.ExamDueDate?.Year == 2020 || credential.ExamDueDate?.Year == 2021) && (lookbackDate.Year == 2020 || lookbackDate.Year == 2021)))  //PBI 209119 : (Release 2.35) CMP (ACC) Pathway – COVID Extension
                 {
                     Log.Debug($"Removing credential {credential.ExternalId} for member {credential.MemberId} from CMP.");
                     var command = new UnEnrollInCMPCommand();
@@ -840,6 +884,11 @@ namespace Abim.Platform.Program.App.Services.Impl
                 Log.Error(ex, $"Error attempting to unenroll credential {credential.ExternalId} for user {credential.MemberId} from CMP!");
                 throw;
             }
+        }
+
+        private bool IsEligibleForCOVIDExtension(DateTime lookBackDate, bool credentialIsInCOVID4)
+        {
+            return lookBackDate.Year == 2021 || (lookBackDate.Year == 2022 && credentialIsInCOVID4);
         }
     }
 }

@@ -64,11 +64,11 @@ namespace Abim.Platform.Program.Host.Extensions
                 resource.Links.Add(new Link(e.Type.Name, HttpVerbs.Get, urlHelper.Link(getEnumRouteName, new { name = e.Name })));
             }
         }
-
+        
         /// <summary>
         /// Gets the self link, if any
         /// </summary>
-        /// <param name="resource">The ?.</param>
+        /// <param name="?">The ?.</param>
         public static Link GetSelfLink(this ResourceBase resource)
         {
             return resource.Links.FirstOrDefault(l => l.Name == "self");
@@ -76,11 +76,11 @@ namespace Abim.Platform.Program.Host.Extensions
 
         /// <summary>
         /// Sets the paging properties and links on a collection resource.
-        /// </summary> 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="resource">The resource.</param>
         /// <param name="pageDefinition">The page definition.</param>
         /// <param name="totalCount">The total count.</param>
-        /// <param name="urlHelper">urlHelper.</param>
         /// <param name="usesComplexQuery">if set to <c>true</c> [uses complex query].</param>
         public static void SetPaging(this IPagedCollectionResource resource, PageDefinition pageDefinition, int totalCount, UrlHelper urlHelper,
             bool usesComplexQuery = false)

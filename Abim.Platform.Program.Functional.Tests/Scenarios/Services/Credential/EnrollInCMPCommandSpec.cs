@@ -15,9 +15,6 @@ using Moq;
 using NUnit.Framework;
 using System;
 using TestStack.BDDfy;
-using ServiceBus.Events;
-using System.Threading;
-using Abim.Platform.Program.App.Domain;
 
 namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 {
@@ -152,14 +149,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 _result.Data.IsInCMP.Should().BeTrue();
             }
-
-            private void AndACMPEnrolledShouldBePublished ()
-            {
-                _busControlMock
-                    .Verify(x => 
-                                x.Publish(It.IsAny<CMPEnrolled>(), It.IsAny<CancellationToken>()),
-                                Times.Once);
-            }
         }
 
         private class ShouldNotProcessSuccessfullyWhenCommandIsInvalid : EnrollInCMPCommandScenario
@@ -262,8 +251,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 _credRepoMock = new Mock<ICredentialRepository>(MockBehavior.Strict);
 
-                Credential credential;
-                CredentialBuilder.Build();
+                var credential = CredentialBuilder.Build();
                 credential = null;
 
                 _credRepoMock
@@ -326,13 +314,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             private void ThenTheProcessShouldReturnProperMessage()
             {
                 result.Message.Should().Contain("is already enrolled in the CMP pathway");
-            }
-            private void AndACMPEnrolledShouldNotBePublished()
-            {
-                _busControlMock
-                    .Verify(x =>
-                                x.Publish(It.IsAny<CMPEnrolled>(), It.IsAny<CancellationToken>()),
-                                Times.Never);
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using Abim.Platform.Program.App.Data.ComplexQueries;
+﻿using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
+using Abim.Platform.Program.App.Data.ComplexQueries;
 using Abim.Platform.Program.App.Domain;
 using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.App.Services.CommandResults;
@@ -7,7 +8,6 @@ using Abim.Platform.Program.App.Services.Impl;
 using Abim.Platform.Program.Host.Extensions;
 using Abim.Platform.Program.Host.OptionsResources;
 using Abim.Platform.Program.Host.Util;
-using Abim.Platform.Program.MembershipClient;
 using Abim.Platform.Program.Relational;
 using Abim.Platform.Program.Resources;
 using Abim.Platform.Program.WebApi;
@@ -16,7 +16,6 @@ using Abim.Platform.Program.WebApi.Attributes;
 using Abim.Platform.Program.WebApi.Filters;
 using Abim.Platform.Program.WebApi.Objects;
 using AutoMapper;
-using Swashbuckle.Swagger.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -24,10 +23,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.Http.Results;
 using Thinktecture.IdentityModel.WebApi;
 
 namespace Abim.Platform.Program.Host.Api.Controllers
@@ -57,9 +54,9 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         private ICredentialService CredentialService { get; set; }
 
         /// <summary>
-        /// Membership Client Service
+        /// 
         /// </summary>
-        protected IMembershipClientService MembershipClientService { get; set; } 
+        protected IProfileInterservice ProfileInterService { get; set; }
 
         /// <summary>
         /// The enum service
@@ -78,16 +75,16 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         /// <param name="credentialService">The credential service.</param>
         /// <param name="enumService">The enum service.</param>
         ///  /// <param name="helperService">The helper service.</param>
-        /// <param name="membershipClientService">The enum service.</param>
+        /// <param name="profileInterService">The enum service.</param>
         public CredentialController(ICredentialService credentialService,
                                     IEnumService enumService,
                                     IHelperService helperService,
-                                    IMembershipClientService membershipClientService)
+                                    IProfileInterservice profileInterService)
         {
             CredentialService = credentialService;
             EnumService = enumService;
             HelperService = helperService;
-            MembershipClientService = membershipClientService;
+            ProfileInterService = profileInterService;
         }
 
         #endregion
@@ -98,7 +95,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         /// Disposes the services.
         /// </summary>
         protected void DisposeServices(HttpRequestMessage message)
-        { 
+        {
             message.RegisterForDispose(CredentialService);
         }
 
@@ -113,10 +110,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpOptions]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "CredentialOptions", typeof(CredentialOptionsResponseResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.CredentialOptions, Name = ProgramResourceConstants.RouteNames.Credentials.CredentialOptions)]
         public IHttpActionResult CredentialOptions()
         {
@@ -142,10 +135,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpOptions]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "IssuanceOptions", typeof(IssuanceOptionsResponseResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.CredentialIssuanceOptions, Name = ProgramResourceConstants.RouteNames.Credentials.IssuanceOptions)]
         public IHttpActionResult IssuanceOptions()
         {
@@ -172,10 +161,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpGet]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetCredentialEnum", typeof(object))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.CredentialEnumValues, Name = ProgramResourceConstants.RouteNames.Credentials.CredentialEnumValues)]
         public IHttpActionResult GetCredentialEnum(string name)
         {
@@ -197,10 +182,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpGet]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetIssuanceEnum", typeof(object))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.IssuanceEnumValues, Name = ProgramResourceConstants.RouteNames.Credentials.IssuanceEnumValues)]
         public IHttpActionResult GetIssuanceEnum(string name)
         {
@@ -229,11 +210,8 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpGet]
         [Authorize]
         [ResourceAuthorize(Actions.ViewAllAdmin)]
-        [SwaggerResponse(HttpStatusCode.OK, "GetCredentials", typeof(CredentialCollectionResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.GetCredentials, Name = ProgramResourceConstants.RouteNames.Credentials.GetCredentials)]
+        [Route(ProgramResourceConstants.Routes.Credentials.GetCredentialsRouteExt, Name = ProgramResourceConstants.RouteNames.Credentials.GetCredentialsExt)]
         public IHttpActionResult GetCredentials([FromUri] CredentialComplexQuery credentialComplexQuery)
         {
             //first ensure we have a valid CredentialComplexQuery
@@ -246,7 +224,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
 
             try
             {
-                int totalCount;
+                var totalCount = 0;
                 var credentials = CredentialService.Search(credentialComplexQuery, out totalCount);
                 if (credentialComplexQuery.PageDefinition.SkippedItems >= totalCount && totalCount > 0)
                     return BadRequest(ErrorMessages.PageIndexTooHigh());
@@ -262,26 +240,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             {
                 DisposeServices(Request);
             }
-        }  
-
-        /// <summary>
-        /// GetCredentialsRouteExt
-        /// </summary>
-        /// <remarks>
-        /// Allows client to send complex query from query string through the use of a custom model binder.
-        /// </remarks>
-        /// <returns>A CredentialCollectionResource containing a collection of Credential objects</returns>
-        [HttpGet]
-        [Authorize]
-        [ResourceAuthorize(Actions.ViewAllAdmin)]
-        [SwaggerResponse(HttpStatusCode.OK, "GetCredentialsRouteExt", typeof(CredentialCollectionResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
-        [Route(ProgramResourceConstants.Routes.Credentials.GetCredentialsRouteExt, Name = ProgramResourceConstants.RouteNames.Credentials.GetCredentialsExt)]
-        public IHttpActionResult GetCredentialsRouteExt([FromUri] CredentialComplexQuery credentialComplexQuery)
-        {
-            return GetCredentials(credentialComplexQuery);
         }
 
         /// <summary>
@@ -291,10 +249,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpPost]
         [Authorize]
         [ResourceAuthorize(Actions.ViewAllAdmin)]
-        [SwaggerResponse(HttpStatusCode.OK, "GetCredentialsPost", typeof(CredentialCollectionResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.GetCredentials, Name = ProgramResourceConstants.RouteNames.Credentials.GetCredentialsPost)]
         public IHttpActionResult GetCredentialsPost([FromBody] CredentialComplexQuery credentialComplexQuery)
         {
@@ -308,7 +262,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
 
             try
             {
-                int totalCount;
+                var totalCount = 0;
                 var credentials = CredentialService.Search(credentialComplexQuery, out totalCount);
                 if (credentialComplexQuery.PageDefinition.SkippedItems >= totalCount && totalCount > 0)
                     return BadRequest(ErrorMessages.PageIndexTooHigh());
@@ -338,10 +292,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [Authorize]
         [ResourceAuthorize]
         [ImpersonateMemberId]
-        [SwaggerResponse(HttpStatusCode.OK, "GetCurrentUserCredentials", typeof(CredentialCollectionResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.GetCurrentUserCredentials, Name = ProgramResourceConstants.RouteNames.Credentials.GetCurrentUserCredentials)]
         public IHttpActionResult GetCurrentUserCredentials([FromUri] PageDefinition pageDefinition, Guid? memberId = null)
         {
@@ -400,10 +350,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [Authorize]
         [ResourceAuthorize]
         [ImpersonateMemberId]
-        [SwaggerResponse(HttpStatusCode.OK, "GetCurrentUserCredentialsPost", typeof(CredentialCollectionResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.GetCurrentUserCredentialsPost, Name = ProgramResourceConstants.RouteNames.Credentials.GetCurrentUserCredentialsPost)]
         public IHttpActionResult GetCurrentUserCredentialsPost([FromBody] PageDefinition pageDefinition, Guid? memberId = null)
         {
@@ -460,10 +406,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpGet]
         [Authorize]
         [ResourceAuthorize(Actions.ViewAllAdmin)]
-        [SwaggerResponse(HttpStatusCode.OK, "GetUserCredentialsByMemberId", typeof(CredentialCollectionResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.GetCredentialsByMemberId, Name = ProgramResourceConstants.RouteNames.Credentials.GetCredentialByMemberId)]
         public IHttpActionResult GetUserCredentialsByMemberId(Guid memberId, [FromUri] PageDefinition pageDefinition)
         {
@@ -506,10 +448,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpGet]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetCredentialById", typeof(CredentialResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.GetCredentialById, Name = ProgramResourceConstants.RouteNames.Credentials.GetCredentialById)]
         public IHttpActionResult GetCredentialById(Guid id)
         {
@@ -563,10 +501,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpGet]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetFirstABIMIssuanceDate", typeof(DateTime?))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.GetFirstABIMIssuanceDate, Name = ProgramResourceConstants.RouteNames.Credentials.GetFirstABIMIssuanceDate)]
         public IHttpActionResult GetFirstABIMIssuanceDate(Guid memberId)
         {
@@ -597,10 +531,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpGet]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetLatestLookbackDate", typeof(DateTime?))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.GetLatestLookbackDate, Name = ProgramResourceConstants.RouteNames.Credentials.GetLatestLookbackDate)]
         public IHttpActionResult GetLatestLookbackDate(Guid memberId)
         {
@@ -631,11 +561,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpGet]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetVocLetter", typeof(ResponseMessageResult))]
-        [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.GetVocLetter, Name = ProgramResourceConstants.RouteNames.Credentials.GetVocLetter)]
         public async Task<IHttpActionResult> GetVocLetter(string abimId)
         {
@@ -651,11 +576,8 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             try
             {
                 //ar@7/14/22 : no change here since we are reusing existing incoming access token
-                var profile = await MembershipClientService.GetProfileByAbimIdAsync(abimId).ConfigureAwait(false);
+                var profile = await ProfileInterService.GetProfileByABIMId(UserProfile.TokenWithoutBearer, ProfileHostUrl, abimId).ConfigureAwait(false);
 
-                if (profile == null)
-                    return Content(HttpStatusCode.NotFound, $"No user exists with AbimId:'{abimId}'.");
-          
                 var allCredentials = await CredentialService.SearchByMemberIdAsync(profile.Id).ConfigureAwait(false);
 
                 // filter only ABIM certificates (not ABIM issued cert (Issuance.SourceId=1)
@@ -663,7 +585,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                 // PBI 219808 : (Jan) Suppress Cosponsored certs from My Profile page for hybrid physicians
                 var ABIMcredentials = allCredentials.Where(c => c.Certification.Source.Code == "ABIM" && !c.IsCosponsored);
 
-                var vocLetterContent = HelperService.GetVocLetterContent(profile, ABIMcredentials).Result;
+                var vocLetterContent = HelperService.GetVocLetterContent(profile, ABIMcredentials);
 
                 if (vocLetterContent != null)
                 {
@@ -700,16 +622,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                 }
 
             }
-            catch (ApiException ex)
-            {
-                if (ex.StatusCode == 404)
-                    return Content(HttpStatusCode.NotFound, $"No user exists with AbimId:'{abimId}'.");
-                else
-                {
-                    HandleExceptionLogging(ex, $"abimId: '{abimId}'");
-                    return BadRequest(ex.InnerException?.Message);
-                }
-            }
             catch (Exception ex)
             {
                 HandleExceptionLogging(ex, $"abimId: '{abimId}'");
@@ -717,7 +629,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             }
             finally
             {
-                DisposeServices(Request); 
+                DisposeServices(Request);
             }
         }
         #endregion
@@ -734,11 +646,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpPost]
         [Authorize] //ar@10/19/2017 per task 101278
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "UpdateSelectedToMaintain", typeof(CredentialResource))]
-        [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.UpdateSelectedToMaintain, Name = ProgramResourceConstants.RouteNames.Credentials.UpdateSelectedToMaintain)]
         public async Task<IHttpActionResult> UpdateSelectedToMaintain(Guid credentialId, [FromBody] UpdateSelectedToMaintainCommand command)
         {
@@ -796,11 +703,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpPost]
         [Authorize] //ah@11/5/2018 per PBI 136142
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "UpdatePathway", typeof(CredentialResource))]
-        [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.UpdatePathway, Name = ProgramResourceConstants.RouteNames.Credentials.UpdatePathway)]
         public async Task<IHttpActionResult> UpdatePathway(Guid credentialId, [FromBody] UpdatePathwayCommand command)
         {
@@ -858,11 +760,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpPost]
         [Authorize]
         [ResourceAuthorize(Actions.Update)]
-        [SwaggerResponse(HttpStatusCode.OK, "WithdrawCredential", typeof(CredentialResource))]
-        [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.WithdrawCredential, Name = ProgramResourceConstants.RouteNames.Credentials.WithdrawCredential)]
         public async Task<IHttpActionResult> WithdrawCredential(Guid credentialId, [FromBody] WithdrawCredentialCommand command)
         {
@@ -886,7 +783,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             {
                 HandleExceptionLogging(ex, $"credentialId: '{credentialId}'", command);
                 return Content(HttpStatusCode.InternalServerError, ex.Message);
-            } 
+            }
         }
 
         /// <summary>
@@ -916,10 +813,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpPost]
         [Authorize]
         [ResourceAuthorize(Actions.Update)]
-        [SwaggerResponse(HttpStatusCode.OK, "ReinstateCredential", typeof(CredentialResource))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.ReinstateCredential, Name = ProgramResourceConstants.RouteNames.Credentials.ReinstateCredential)]
         public async Task<IHttpActionResult> ReinstateCredential(Guid credentialId, [FromBody] ReinstateCredentialCommand command)
         {
@@ -945,7 +838,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             {
                 HandleExceptionLogging(ex, $"credentialId: '{credentialId}'", command);
                 return Content(HttpStatusCode.InternalServerError, ex.Message);
-            } 
+            }
         }
 
         /// <summary>
@@ -973,11 +866,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpPost]
         [Authorize]
         [ResourceAuthorize(Actions.Update)]
-        [SwaggerResponse(HttpStatusCode.OK, "MarkForSelectionOrDeselection", typeof(CredentialResource))]
-        [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.MarkForSelectionOrDeselection, Name = ProgramResourceConstants.RouteNames.Credentials.MarkForSelectionOrDeselection)]
         public IHttpActionResult MarkForSelectionOrDeselection([FromBody] MarkCertificatesForSelectOrDeselectCommand command)
         {
@@ -990,15 +878,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                     return BadRequest(GetModelStateErrorMessage());
 
                 command.UserInfo = UserProfile;
-                if (command.UserInfo != null && string.IsNullOrEmpty(command.UserInfo?.Username))
-                {
-                    var windowsAccountNameIdentifierClaim = command.UserInfo?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.WindowsAccountName);
-                    var usernameValue = windowsAccountNameIdentifierClaim?.Value;
-                    if (!string.IsNullOrEmpty(usernameValue))
-                    {
-                        command.UserInfo.Username = usernameValue.ToLower();
-                    }
-                }
 
                 var commandResult = 
                     (MarkCertificatesForSelectOrDeselectCommandResult)CredentialService.Handle(command);
@@ -1016,8 +895,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                     (ex.Message.Contains("already") ? HttpStatusCode.BadRequest : HttpStatusCode.InternalServerError);
 
                 return Content(httpStatusCode, ex.Message);
-            } 
-             
+            }
         }
         #endregion Selection and Deselection
 
@@ -1034,11 +912,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpPost]
         [Authorize]
         [ResourceAuthorize(Actions.Create)]
-        [SwaggerResponse(HttpStatusCode.OK, "AddCredential", typeof(CredentialResource))]
-        [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.AddCredential, Name = ProgramResourceConstants.RouteNames.Credentials.AddCredential)]
         public async Task<IHttpActionResult> AddCredential([FromBody] AddCredentialCommand command)
         {
@@ -1068,7 +941,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                 HandleExceptionLogging(ex, null, command);
                 return InternalServerError(ex);
             }
-            
         }
         #endregion
 
@@ -1081,11 +953,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpPut]
         [Authorize]
         [ResourceAuthorize(Actions.Update)]
-        [SwaggerResponse(HttpStatusCode.OK, "UpdateCredential", typeof(CredentialResource))]
-        [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.UpdateCredential, Name = ProgramResourceConstants.RouteNames.Credentials.UpdateCredential)]
         public async Task<IHttpActionResult> UpdateCredential([FromBody] UpdateCredentialCommand command)
         {
@@ -1114,7 +981,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             {
                 HandleExceptionLogging(ex, null, command);
                 return InternalServerError(ex);
-            } 
+            }
         }
         #endregion
 
@@ -1127,11 +994,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpPost]
         [Authorize]
         [ResourceAuthorize(Actions.Create)]
-        [SwaggerResponse(HttpStatusCode.OK, "AddIssuance", typeof(IssuanceResource))]
-        [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.AddIssuance, Name = ProgramResourceConstants.RouteNames.Credentials.AddIssuance)]
         public async Task<IHttpActionResult> AddIssuance([FromBody] AddIssuanceCommand command)
         {
@@ -1160,8 +1022,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             {
                 HandleExceptionLogging(ex, null, command);
                 return InternalServerError(ex);
-            } 
-             
+            }
         }
         #endregion
 
@@ -1174,11 +1035,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpPut]
         [Authorize]
         [ResourceAuthorize(Actions.Update)]
-        [SwaggerResponse(HttpStatusCode.OK, "UpdateIssuance", typeof(IssuanceResource))]
-        [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.UpdateIssuance, Name = ProgramResourceConstants.RouteNames.Credentials.UpdateIssuance)]
         public async Task<IHttpActionResult> UpdateIssuance([FromBody] UpdateIssuanceCommand command)
         {
@@ -1207,7 +1063,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             {
                 HandleExceptionLogging(ex, null, command);
                 return InternalServerError(ex);
-            } 
+            }
         }
         #endregion
 
@@ -1220,11 +1076,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpGet]
         [Authorize]
         [ResourceAuthorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetNonAbimIssuanceCount", typeof(int))]
-        [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.GetNonAbimIssuancesCount, Name = ProgramResourceConstants.RouteNames.Credentials.GetNonAbimIssuancesCount)]
         public IHttpActionResult GetNonAbimIssuanceCount()
         {
@@ -1238,7 +1089,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             {
                 HandleExceptionLogging(ex, null);
                 return Content(HttpStatusCode.InternalServerError, ex.Message);
-            } 
+            }
         }
         #endregion
 
@@ -1254,11 +1105,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpPost]
         [RequiresHttps, Authorize]
         [ResourceAuthorize(Actions.Update)]
-        [SwaggerResponse(HttpStatusCode.OK, "EnrollInCMP", typeof(CredentialResource))]
-        [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.EnrollInCMP, Name = ProgramResourceConstants.RouteNames.Credentials.EnrollInCMP)]
         public async Task<IHttpActionResult> EnrollInCMP([FromBody] EnrollInCMPCommand command)
         {
@@ -1290,8 +1136,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             {
                 HandleExceptionLogging(ex, null, command);
                 return InternalServerError(ex);
-            } 
-             
+            }
         }
 
         /// <summary>
@@ -1302,11 +1147,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         [HttpPost]
         [RequiresHttps, Authorize]
         [ResourceAuthorize(Actions.Update)]
-        [SwaggerResponse(HttpStatusCode.OK, "UnEnrollInCMP", typeof(CredentialResource))]
-        [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.Credentials.UnEnrollInCMP, Name = ProgramResourceConstants.RouteNames.Credentials.UnEnrollInCMP)]
         public async Task<IHttpActionResult> UnEnrollInCMP([FromBody] UnEnrollInCMPCommand command)
         {
@@ -1336,7 +1176,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             {
                 HandleExceptionLogging(ex, null, command);
                 return InternalServerError(ex);
-            } 
+            }
         }
         #endregion
     }

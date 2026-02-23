@@ -83,6 +83,8 @@ namespace Abim.Platform.Program.App.Util
 
         public bool? PassExamWith2YearsOfFailed { get; set; }
 
+        public bool? NoConsequenceKCIExam { get; set; }
+
         public bool? ExamPassAfterNoconcequences { get; set; }
 
         public bool? InGracePeriod { get; set; }
@@ -106,7 +108,8 @@ namespace Abim.Platform.Program.App.Util
             result.CMPExamTimeRange = $"{CMPExamTimeRange?.Item1.ToShortDateString()}-{CMPExamTimeRange?.Item2.ToShortDateString()}";
             if (PassExamWith2YearsOfFailed.HasValue)
                 result.AdditionalResults += result.AdditionalResults + $" Exam_PassExamWith2YearsOfFailed:{PassExamWith2YearsOfFailed.Value.ToYesNo()}";
-
+            if (NoConsequenceKCIExam.HasValue)
+                result.AdditionalResults += result.AdditionalResults + $" Exam_NoConsequenceKCIExam:{NoConsequenceKCIExam.Value.ToYesNo()}";
             if (ExamPassAfterNoconcequences.HasValue)
                 result.AdditionalResults += result.AdditionalResults + $" Exam_ExamPassAfterNoconcequences:{ExamPassAfterNoconcequences.Value.ToYesNo()}";
 

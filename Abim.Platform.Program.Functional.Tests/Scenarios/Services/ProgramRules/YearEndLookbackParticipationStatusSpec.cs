@@ -121,6 +121,14 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             new Should_NOT_Update_Issuances_In_2022_Covid4Spec().BDDfy();
         }
 
+        [Test]
+        [WorkItem(216370)]
+        [WorkItem(208254)]
+        public void Should_Update_Issuances_In_2022_NotCovid4()
+        {
+            new Should_Update_Issuances_In_2022_NotCovid4Spec().BDDfy();
+        }
+
         #region Scenarios
         private abstract class ParticipationStatusSpec : ProgramRulesServiceSimplifiedScenario
         {
@@ -695,6 +703,73 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             }
         }
 
+        private class Should_Update_Issuances_In_2022_NotCovid4Spec : ParticipationStatusSpec
+        {
+            protected override void SetupCredentials()
+            {
+
+                _lookbackDate = new DateTime(2022, 12, 31);
+
+                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
+                _creds = new List<Credential>(2);
+
+                _creds.Add(CredentialBuilder.Build(abimSource));
+                // MBM issuance
+                DateTime issuanceDate = _lookbackDate.AddMonths(-(new Random()).Next(1, 24)); // make sure it is before _lookbackDate
+                _creds[0].AddIssuance(IssuanceBuilder.Build(abimSource, IssuanceStatusType.Active, DurationType.Continuous, MaintenanceRequirementType.Required, MaintenanceStatusType.Maintained, issuanceDate));
+
+                _creds[0].ApplyChangesAfterCreatingCredential(true, DateTime.Now.AddYears(-3), DateTime.Now.AddYears(-2), null, null, null, null, false, null);
+
+                _creds[0].Certification.Code = ProgramResourceConstants.CertificationCode.GeriatricMedicine;
+            }
+
+            protected override void SetupProductInterserviceMock()
+            {
+                var activites = new ActivityFullCollectionResource();
+                var builder = new ActivityResourceBuilder();
+                activites.Data = new List<ActivityResource>(1);
+
+                base.SetupProductInterserviceMock();
+                _prodInterSvcMock
+                    .Setup(x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                    .Returns(Task.FromResult(activites));
+
+            }
+
+            protected override void SetupRegistrationInterserviceMock()
+            {
+                var regBuilder = new RegistrationResourceBuilder();
+                var registrations = new UserRegistrationsAndCMPRegistrationsResource();
+
+                registrations.Registrations = new List<RegistrationResource>(1);
+                registrations.CMPRegistrations = new List<CMPRegistrationResource>(0);
+
+                registrations.Registrations.Add(
+                    regBuilder
+                        .WithCertificationId(_creds[0].Certification.ExternalId)
+                        .WithExamType(ExamType.Moc)
+                        .WithResult("Pending")
+                        .Build());
+                _regInterSvcMock = new Mock<IRegistrationInterservice>(MockBehavior.Strict);
+                _regInterSvcMock
+                    .Setup(x => x.GetAllRegistrationsAndCMPRegistrationsForUser(It.IsAny<string>(), It.IsAny<Guid>()))
+                    .Returns(Task.FromResult(registrations));
+            }
+
+            protected override void GivenThatIHaveParameters()
+            {
+                _memberId = Guid.NewGuid();
+                _processingDate = DateTime.Now;
+            }
+
+            private void AndThen_MB_IssuanceShould_BeUpdated()
+            {
+                var MBMIssuance = _creds[0].Issuances.Where(x => x.Duration == DurationType.Continuous).FirstOrDefault();
+
+                MBMIssuance.MaintenanceStatus.Should().Be(MaintenanceStatusType.NotMaintained); 
+                MBMIssuance.AuditData.ModifiedBy.Should().Be("ClearMaint");
+            }
+        }
         #endregion Scenarios
     }
 }

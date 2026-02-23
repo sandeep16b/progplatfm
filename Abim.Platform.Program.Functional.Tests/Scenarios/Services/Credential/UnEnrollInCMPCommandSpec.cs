@@ -1,9 +1,7 @@
 ﻿using Abim.Enterprise.Core.Registration.Enums;
 using Abim.Platform.Program.App.Data;
-using Abim.Platform.Program.App.Domain;
 using Abim.Platform.Program.App.Services.CommandResults;
 using Abim.Platform.Program.App.Services.Commands;
-using ServiceBus.Events;
 using Abim.Platform.Program.Relational.Validation;
 using Abim.Platform.Program.Relational.Validation.Impl;
 using Abim.Platform.Program.Resources;
@@ -18,7 +16,6 @@ using FluentValidation.Results;
 using Moq;
 using NUnit.Framework;
 using System;
-using System.Threading;
 using TestStack.BDDfy;
 
 namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
@@ -34,13 +31,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
         public void Should_Process_Command_Successfully_When_Valid()
         {
             new ShouldProcessCommandSuccessfullyWhenValid().BDDfy();
-        }
-
-        // pbi 278052 : (HF after 2.50) Cert Fees for pre-1990 CMP enrollees - team 4 work
-        [Test]
-        public void Should_Process_InvoluntaryKickOutOfCMP_Command_Successfully_When_Valid()
-        {
-            new ShouldProcessInvoluntaryKickOutOfCmpSuccessfullyWhenValid().BDDfy();
         }
 
         [Test]
@@ -96,7 +86,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
         {
             protected UnEnrollInCMPCommand _cmd;
             protected UnEnrollInCMPCommandResult _result;
-            protected Credential credential;
 
             protected override void SetupValidationFactoryMock()
             {
@@ -134,13 +123,13 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
         #endregion Setup
 
-        private class ShouldProcessCommandSuccessfullyWhenValid : UnEnrollInCMPCommandScenario //
+        private class ShouldProcessCommandSuccessfullyWhenValid : UnEnrollInCMPCommandScenario
         {
             protected override void SetupCredentialRepositoryMock()
             {
                 _credRepoMock = new Mock<ICredentialRepository>(MockBehavior.Strict);
 
-                credential = CredentialBuilder.Build();
+                var credential = CredentialBuilder.Build();
                 credential.IsInCMP=true;
 
                 _credRepoMock
@@ -148,7 +137,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
                      .Returns(credential);
 
                 _credRepoMock
-                    .Setup(x => x.Update(It.IsAny<Credential>(), It.IsAny<string>()))
+                    .Setup(x => x.Update(It.IsAny<App.Domain.Credential>(), It.IsAny<string>()))
                     .Returns(new AbimValidationResult { Succeeded = true });
 
                 _credRepoMock
@@ -195,97 +184,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             private void AndPathwayShouldBeSetToMOC()
             {
                 _result.Data.Pathway.Should().Equals(Resources.PathwayType.MOC);
-            }
-
-            private void AndUnEnrollDateShouldBeSet()
-            {
-                _result.Data.CMPUnenrollmentDate.Should().Equals(_cmd.UnEnrollmentDate);
-            }
-
-            private void AndACMPUnEnrolledShouldBePublishedWithTrueVoluntaryValue()
-            {
-                _busControlMock
-                .Verify(mock =>
-                            mock.Publish(It.Is<CMPUnEnrolled>( e => e.MemberId == credential.MemberId && e.Voluntary == true), It.IsAny<CancellationToken>()),
-                                Times.Once);
-            }
-        }
-
-        private class ShouldProcessInvoluntaryKickOutOfCmpSuccessfullyWhenValid : UnEnrollInCMPCommandScenario //
-        {
-            protected override void SetupCredentialRepositoryMock()
-            {
-                _credRepoMock = new Mock<ICredentialRepository>(MockBehavior.Strict);
-
-                credential = CredentialBuilder.Build();
-                credential.IsInCMP = true;
-
-                _credRepoMock
-                     .Setup(x => x.GetCredentialByMemberAndCode(It.IsAny<Guid>(), It.IsAny<string>()))
-                     .Returns(credential);
-
-                _credRepoMock
-                    .Setup(x => x.Update(It.IsAny<Credential>(), It.IsAny<string>()))
-                    .Returns(new AbimValidationResult { Succeeded = true });
-
-                _credRepoMock
-                    .SetupGet(x => x.CommitEachCallInItsOwnTransaction)
-                    .Returns(true);
-
-                _credRepoMock
-                    .Setup(x => x.CommitTransaction());
-
-            }
-
-            private void GivenIHaveACommand()
-            {
-                _cmd = UnEnrollInCMPCommandBuilder.BuildValid();
-                _cmd.RequestingUserName = "KickCMP"; // replicate KickOutOfCMPIfApplicable()
-            }
-
-            private void WhenICallTheHandleMethod()
-            {
-                try
-                {
-                    _result = _sut.Handle(_cmd).Result;
-                }
-                catch (Exception ex)
-                {
-                    _caughtException = ex;
-                }
-            }
-
-            private void ThenNoExceptionShouldHaveOccurred()
-            {
-                _caughtException.Should().BeNull();
-            }
-
-            private void AndResultShouldBeSuccessful()
-            {
-                _result.Succeeded.Should().BeTrue();
-            }
-
-            private void AndIsInCMPShouldBeSetToFalse()
-            {
-                _result.Data.IsInCMP.Should().BeFalse();
-            }
-
-            private void AndPathwayShouldBeSetToMOC()
-            {
-                _result.Data.Pathway.Should().Equals(Resources.PathwayType.MOC);
-            }
-
-            private void AndUnEnrollDateShouldBeSet()
-            {
-                _result.Data.CMPUnenrollmentDate.Should().Equals(_cmd.UnEnrollmentDate);
-            }
-
-            private void AndACMPUnEnrolledShouldBePublishedWithFalseVoluntaryValue()
-            {
-                _busControlMock
-                .Verify(mock =>
-                            mock.Publish(It.Is<CMPUnEnrolled>(e => e.MemberId == credential.MemberId && e.Voluntary == false), It.IsAny<CancellationToken>()),
-                                Times.Once);
             }
         }
 
@@ -377,10 +275,12 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 _credRepoMock = new Mock<ICredentialRepository>(MockBehavior.Strict);
 
-                Credential cred = null;    
+                var credential = CredentialBuilder.Build();
+                credential = null;
+
                 _credRepoMock
                      .Setup(x => x.GetCredentialByMemberAndCode(It.IsAny<Guid>(), It.IsAny<string>()))
-                     .Returns(cred);
+                     .Returns(credential);
             }
 
             private void GivenThatIHaveACommand()
@@ -449,14 +349,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             private void ThenTheProcessShouldReturnProperMessage()
             {
                 result.Message.Should().Contain("IS NOT enrolled in the CMP pathway.");
-            }
-
-            private void AndACMPEnrolledShouldNotPublished()
-            {
-                _busControlMock
-                    .Verify(x =>
-                                x.Publish(It.IsAny<CMPEnrolled>(), It.IsAny<CancellationToken>()),
-                                Times.Never);
             }
         }
 

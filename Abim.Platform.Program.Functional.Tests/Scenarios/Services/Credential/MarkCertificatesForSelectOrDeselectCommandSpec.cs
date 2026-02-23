@@ -1,4 +1,5 @@
-﻿using Abim.Platform.Program.App.Data;
+﻿using Abim.Enterprise.Core.ServiceBus.Program;
+using Abim.Platform.Program.App.Data;
 using Abim.Platform.Program.App.Domain;
 using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.App.Services.CommandResults;
@@ -20,7 +21,6 @@ using Moq;
 using NHibernate;
 using NLog;
 using NUnit.Framework;
-using ServiceBus.Events;
 using Shouldly;
 using System;
 using System.Collections.Generic;
@@ -244,7 +244,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
                        Resources.OccurrenceType.Recertification);
                 Issuance[] issuances4 = { issuance4 };
 
-                issuance4.DeselectionEffectiveDate = new DateTime(DateTime.Now.Year, 4, 1);
+                issuance4.DeselectionEffectiveDate = new DateTime(DateTime.Now.Year, 2, 1);
                 issuance4.DeselectionSubmittedDate = DateTime.Now.AddYears(-1);
 
                 Credentials.Add(
@@ -267,7 +267,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
                            Resources.MaintenanceStatusType.Maintained,
                            Resources.OccurrenceType.Recertification);
 
-                issuance5.DeselectionEffectiveDate = new DateTime(DateTime.Now.Year, 4, 1);
+                issuance5.DeselectionEffectiveDate = new DateTime(DateTime.Now.Year, 2, 1);
                 issuance5.DeselectionSubmittedDate = DateTime.Now.AddYears(-1);
 
                 Issuance[] issuances5 = { issuance5 };
@@ -292,7 +292,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
                        Resources.MaintenanceStatusType.Maintained,
                        Resources.OccurrenceType.Recertification);
 
-                issuance6.DeselectionEffectiveDate = new DateTime(DateTime.Now.Year, 4, 1);
+                issuance6.DeselectionEffectiveDate = new DateTime(DateTime.Now.Year, 2, 1);
                 issuance6.DeselectionSubmittedDate = DateTime.Now.AddYears(-1);
 
                 Issuance[] issuances6 = { issuance6 };
@@ -369,14 +369,14 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             protected virtual void SetupMessageBus()
             {
                 My<IBusControl>()
-                    .Setup(mock => mock.Publish(
-                        It.IsAny<CertDeselected>(), 
+                    .Setup(mock => mock.Publish<CertificateDeselectedEvent>(
+                        It.IsAny<CertificateDeselectedEvent>(), 
                         It.IsAny<System.Threading.CancellationToken>()))
                     .Returns(Task.FromResult(true));
 
                 My<IBusControl>()
-                    .Setup(mock => mock.Publish(
-                        It.IsAny<CertSelected>(),
+                    .Setup(mock => mock.Publish<CertificateSelectedEvent>(
+                        It.IsAny<CertificateSelectedEvent>(),
                         It.IsAny<System.Threading.CancellationToken>()))
                     .Returns(Task.FromResult(true));
             }
@@ -639,13 +639,10 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
                 {
                     My<IBusControl>()
                         .Verify(mock =>
-                            mock.Publish(It.Is<CertDeselected>(deselectedEvent => 
+                            mock.Publish(It.Is<CertificateDeselectedEvent>(deselectedEvent => 
                                 deselectedEvent.MemberId == credential.MemberId 
-                                && deselectedEvent.CredentialId == credential.ExternalId
-                                && deselectedEvent.CertificationId == credential.Certification.ExternalId
-                                 && deselectedEvent.CertificationCode == credential.Certification.Code
-                                 && deselectedEvent.Cosponsored==credential.IsCosponsored
-                                ), default(System.Threading.CancellationToken)), 
+                                && deselectedEvent.CredentialGuid == credential.ExternalId
+                                && deselectedEvent.CertificationGuid == credential.Certification.ExternalId), default(System.Threading.CancellationToken)), 
                             Times.Once);
                 }
             }
@@ -656,13 +653,11 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
                 {
                     My<IBusControl>()
                         .Verify(mock =>
-                            mock.Publish(It.Is<CertSelected>(selectedEvent =>
+                            mock.Publish(It.Is<CertificateSelectedEvent>(selectedEvent =>
                                 selectedEvent.MemberId == credential.MemberId
-                                && selectedEvent.CredentialId == credential.ExternalId
-                                && selectedEvent.CertificationId == credential.Certification.ExternalId
-                                && selectedEvent.CertificationCode == credential.Certification.Code
-                                && selectedEvent.Cosponsored == credential.IsCosponsored
-                                && selectedEvent.InitialCertificationDate == credential.OldestIssuance.IssuanceDate ), default(System.Threading.CancellationToken)),
+                                && selectedEvent.CredentialGuid == credential.ExternalId
+                                && selectedEvent.CertificationGuid == credential.Certification.ExternalId
+                                && selectedEvent.InitialCertDate == credential.OldestIssuance.IssuanceDate ), default(System.Threading.CancellationToken)),
                             Times.Once);
                 }
             }

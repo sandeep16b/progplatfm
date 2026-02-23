@@ -1,7 +1,10 @@
-﻿extern alias SharedOldServiceBus;  
+﻿extern alias SharedOldServiceBus;
+
+using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
+using Abim.Enterprise.Core.Profile.Resource;
+using Abim.Platform.Program.App.Classes;
 using Abim.Platform.Program.App.DTOs;
 using Abim.Platform.Program.App.Services;
-using Abim.Platform.Program.MembershipClient;
 using Abim.Platform.Program.App.Services.CommandResults;
 using Abim.Platform.Program.App.Services.Commands;
 using Abim.Platform.Program.Core.Identity;
@@ -13,7 +16,7 @@ using SharedOldServiceBus::Abim.Enterprise.Core.ServiceBus.Notification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Abim.Platform.Program.App.Util.Constants; 
+using static Abim.Platform.Program.App.Util.Constants;
 
 namespace Abim.Platform.Program.App.HangFireJobs
 {
@@ -24,39 +27,36 @@ namespace Abim.Platform.Program.App.HangFireJobs
     {
         private ICredentialService _credentialService;
         private IBusControl _bus;
-        private IMembershipClientService _membershipClientService;
+        private IProfileInterservice _profileInterservice;
         private IAccessTokenService _accessTokenService;
         private string _profileHostUrl;
         private static ILogger Log = LogManager.GetCurrentClassLogger();
-        private string _enviroment;
+
+
         /// <summary>
         /// Creates a new instance of DeSelectCertificateChildJob
         /// </summary>
         /// <param name="credentialService">An instance of ICredentialService required by the job</param>
         /// <param name="bus">An instance of IBusControl with which to publish messages</param>
-        /// <param name="membershipClientService">An instance of IProfileApiClientWraperService to be used to retrieve Profile information</param>
+        /// <param name="profileInterservice">An instance of IProfileInterservice to be used to retrieve profile information</param>
         /// <param name="profileHostUrl">The URL of the profile host</param>
-        /// <param name="enviroment">The enviroment name (Dev, QA, Prod)</param>
         /// <param name="accessTokenSingletonWraper">An instance of IAccessTokenService with which to retrieve an access token for interservice calls</param>
         public DeselectCertificateChildJob(
             ICredentialService credentialService, 
-            IBusControl bus,
-            IMembershipClientService membershipClientService,
+            IBusControl bus, 
+            IProfileInterservice profileInterservice,
             string profileHostUrl,
-            string enviroment,
             IAccessTokenService accessTokenSingletonWraper)
 
         {
             _credentialService = credentialService ?? throw new ArgumentNullException("credentialService");
             _bus = bus ?? throw new ArgumentNullException("bus");
-            _membershipClientService = membershipClientService ?? throw new ArgumentNullException("membershipClientService");
+            _profileInterservice = profileInterservice ?? throw new ArgumentNullException("profileInterservice");
 
             if (string.IsNullOrWhiteSpace(profileHostUrl))
                 throw new ArgumentException("profileHostUrl is required.", profileHostUrl);
             else
                 _profileHostUrl = profileHostUrl;
-
-            _enviroment = enviroment ?? throw new ArgumentNullException("enviroment");
 
             _accessTokenService = accessTokenSingletonWraper ?? throw new ArgumentNullException("accessTokenSingletonWraper");
         }
@@ -92,7 +92,7 @@ namespace Abim.Platform.Program.App.HangFireJobs
             {
                 Log.Error($"DeselectCertificateChildJob.ExecuteChild failed for member {memberId}, de-selection effective date {deselectionEffectiveDate}, with exception \"{ex.Message}\".");
                 throw;
-            } 
+            }
         }
 
         private void DeselectCertificates(List<Guid> credentialIds, DateTime deselectionEffectiveDate)
@@ -117,10 +117,11 @@ namespace Abim.Platform.Program.App.HangFireJobs
             }
         }
 
-        private ProfileResource GetProfileInfo(Guid memberId)
-        { 
-             var profile =  _membershipClientService.GetProfileByMemberIdAsync(memberId).Result;
-             return profile; 
+        private ProfileNestedResource GetProfileInfo(Guid memberId)
+        {
+            string accessToken = _accessTokenService.GetAccessToken();
+            var profile = _profileInterservice.GetProfileById(accessToken, _profileHostUrl, memberId).Result;
+            return profile;
         }
 
         private void SendEmailNotificationOfDeselect(Guid memberId, List<CredentialInfoDTO> credentialsInfo)
@@ -132,16 +133,14 @@ namespace Abim.Platform.Program.App.HangFireJobs
             var notificationEvent = new NotificationEvent()
             {
                 TemplateExternalKey = TriggeredCommunicationTemplateExternalKey.DeactivateCertification,
-                EmailAddress = profile.EmailAddress,
+                EmailAddress = profile.EmailAddress.EmailAddress,
                 Parameters = new Dictionary<string, string>
                 {
                     { "LastName", profile.Name.LastName }, 
                     { "CertificationNames", GetDelimitedCertNames(certNames, "<br />", true) }, 
                     { "CertificationNames_TV", GetDelimitedCertNames(certNames, ", ", false) }, 
-                    { "SubscriberKey", profile.EmailAddress }, 
-                    { "IID", profile.AbimId },
-                    // Enviroment --
-                    { "Env", _enviroment }
+                    { "SubscriberKey", profile.EmailAddress.EmailAddress }, 
+                    { "IID", profile.AbimId }
                 }
             };
 

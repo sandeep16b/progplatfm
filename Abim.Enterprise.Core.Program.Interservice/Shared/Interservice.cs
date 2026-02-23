@@ -43,7 +43,7 @@ namespace Abim.Platform.Program.Interservice.Shared
         /// <value>
         /// true or false.
         /// </value>
-        protected bool DisposeCalled;
+        protected bool DisposeCalled = false;
 
         #endregion
 
@@ -72,7 +72,7 @@ namespace Abim.Platform.Program.Interservice.Shared
         /// From the site cited above, on why disposing per-request HttpClients (whether manually or through a using statement) is not sufficient:
         /// 
         ///     Windows will hold a connection in this state for 240 seconds (It is set by [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\TcpTimedWaitDelay]). There is a
-        ///     limit to how quickly Windows can open new sockets so if you exhaust the connection pool then youï¿½re likely to see error like:
+        ///     limit to how quickly Windows can open new sockets so if you exhaust the connection pool then you’re likely to see error like:
         ///     
         ///     Unable to connect to the remote server
         ///     System.Net.Sockets.SocketException: Only one usage of each socket address (protocol/network address/port) is normally permitted.
@@ -203,7 +203,7 @@ namespace Abim.Platform.Program.Interservice.Shared
                         }
                         
                         //Read the response content
-                        string content;
+                        string content = null;
                         try
                         {
                             content = await response.Content.ReadAsStringAsync();
@@ -214,7 +214,7 @@ namespace Abim.Platform.Program.Interservice.Shared
                         }
                         
                         //Deserialize the response content (unless the type T requested is typeof(string))
-                        T deserialized;
+                        T deserialized = default(T);
                         if(typeof(T) == typeof(string))
                         {
                             string cleanedContent = content;
@@ -244,7 +244,7 @@ namespace Abim.Platform.Program.Interservice.Shared
             {
                 throw new Exception($"{ErrorPrefix}json exception from {url}", ex);
             }
-            catch(UnsuccessfulStatusException)
+            catch(UnsuccessfulStatusException ex)
             {
                 throw;
             }
@@ -265,7 +265,7 @@ namespace Abim.Platform.Program.Interservice.Shared
             {
                 HttpClient.Dispose();
             }
-            catch(Exception)
+            catch(Exception ex)
             {
             }
         }
@@ -325,7 +325,7 @@ namespace Abim.Platform.Program.Interservice.Shared
                 responseContent =  await response.Content.ReadAsStringAsync();
             }
             #pragma warning disable 0168
-            catch(Exception)
+            catch(Exception ex)
             {
             }
             return responseContent;
@@ -357,7 +357,7 @@ namespace Abim.Platform.Program.Interservice.Shared
                     bodyJson = JsonConvert.ToString(body);
                 }
                 #pragma warning disable 0168
-                catch(Exception)
+                catch(Exception ex)
                 {
                     returnStringPart2 += ". The body may have failed to serialize during the send";
                 }
@@ -365,13 +365,13 @@ namespace Abim.Platform.Program.Interservice.Shared
             if(bodyJson != null) returnStringPart2 += " with body " + bodyJson;
             
             //response content
-            string responseContent;
+            string responseContent = null;
             try
             {
                 responseContent = string.Format(": '{0}'", await response.Content.ReadAsStringAsync());
             }
             #pragma warning disable 0168
-            catch(Exception)
+            catch(Exception ex)
             {
                 responseContent = " unable to be read";
             }
@@ -404,8 +404,9 @@ namespace Abim.Platform.Program.Interservice.Shared
         /// <returns></returns>
         public static HttpClient CreateHttpClient(string hostUrl, string responseDataType)
         {
-            HttpClient httpClient;
-            if (string.IsNullOrEmpty(responseDataType) || responseDataType == DefaultContentType)
+            HttpClient httpClient = null;
+            
+            if(string.IsNullOrEmpty(responseDataType) || responseDataType == DefaultContentType)
                 httpClient = new HttpClient();
             else
                 httpClient = new HttpClient(new SpecifiedMediaTypeDelegatingHandler(responseDataType));

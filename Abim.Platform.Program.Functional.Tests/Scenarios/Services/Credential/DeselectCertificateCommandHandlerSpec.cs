@@ -20,12 +20,10 @@ using Moq;
 using NHibernate;
 using NLog;
 using NUnit.Framework;
-using ServiceBus.Events;
 using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using TestStack.BDDfy;
 
@@ -35,7 +33,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
     {
         [TestCase]
         [WorkItem(187664)]
-        [WorkItem(322411)]
         public void DeselectCertificateCommandHandleReturnsAcceptedOnSuccess()
         {
             new DeselectCertificateCommandHandleSuccessfulScenario().BDDfy();
@@ -70,7 +67,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
         }
 
         [TestCase]
-        [WorkItem(293547)]
+        [WorkItem(187664)]
         public void DeselectCertificateCommandHandleReturnsRejectedWhenCredentialHasAlreadyBeenDeselected()
         {
             new DeselectCertificateCommandHandleReturnsRejectedWhenCredentialAlreadyDeselectedScenario().BDDfy();
@@ -102,8 +99,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             protected new EmailBuilder EmailBuilder { get; set; }
             protected new DateTimeBuilder DateTimeBuilder { get; set; }
             protected new Exception ExceptionCaught { get; set; }
-            
-            protected Mock<IBusControl> _busControlMock;
 
             protected override List<Type> AdditionalDependencies()
             {
@@ -116,6 +111,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
                 types.Add(typeof(ICertificationRepository));
                 types.Add(typeof(ISourceService));
                 types.Add(typeof(ISourceRepository));
+                types.Add(typeof(IBusControl));
                 types.Add(typeof(IBackgroundJobClient));
                 types.Add(typeof(IValidationFactory));
                 types.Add(typeof(IValidator<MarkCertificateForDeselectCommand>));
@@ -140,8 +136,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
                 My<IHelperService>()
                    .Setup(o => o.TriggeredCommunication(It.IsAny<Credential>(), It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<ICredentialService>()))
                    .Returns(new Task(() => { }));
-
-                SetupBusControlMock();
 
                 CredentialService = Container.GetInstance<App.Services.Impl.CredentialService>();
                 SetupCredential();
@@ -176,22 +170,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
                         Resources.CredentialType.General,
                         Resources.PathwayType.MOC,
                         issuances);
-
-                Credential.IsInCMP = true;
-            }
-
-            protected virtual void SetupBusControlMock()
-            {
-
-                _busControlMock = new Mock<IBusControl>(MockBehavior.Strict);
-
-                _busControlMock
-                    .Setup(x => x.Publish(It.IsAny<CMPUnEnrolled>(), It.IsAny<CancellationToken>()))
-                     .Returns(Task.FromResult(false));
-
-                Mocks.Add(typeof(IBusControl), _busControlMock);
-
-                Container.Inject(typeof(IBusControl), _busControlMock.Object);
             }
 
             protected virtual void SetupCredentialRespository()
@@ -350,15 +328,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 My<ICredentialRepository>().Verify(mock => mock.CommitTransaction(), Times.Once);
             }
-
-            private void AndACMPUnEnrolledShouldBePublishedWithTrueVoluntaryValue()
-            {
-                _busControlMock
-                .Verify(mock =>
-                            mock.Publish(It.Is<CMPUnEnrolled>(e => e.Voluntary == true), It.IsAny<CancellationToken>()),
-                                Times.Once);
-            }
-
         }
         #endregion Successful Scenario
 
@@ -514,39 +483,21 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
         #region Already Deselected Scenario
         private class DeselectCertificateCommandHandleReturnsRejectedWhenCredentialAlreadyDeselectedScenario : DeselectCertificateCommandHandleReturnsRejectedScenario
         {
-            Guid credentialId = Guid.NewGuid();
-            public DeselectCertificateCommandHandleReturnsRejectedWhenCredentialAlreadyDeselectedScenario() : base("")
+            public DeselectCertificateCommandHandleReturnsRejectedWhenCredentialAlreadyDeselectedScenario() : base("has already been processed for deselection")
             { }
-
-            public void GivenIInputAValidCommand()
-            {
-                Command = CommandBuilder<DeselectCertificateCommand>
-                             .Valid()
-                             .With(cmd => cmd.Username = "bdickinson")
-                             .With(cmd => cmd.ExpiredDate = new DateTime(2020, 9, 18))
-                             .With(cmd => cmd.CredentialId = credentialId)
-                             .Build();
-            }
 
             protected override void SetupCredential()
             {
                 base.SetupCredential();
-                var latestIssuance = Credential.Issuances.OrderByDescending(issuance => issuance.IssuanceDate).First();
-                Credential.ExternalId = Guid.NewGuid();
-                latestIssuance.DeselectionProcessedDate = new DateTime(2020, 11, 1);
-                GivenIInputAValidCommand();
-                resultMessageShouldContain = $"Credential {credentialId} has already been processed for deselection.";
-            }
-            public void AndThenTheCommandResultValidationShouldShowSuccess()
-            {
-                CommandResult.Validation.Succeeded.Should().BeTrue();
+                Credential.Issuances[0].DeselectionProcessedDate = new DateTime(2020, 11, 1);
             }
 
-            public void AndThenThereShouldBeAWarningMessage()
+            public void GivenIHaveAValidCommand()
             {
-                LogTest.Should().Match<LogTest>(log =>
-                    log.Warns.Any(s => s.StartsWith(resultMessageShouldContain)) &&
-                    log.Errors.All(s => s.Equals("")));
+                Command =
+                    CommandBuilder<DeselectCertificateCommand>
+                        .Valid()
+                        .Build();
             }
         }
         #endregion Already Deselected Scenario

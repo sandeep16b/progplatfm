@@ -7,7 +7,6 @@ using GreenPipes;
 using GreenPipes.Introspection;
 using MassTransit;
 using Newtonsoft.Json;
-using Swashbuckle.Swagger.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Configuration.Abstractions;
@@ -22,7 +21,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
     /// Api Controller
     /// </summary>
     /// <seealso cref="System.Web.Http.ApiController"/>
-    [RoutePrefix(ProgramResourceConstants.Routes.Prefix.ApiVersion)]
+    [RoutePrefix(ProgramResourceConstants.Routes.Prefix.App)]
     public class AppInfoController : ControllerBase
     {
         #region Properties
@@ -76,8 +75,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [AllowAnonymous]
-        [SwaggerResponse(HttpStatusCode.OK, "Status", typeof(string))]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [HttpGet, Route(ProgramResourceConstants.Routes.App.Status, Name = ProgramResourceConstants.RouteNames.App.Status)]
         public string Status()
         {
@@ -91,11 +88,8 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         /// <returns></returns>
         [HttpOptions]
         [Authorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetSystemInfo", typeof(SystemInfo))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.System.SystemInfo, Name = ProgramResourceConstants.RouteNames.System.SystemInfo)]
+        [Route(ProgramResourceConstants.Routes.System.SystemInfoExt, Name = ProgramResourceConstants.RouteNames.System.SystemInfoExt)]
         public IHttpActionResult GetSystemInfo()
         {
             string owinUrl = (ConfigurationManager.AppSettings["OwinUrl"] ?? "").TrimEnd('/');
@@ -118,30 +112,13 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         }
 
         /// <summary>
-        /// GetSystemInfoExt method.
-        /// </summary>
-        /// <returns></returns>
-        [HttpOptions]
-        [Authorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetSystemInfoExt", typeof(SystemInfo))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
-        [Route(ProgramResourceConstants.Routes.System.SystemInfoExt, Name = ProgramResourceConstants.RouteNames.System.SystemInfoExt)]
-        public IHttpActionResult GetSystemInfoExt()
-        {
-            return GetSystemInfo();
-        }
-
-
-        /// <summary>
         /// GetVersionInfo method.
         /// </summary>
         /// <returns></returns>
         [HttpGet]
         [AllowAnonymous]
-        [SwaggerResponse(HttpStatusCode.OK, "GetVersionInfo", typeof(VersionInfo))]
         [Route(ProgramResourceConstants.Routes.System.VersionInfo, Name = ProgramResourceConstants.RouteNames.System.VersionInfo)]
+        [Route(ProgramResourceConstants.Routes.System.VersionInfoExt, Name = ProgramResourceConstants.RouteNames.System.VersionInfoExt)]
         public IHttpActionResult GetVersionInfo()
         {
             var assembly = Assembly.GetExecutingAssembly().GetName().Version;
@@ -164,29 +141,13 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         }
 
         /// <summary>
-        /// GetVersionInfoExt method.
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        [AllowAnonymous]
-        [SwaggerResponse(HttpStatusCode.OK, "GetVersionInfoExt", typeof(VersionInfo))]
-        [Route(ProgramResourceConstants.Routes.System.VersionInfoExt, Name = ProgramResourceConstants.RouteNames.System.VersionInfoExt)]
-        public IHttpActionResult GetVersionInfoExt()
-        {
-            return GetVersionInfo();
-        }
-
-        /// <summary>
         /// GetBusInfo method.
         /// </summary>
         /// <returns></returns>
         [HttpGet]
         [Authorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetBusInfo", typeof(BusInfo))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.System.BusInfo, Name = ProgramResourceConstants.RouteNames.System.BusInfo)]
+        [Route(ProgramResourceConstants.Routes.System.BusInfoExt, Name = ProgramResourceConstants.RouteNames.System.BusInfoExt)]
         public IHttpActionResult GetBusInfo()
         {
             ProbeResult probeData = BusControl.GetProbeResult();
@@ -206,32 +167,13 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         }
 
         /// <summary>
-        /// GetBusInfoExt method.
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        [Authorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetBusInfoExt", typeof(BusInfo))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
-        [Route(ProgramResourceConstants.Routes.System.BusInfoExt, Name = ProgramResourceConstants.RouteNames.System.BusInfoExt)]
-        public IHttpActionResult GetBusInfoExt()
-        {
-            return GetBusInfo();
-        }
-
-        /// <summary>
         /// GetSystemRoot method.
         /// </summary>
         /// <returns></returns>
         [HttpGet]
         [Authorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetSystemRoot", typeof(SystemRootInfo))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(ProgramResourceConstants.Routes.System.SystemRoot, Name = ProgramResourceConstants.RouteNames.System.SystemRoot)]
+        [Route(ProgramResourceConstants.Routes.System.SystemRootExt, Name = ProgramResourceConstants.RouteNames.System.SystemRootExt)]
         public IHttpActionResult GetSystemRoot()
         {
             var links = new List<Link>();
@@ -340,30 +282,12 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             });
         }
 
-
-        /// <summary>
-        /// GetSystemRootExt method.
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        [Authorize]
-        [SwaggerResponse(HttpStatusCode.OK, "GetSystemRootExt", typeof(SystemRootInfo))]
-        [SwaggerResponse(HttpStatusCode.Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.Forbidden)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
-        [Route(ProgramResourceConstants.Routes.System.SystemRootExt, Name = ProgramResourceConstants.RouteNames.System.SystemRootExt)]
-        public IHttpActionResult GetSystemRootExt()
-        {
-            return GetSystemRoot();
-        }
-
         /// <summary>
         /// Version endpoint
         /// </summary>
         /// <returns></returns>
         [AllowAnonymous]
         [HttpGet]
-        [SwaggerResponse(HttpStatusCode.OK, "Version", typeof(string))]
         [Route(ProgramResourceConstants.Routes.App.Version, Name = ProgramResourceConstants.RouteNames.App.Version)]
         public string Version()
         {
@@ -381,7 +305,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         /// <returns></returns>
         [AllowAnonymous]
         [HttpGet]
-        [SwaggerResponse(HttpStatusCode.OK, "Uptime", typeof(string))]
         [Route(ProgramResourceConstants.Routes.App.Uptime, Name = ProgramResourceConstants.RouteNames.App.Uptime)]
         public string Uptime()
         {
@@ -395,7 +318,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         /// <returns></returns>
         [AllowAnonymous]
         [HttpGet]
-        [SwaggerResponse(HttpStatusCode.OK, "Servertime", typeof(string))]
         [Route(ProgramResourceConstants.Routes.App.Servertime, Name = ProgramResourceConstants.RouteNames.App.Servertime)]
         public string Servertime()
         {
@@ -408,60 +330,11 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [AllowAnonymous]
-        [SwaggerResponse(HttpStatusCode.OK, "GetResourceNotFound", typeof(string))]
-        [HttpGet]
-        public IHttpActionResult GetResourceNotFound(string uri)
+        [HttpGet, HttpPost, HttpPut, HttpOptions, HttpDelete]
+        public IHttpActionResult ResourceNotFound(string uri)
         {
             return Content(HttpStatusCode.NotFound, "Resource not found");
         }
-
-        /// <summary>
-        /// A friendly page not found message endpoint
-        /// </summary>
-        /// <returns></returns>
-        [AllowAnonymous]
-        [SwaggerResponse(HttpStatusCode.OK, "PostResourceNotFound", typeof(string))]
-        [HttpPost]
-        public IHttpActionResult PostResourceNotFound(string uri)
-        {
-            return Content(HttpStatusCode.NotFound, "Resource not found");
-        }
-
-        /// <summary>
-        /// A friendly page not found message endpoint
-        /// </summary>
-        /// <returns></returns>
-        [AllowAnonymous]
-        [SwaggerResponse(HttpStatusCode.OK, "PutResourceNotFound", typeof(string))]
-        [HttpPut]
-        public IHttpActionResult PutResourceNotFound(string uri)
-        {
-            return Content(HttpStatusCode.NotFound, "Resource not found");
-        }
-
-        /// <summary>
-        /// A friendly page not found message endpoint
-        /// </summary>
-        /// <returns></returns>
-        [AllowAnonymous]
-        [SwaggerResponse(HttpStatusCode.OK, "OptionsResourceNotFound", typeof(string))]
-        [HttpOptions]
-        public IHttpActionResult OptionsResourceNotFound(string uri)
-        {
-            return Content(HttpStatusCode.NotFound, "Resource not found");
-        }
-
-        /// <summary>
-        /// A friendly page not found message endpoint
-        /// </summary>
-        /// <returns></returns>
-        [AllowAnonymous]
-        [SwaggerResponse(HttpStatusCode.OK, "DeleteResourceNotFound", typeof(string))]
-        [HttpDelete]
-        public IHttpActionResult DeleteResourceNotFound(string uri)
-        {
-            return Content(HttpStatusCode.NotFound, "Resource not found");
-        } 
 
         #endregion
     }

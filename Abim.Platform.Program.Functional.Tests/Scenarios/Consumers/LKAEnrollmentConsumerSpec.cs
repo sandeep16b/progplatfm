@@ -1,4 +1,4 @@
-﻿using ServiceBus.Events;
+﻿using Abim.Enterprise.Core.ServiceBus.Registration;
 using Abim.Platform.Program.App.ServiceBus;
 using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.App.Services.CommandResults;
@@ -21,7 +21,7 @@ namespace Abim.Platform.Program.Testing.Scenarios.Consumers
     [Story(
         AsA = "bus consumer",
         IWant = "to be able to utilize the LKAEnrollmentConsumer Consumer",
-        SoThat = "to consume IMemberEnrolled messages"
+        SoThat = "to consume IMemberEnrolledEvent messages"
     )]
     [TestFixture]
     public class LKAEnrollmentConsumerSpec
@@ -45,13 +45,13 @@ namespace Abim.Platform.Program.Testing.Scenarios.Consumers
         {
             protected InMemoryTestHarness Harness;
             protected ConsumerTestHarness<LKAEnrollmentConsumer> Consumer;
-            protected HandlerTestHarness<IMemberEnrolled> Handler;
+            protected HandlerTestHarness<IMemberEnrolledEvent> Handler;
 
             protected Mock<ILogger> Log { get; set; }
             protected Mock<ICredentialService> CredentialService { get; set; }
             protected Mock<IBusControl> BusControl { get; set; }
 
-            protected IMemberEnrolled EventToSend { get; set; }
+            protected IMemberEnrolledEvent EventToSend { get; set; }
 
             protected Func<LKAEnrollmentConsumer> ConsumerFactoryMethod;
 
@@ -77,7 +77,7 @@ namespace Abim.Platform.Program.Testing.Scenarios.Consumers
 
             protected void AndThereShouldBeNoExceptionInTheConsumer()
             {
-                Consumer.Consumed.Select<IMemberEnrolled>()
+                Consumer.Consumed.Select<IMemberEnrolledEvent>()
                     .FirstOrDefault()
                     .Exception
                     .Should().BeNull();
@@ -85,12 +85,12 @@ namespace Abim.Platform.Program.Testing.Scenarios.Consumers
 
             protected void AndTheMessageShouldHaveBeenSentToTheConsumerFromTheEndpoint()
             {
-                Harness.Sent.Select<IMemberEnrolled>().Any().Should().BeTrue();
+                Harness.Sent.Select<IMemberEnrolledEvent>().Any().Should().BeTrue();
             }
 
             protected void AndTheMessageShouldHaveBeenConsumedByTheHarness()
             {
-                Harness.Consumed.Select<IMemberEnrolled>().Any().Should().BeTrue();
+                Harness.Consumed.Select<IMemberEnrolledEvent>().Any().Should().BeTrue();
             }
 
         }
@@ -107,9 +107,9 @@ namespace Abim.Platform.Program.Testing.Scenarios.Consumers
 
                 ConsumerFactoryMethod = () => new LKAEnrollmentConsumer(CredentialService.Object);
 
-                Consumer = Harness.Consumer(ConsumerFactoryMethod);
+                Consumer = Harness.Consumer<LKAEnrollmentConsumer>(ConsumerFactoryMethod);
 
-                Handler = Harness.Handler<IMemberEnrolled>();
+                Handler = Harness.Handler<IMemberEnrolledEvent>();
             }
 
             protected new async Task Teardown()
@@ -135,7 +135,7 @@ namespace Abim.Platform.Program.Testing.Scenarios.Consumers
 
             protected void GivenIHaveAValidEvent()
             {
-                EventToSend = new MemberEnrolled()
+                EventToSend = new MemberEnrolledEvent()
                 {
                     MemberId = Guid.NewGuid(), //Do you ever worry that someday we'll run out of Guids? :O
                     CredentialId = Guid.NewGuid()
@@ -147,7 +147,7 @@ namespace Abim.Platform.Program.Testing.Scenarios.Consumers
                 //Calling Any() below is what will enumerate the consumer and actually invoke the
                 //Consume event! But having this in the base class didn't work for some reason -- it only 
                 //works correctly from here!
-                Consumer.Consumed.Select<IMemberEnrolled>().Any().Should().BeTrue();
+                Consumer.Consumed.Select<IMemberEnrolledEvent>().Any().Should().BeTrue();
             }
 
             protected void AndTheHandlerShouldHaveConsumedTheMessage()
@@ -185,9 +185,9 @@ namespace Abim.Platform.Program.Testing.Scenarios.Consumers
 
                 ConsumerFactoryMethod = () => new LKAEnrollmentConsumer(CredentialService.Object);
 
-                Consumer = Harness.Consumer(ConsumerFactoryMethod);
+                Consumer = Harness.Consumer<LKAEnrollmentConsumer>(ConsumerFactoryMethod);
 
-                Handler = Harness.Handler<IMemberEnrolled>();
+                Handler = Harness.Handler<IMemberEnrolledEvent>();
             }
 
             protected new async Task Teardown()
@@ -209,7 +209,7 @@ namespace Abim.Platform.Program.Testing.Scenarios.Consumers
 
             protected void GivenIHaveAnEventWithAnEmptyCredentialId()
             {
-                EventToSend = new MemberEnrolled()
+                EventToSend = new MemberEnrolledEvent()
                 {
                     CredentialId = Guid.Empty,
                     MemberId = Guid.NewGuid()
@@ -223,7 +223,7 @@ namespace Abim.Platform.Program.Testing.Scenarios.Consumers
                 //Calling Any() below is what will enumerate the consumer and actually invoke the
                 //Consume event! But having this in the base class didn't work for some reason -- it only 
                 //works correctly from here!
-                Consumer.Consumed.Select<IMemberEnrolled>().Any().Should().BeTrue();
+                Consumer.Consumed.Select<IMemberEnrolledEvent>().Any().Should().BeTrue();
             }
 
             protected void AndTheHandlerShouldHaveConsumedTheMessage()

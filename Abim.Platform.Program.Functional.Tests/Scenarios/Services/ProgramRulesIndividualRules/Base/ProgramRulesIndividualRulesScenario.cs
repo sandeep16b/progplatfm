@@ -1,4 +1,5 @@
-﻿using Abim.Enterprise.Core.Registration.Enums;
+﻿using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
+using Abim.Enterprise.Core.Registration.Enums;
 using Abim.Enterprise.Core.Registration.Interservice;
 using Abim.Enterprise.Core.Registration.Resources;
 using Abim.Platform.Product.Extensions.ExternalResponses;
@@ -91,7 +92,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules.Base
                 typeof(IValidationFactory),
                 typeof(IAccessTokenService),
                 typeof(ICorrectiveActionResultService),
-                typeof(IMembershipClientService),
+                typeof(IProfileInterservice),
                 typeof(ILookBackDatesInfoService),
                 typeof(ILookbackLogService)
             };
@@ -206,14 +207,12 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules.Base
                                         string certificationCode,
                                         IssuanceStatusType issuanceStatus = IssuanceStatusType.Active,
                                         OccurrenceType occurrenceType = OccurrenceType.Initial,
-                                        MaintenanceStatusType maintenanceStatus = MaintenanceStatusType.Maintained,
-                                        bool IsCosponsored = false)
+                                        MaintenanceStatusType maintenanceStatus = MaintenanceStatusType.Maintained)
         {
             var credentialNewInitialCert = CredentialDataBuilder.StartWithCertCode(certCode: certificationCode,
                                                                                     memberId: MemberId)
                                                                 .With(a => a.AssessmentMet = true)
                                                                 .With(a => a.AssessmentMetDate = issuanceDate)
-                                                                .With(a => a.IsCosponsored = IsCosponsored)
                                                                 .Build()
                                                                 .AddIssuances(new List<Issuance>() {
                                                                                          IssuanceDataBuilder

@@ -13,7 +13,7 @@ namespace Abim.Platform.Program.Relational.Services.Impl
     /// <summary>
     /// ServiceBase Class.
     /// </summary>
-    public abstract class ServiceBase<TAggregateRoot, TRepository> : IService<TAggregateRoot>
+    public abstract class ServiceBase<TAggregateRoot, TRepository> : IService<TAggregateRoot>, IDisposable
         where TAggregateRoot : class, IAggregateRoot, IEntity<int>
         where TRepository : IRepository<TAggregateRoot, int>
     {
@@ -480,7 +480,7 @@ namespace Abim.Platform.Program.Relational.Services.Impl
                     failureResult.AddErrorMessage("Failed uniqueness check");
                 if(ex.Message != null) failureResult.AddErrorMessage(ex.Message);
                 Logger.Error(ex);
-                Logger.Error("Exception during Add {0}, at {1}", ex.Message, Environment.StackTrace);
+                Logger.Error(string.Format("Exception during Add {0}, at {1}", ex.Message, Environment.StackTrace));
                 return failureResult;
             }
             if(!objValidation.Succeeded)
@@ -555,7 +555,7 @@ namespace Abim.Platform.Program.Relational.Services.Impl
                     failureResult.AddErrorMessage("Failed uniqueness check");
                 if(ex.Message != null) failureResult.AddErrorMessage(ex.Message);
                 Logger.Error(ex);
-                Logger.Error("Exception during Update {0}, at {1}", ex.Message, Environment.StackTrace);
+                Logger.Error(string.Format("Exception during Update {0}, at {1}", ex.Message, Environment.StackTrace));
                 return failureResult;
             }
             if(!objValidation.Succeeded)

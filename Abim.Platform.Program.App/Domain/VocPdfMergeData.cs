@@ -79,7 +79,11 @@ namespace Abim.Platform.Program.App.Domain
             body.Append($"<p {style10ptTimes}>Name: <b>{data.Name}</b></p>");
             body.Append($"<br {style10ptTimes}>&nbsp;");
 
-           if (!data.isActive)
+            if (!data.isCertified)
+            {
+                body.Append($"<p {style10ptTimes}><b>Not Certified</b></p>");
+            }
+            else if (!data.isActive)
             {
                 body.Append($"<p {style10ptTimes}><b>Inactive</b></p>");
                 body.Append($"<br {style10ptTimes}>&nbsp;");
@@ -88,7 +92,9 @@ namespace Abim.Platform.Program.App.Domain
             }
             else
             {
+                // certified
                 var currentCertsText = data.CurrentCertifications
+                    .Replace(": Certified", ": <b>Certified</b>")
                     .Replace(Environment.NewLine, "<br>");
 
                 body.Append($"<p {style10ptTimes}>{currentCertsText}</p>");

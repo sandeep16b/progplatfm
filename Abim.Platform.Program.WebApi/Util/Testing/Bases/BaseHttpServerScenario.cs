@@ -61,9 +61,9 @@ namespace Abim.Platform.Program.WebApi.Testing.Setup
                 ConfigurationManager.AppSettings["IdentityTestPassword"]                 
                 );
 
-        protected string Scopes { get; set; } = "a.r a.w ata.r ata.w b.r b.w c.r c.w f.r f.w n.r n.w pd.r pd.w pf.r pf.w r.r r.w s.r s.w t.r t.w u.r u.w"; 
+        protected string Scopes { get; set; } = "openid all_claims profile email webapi"; 
 
-        protected string GrantType { get; set; } = GrantTypes.Client_credentials; 
+        protected string GrantType { get; set; } = GrantTypes.Password; 
 
         /// <summary>
         /// Gets or sets the token.
@@ -241,7 +241,7 @@ namespace Abim.Platform.Program.WebApi.Testing.Setup
             TokenResponseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
             Token = JObject.Parse(await response.Content.ReadAsStringAsync()).Value<string>("access_token");
-            return await Task.Run(() => { return 0; });
+            return await Task.Run<int>(() => { return 0; });
         }
 
         /// <summary>
@@ -256,19 +256,17 @@ namespace Abim.Platform.Program.WebApi.Testing.Setup
         protected void OverrideAndInjectUnacceptableScope()
         {
             // wrong scope should return forbidden
-            Scopes = "openid";
-            GrantType = GrantTypes.Password;
+            Scopes = "profile_read";
+            GrantType = GrantTypes.Client_credentials;
         }
 
         /// <summary>
         /// Override Scope
         /// </summary>
         /// <param name="scopes"></param>
-        protected void OverrideScope(string scopes = "c.r")
+        protected void OverrideScope(string scopes = "profile_read")
         {            
-             Scopes = scopes;            
+            Scopes = scopes;            
         }
-       
-   
     }
 }

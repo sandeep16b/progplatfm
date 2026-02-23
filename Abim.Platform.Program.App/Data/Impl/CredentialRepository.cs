@@ -70,7 +70,7 @@ namespace Abim.Platform.Program.App.Data.Impl
                          .Where(a => a.MemberId == memberId)
                          .JoinQueryOver<Issuance>(p => p.Issuances)
                          .List()
-                         .Select(r => r.Certification).ToList(); 
+                         .Select(r => r.Certification);
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Abim.Platform.Program.App.Data.Impl
         {
             return Session.QueryOver<Credential>()
                       .Where(cred => cred.MemberId == memberId)
-                      .JoinQueryOver(p => p.Certification)
+                      .JoinQueryOver<Certification>(p => p.Certification)
                       .Where(c => c.ExternalId == certificationId)
                       .SingleOrDefault();
         }
@@ -142,8 +142,10 @@ namespace Abim.Platform.Program.App.Data.Impl
         /// <param name="endDate"></param>
         /// <param name="abimCredentialsOnly">Optional parameter to specify ABIM-issued credentials only (default is false).</param>
         /// <returns></returns>
-        IEnumerable<Tuple<Guid, int>> ICredentialRepository.GetExpiredCredentials(DateTime startDate, DateTime endDate, bool abimCredentialsOnly)
-        {            
+        IEnumerable<Tuple<Guid, int>> ICredentialRepository.GetExpiredCredentials(DateTime startDate, DateTime endDate, bool abimCredentialsOnly = false)
+        {
+            var session = Session.SessionFactory.OpenSession();
+            
             string hql = 
                 @"select c.ExternalId, i.Id 
                     from Credential c 
@@ -151,7 +153,7 @@ namespace Abim.Platform.Program.App.Data.Impl
                     where i.IssuanceStatus = 'Active'
                     and(i.Duration = 'Timelimited' and i.ExpirationDate is not null and i.ExpirationDate >= :startDate and i.ExpirationDate <= :endDate" + (abimCredentialsOnly ? " and i.Source = 1 " : "") + ")";
             
-            var query = Session.CreateQuery(hql)
+            var query = session.CreateQuery(hql)
                 .SetDateTime("startDate", startDate)
                 .SetDateTime("endDate", endDate);
             var list = query.Future<Object[]>().ToList();
@@ -168,8 +170,9 @@ namespace Abim.Platform.Program.App.Data.Impl
         /// </returns>
         IEnumerable<Tuple<Guid, int>> ICredentialRepository.GetExpiredCredentials(DateTime checkDate)
         {
+            var session = Session.SessionFactory.OpenSession();
             string hql = GetExpiredCredentialsHQL.HQL;
-            var query = Session.CreateQuery(hql)
+            var query = session.CreateQuery(hql)
                 .SetDateTime("checkDate", checkDate);
             var list = query.Future<Object[]>().ToList();
             return list.Select(x => new Tuple<Guid, int>((Guid)(x[0]), (int)(x[1])));
@@ -186,8 +189,9 @@ namespace Abim.Platform.Program.App.Data.Impl
         /// </returns>
         IEnumerable<Tuple<Guid, int>> ICredentialRepository.GetExpiredCredentials(DateTime checkDate, Guid memberId)
         {
+            var session = Session.SessionFactory.OpenSession();
             string hql = GetExpiredCredentialsHQL.MemberHQL;
-            var query = Session.CreateQuery(hql)
+            var query = session.CreateQuery(hql)
                 .SetDateTime("checkDate", checkDate)
                 .SetGuid("memberId", memberId);
             var list = query.Future<Object[]>().ToList();
@@ -200,7 +204,9 @@ namespace Abim.Platform.Program.App.Data.Impl
         /// <param name="deselectionEffectiveDate">The DeSelectionEffectiveDate to query by</param>
         /// <returns>An IEnumerable of Tuple&lt;Guid, Guid, string, bool&gt;. The tuple elements are the member ID, credential ID, certificate name, and boolean indicating wether or not the credential is currently active, in that order.</returns>
         IEnumerable<Tuple<Guid, Guid, string, bool>> ICredentialRepository.GetInfoOfCredentialsMarkedForDeselection(DateTime deselectionEffectiveDate)
-        { 
+        {
+            var session = Session.SessionFactory.OpenSession();
+
             string hql = @"select cred.MemberId, cred.ExternalId, cert.Name, cred.IsActive 
                             from Credential cred 
                             join cred.Issuances i
@@ -208,7 +214,7 @@ namespace Abim.Platform.Program.App.Data.Impl
                             where i.DeselectionEffectiveDate = :deselectionEffectiveDate 
                             and i.DeselectionProcessedDate is null";
 
-            var query = Session.CreateQuery(hql)
+            var query = session.CreateQuery(hql)
                 .SetDateTime("deselectionEffectiveDate", deselectionEffectiveDate);
 
             var list = query.Future<Object[]>().ToList();
@@ -222,7 +228,7 @@ namespace Abim.Platform.Program.App.Data.Impl
         /// <returns></returns>
         IEnumerable<Issuance> ICredentialRepository.GetIssuancesForMemberId(Guid memberId)
         {
-            return Session.QueryOver<Credential>().Where(cred => cred.MemberId == memberId).List().SelectMany(a => a.Issuances).ToList();
+            return Session.QueryOver<Credential>().Where(cred => cred.MemberId == memberId).List().SelectMany(a => a.Issuances);
         }
 
         /// <summary>
@@ -232,18 +238,27 @@ namespace Abim.Platform.Program.App.Data.Impl
         /// <returns></returns>
         DateTime? ICredentialRepository.GetFirstIssuanceDate(Guid memberId)
         {
-            string HQL = @"select Min(i.IssuanceDate)
+            try
+            {
+
+                var session = Session.SessionFactory.OpenSession();
+
+                string HQL = @"select Min(i.IssuanceDate)
                     from Credential c 
                      join c.Issuances i 
                      join i.Source s
                     where s.Code='ABIM' and c.MemberId = :memberId"; // i.Duration = 'Timelimited' and
 
-                var query = Session.CreateQuery(HQL)
+                var query = session.CreateQuery(HQL)
                             .SetGuid("memberId", memberId);
                 //for exception situation when date is not found then return max DateTime.
                 //var queryReturn = query.UniqueResult() ?? DateTime.MaxValue;
                 return (DateTime?)query.UniqueResult();
-        
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         /// <summary>
@@ -253,14 +268,17 @@ namespace Abim.Platform.Program.App.Data.Impl
         /// <returns></returns>
         DateTime? ICredentialRepository.GetLatestLookbackDate(Guid memberId)
         {
+            using (var session = Session.SessionFactory.OpenSession())
+            {
                 string HQL = @"select Max(LookbackDate)
                                 from Credential
                                 where MemberId = :memberId";
 
-                var query = Session.CreateQuery(HQL)
+                var query = session.CreateQuery(HQL)
                             .SetGuid("memberId", memberId);
 
                 return (DateTime?)query.UniqueResult();
+            }
         }
 
         /// <summary>
@@ -273,7 +291,7 @@ namespace Abim.Platform.Program.App.Data.Impl
         {
             return Session.QueryOver<Issuance>()
                 .Where(i => i.IssuanceDate.Date == issuanceDate.Date)
-                .JoinQueryOver(p => p.Credential)
+                .JoinQueryOver<Credential>(p => p.Credential)
                 .Where(i => i.ExternalId == credentialId)
                 .SingleOrDefault();
         }
@@ -284,12 +302,14 @@ namespace Abim.Platform.Program.App.Data.Impl
         /// <returns></returns>
         int ICredentialRepository.GetNonAbimIssuanceCount()
         {
+            var session = Session.SessionFactory.OpenSession();
+
             string hql = @"select max(i.IssuanceDate)
                         from Issuance i join i.Source s
                         where s.Code <> 'ABIM'
                         group by i.Credential.ExternalId";
 
-            var query = Session.CreateQuery(hql);
+            var query = session.CreateQuery(hql);
 
             return query.Future<DateTime>().Count();
         }
@@ -336,7 +356,7 @@ namespace Abim.Platform.Program.App.Data.Impl
                              .CacheMode(CacheMode.Normal)
                              .Future<Credential>();
 
-            return results.Select(a => a.Certification).ToList();
+            return results.Select(a => a.Certification);
         }
         #endregion
 
@@ -348,7 +368,8 @@ namespace Abim.Platform.Program.App.Data.Impl
         /// <returns></returns>
         AbimValidationResult ICredentialRepository.UpdateCredential(Credential credential, string Username)
         {
-            AbimValidationResult objValidation;
+            AbimValidationResult objValidation = null;
+
             Log.Info($"CredentialRepository.UpdateCredential with CredentialId:{credential.Id} IssuanceDate:{credential.NewestIssuance.IssuanceDate.ToShortDateString()} on Thread:{Thread.CurrentThread.ManagedThreadId}");
 
             using (var t = Session.BeginTransaction(IsolationLevel.Serializable))
@@ -356,8 +377,8 @@ namespace Abim.Platform.Program.App.Data.Impl
                 try
                 {
                     objValidation = Update(credential, Username);
-                    Session.Flush();
                     t.Commit();
+                    Session.Flush();
                 }
                 catch (Exception ex)
                 {

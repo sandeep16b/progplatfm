@@ -52,8 +52,8 @@ namespace Abim.Platform.Program.Relational.Repository
         {
             try
             {
-                Session.Flush();
                 NHibernateTransaction.Commit();
+                Session.Flush();
             }
             finally
             {

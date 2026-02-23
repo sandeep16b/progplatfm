@@ -58,6 +58,20 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         {
             new ShouldNotReissueWhenNoMOCPassAndBadKCINoConsequencesWithInapplicableAdminDate().BDDfy();
         }
+
+        [TestCase]
+        [WorkItem(137190)]
+        public void Should_Reissue_When_No_MOC_Pass_And_Bad_KCI_NoConsequences_With_Inapplicable_Admin_Date_But_Has_Later_Pass()
+        {
+            new ShouldReissueWhenNoMOCPassAndBadKCINoConsequencesWithInapplicableAdminDateButHasLaterPass().BDDfy();
+        }
+
+        [TestCase]
+        [WorkItem(151482)]
+        public void Should_Reissue_When_No_MOC_Pass_But_No_Bad_KCI_or_CMP_NoConsequences_Exam()
+        {
+            new ShouldReissueWhenNoMOCPassButNoBadKCIorCMPNoConsequencesExam().BDDfy();
+        }
         
         [TestCase]
         [WorkItem(151482)]
@@ -86,7 +100,34 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         {
             new ShouldNotReissueWhenNoMOCPassButNoKCINoConsequencesExamCmpNoConsequenceIncompleteExistsNoSubsequentPass().BDDfy();
         }     
-  
+
+        [TestCase]
+        [WorkItem(151482)]
+        public void Should_Reissue_When_No_MOCPass_But_NoKCINoConsequencesExam_CmpNoConsequenceFailExists_SubsequentPass_Exists()
+        {
+            new ShouldReissueWhenNoMOCPassButNoKCINoConsequencesExamCmpNoConsequenceFailExistsSubsequentPassExists().BDDfy();
+        }
+        [TestCase]
+        [WorkItem(151482)]
+        public void Should_Reissue_When_No_MOCPass_But_NoKCINoConsequencesExam_CmpNoConsequenceUttExists_SubsequentPass_Exists()
+        {
+            new ShouldReissueWhenNoMOCPassButNoKCINoConsequencesExamCmpNoConsequenceUttExistsSubsequentPassExists().BDDfy();
+        }
+
+        [TestCase]
+        [WorkItem(151482)]
+        public void Should_Reissue_When_No_MOCPass_But_NoKCINoConsequencesExam_CmpNoConsequenceIndtExists_SubsequentPass_Exists()
+        {
+            new ShouldReissueWhenNoMOCPassButNoKCINoConsequencesExamCmpNoConsequenceIndeterminateExistsSubsequentPassExists().BDDfy();
+        }
+
+        [TestCase]
+        [WorkItem(151482)]
+        public void Should_Reissue_When_No_MOCPass_But_NoKCINoConsequencesExam_CmpNoConsequenceIncompleteExists_SubsequentPass_Exists()
+        {
+            new ShouldReissueWhenNoMOCPassButNoKCINoConsequencesExamCmpNoConsequenceIncompleteExistsSubsequentPassExists().BDDfy();
+        }     
+
         [TestCase]
         [WorkItem(151482)]
         public void Should_Reissue_When_No_MOCPass_But_NoKCINoConsequencesExam_CmpNoConsequenceBadStatusExists_No_SubsequentPass_Exists_Prior_Pass_Exists()
@@ -529,6 +570,11 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         }
     }
 
+    public class ShouldReissueWhenNoMOCPassButNoBadKCIorCMPNoConsequencesExam : MBMReissuedScenario
+    {
+        //Default setup and methods in base class MBMReissuedScenario handle this scenario as-is
+    }
+
     public class ShouldNotReissueWhenNoMOCPassButNoKCINoConsequencesExamCmpNoConsequenceFailExistsNoSubsequentPass : MBMNotReissuedScenario//MBMReissuedScenario
     {
         protected override void SetupCredentials()
@@ -618,6 +664,107 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
                     .WithCMPExam(summaryBuilder.WithCertificationId(_certificationId).WithNoConsequenceYear(BASE_DATE.AddDays(10).Year).Build())
                     .WithTestDate(BASE_DATE.AddDays(10))
                     .WithExamResult(ExamResultType.Incomplete)
+                    .Build());
+        }
+    }
+
+
+    public class ShouldReissueWhenNoMOCPassButNoKCINoConsequencesExamCmpNoConsequenceFailExistsSubsequentPassExists : MBMReissuedScenario
+    {
+        protected override void SetupRegistrations()
+        {
+            base.SetupRegistrations();
+
+            var builder = new CMPRegistrationResourceBuilder();
+            var summaryBuilder = new CMPExamSummaryResourceBuilder();
+
+            _registrations.CMPRegistrations.Add(
+                builder
+                    .WithCMPExam(summaryBuilder.WithCertificationId(_certificationId).WithNoConsequenceYear(BASE_DATE.AddDays(10).Year).Build())
+                    .WithTestDate(BASE_DATE.AddDays(10))
+                    .WithExamResult(ExamResultType.Fail)
+                    .Build());
+
+            _registrations.CMPRegistrations.Add(
+                builder
+                    .WithCMPExam(summaryBuilder.WithCertificationId(_certificationId).WithNoConsequenceYear(BASE_DATE.AddDays(10).Year).Build())
+                    .WithTestDate(BASE_DATE.AddDays(50))
+                    .WithExamResult(ExamResultType.Pass)
+                    .Build());
+        }
+    }
+
+    public class ShouldReissueWhenNoMOCPassButNoKCINoConsequencesExamCmpNoConsequenceUttExistsSubsequentPassExists : MBMReissuedScenario
+    {
+        protected override void SetupRegistrations()
+        {
+            base.SetupRegistrations();
+
+            var builder = new CMPRegistrationResourceBuilder();
+            var summaryBuilder = new CMPExamSummaryResourceBuilder();
+
+            _registrations.CMPRegistrations.Add(
+                builder
+                    .WithCMPExam(summaryBuilder.WithCertificationId(_certificationId).WithNoConsequenceYear(BASE_DATE.AddDays(10).Year).Build())
+                    .WithTestDate(BASE_DATE.AddDays(10))
+                    .WithExamResult(ExamResultType.UnableToTest)
+                    .Build());
+
+            _registrations.CMPRegistrations.Add(
+                builder
+                    .WithCMPExam(summaryBuilder.WithCertificationId(_certificationId).WithNoConsequenceYear(BASE_DATE.AddDays(10).Year).Build())
+                    .WithTestDate(BASE_DATE.AddDays(50))
+                    .WithExamResult(ExamResultType.Pass)
+                    .Build());
+        }
+    }
+
+    public class ShouldReissueWhenNoMOCPassButNoKCINoConsequencesExamCmpNoConsequenceIndeterminateExistsSubsequentPassExists : MBMReissuedScenario
+    {
+        protected override void SetupRegistrations()
+        {
+            base.SetupRegistrations();
+
+            var builder = new CMPRegistrationResourceBuilder();
+            var summaryBuilder = new CMPExamSummaryResourceBuilder();
+
+            _registrations.CMPRegistrations.Add(
+                builder
+                    .WithCMPExam(summaryBuilder.WithCertificationId(_certificationId).WithNoConsequenceYear(BASE_DATE.AddDays(10).Year).Build())
+                    .WithTestDate(BASE_DATE.AddDays(10))
+                    .WithExamResult(ExamResultType.Indeterminate)
+                    .Build());
+
+            _registrations.CMPRegistrations.Add(
+                builder
+                    .WithCMPExam(summaryBuilder.WithCertificationId(_certificationId).WithNoConsequenceYear(BASE_DATE.AddDays(10).Year).Build())
+                    .WithTestDate(BASE_DATE.AddDays(50))
+                    .WithExamResult(ExamResultType.Pass)
+                    .Build());
+        }
+    }
+
+    public class ShouldReissueWhenNoMOCPassButNoKCINoConsequencesExamCmpNoConsequenceIncompleteExistsSubsequentPassExists : MBMReissuedScenario
+    {
+        protected override void SetupRegistrations()
+        {
+            base.SetupRegistrations();
+
+            var builder = new CMPRegistrationResourceBuilder();
+            var summaryBuilder = new CMPExamSummaryResourceBuilder();
+
+            _registrations.CMPRegistrations.Add(
+                builder
+                    .WithCMPExam(summaryBuilder.WithCertificationId(_certificationId).WithNoConsequenceYear(BASE_DATE.AddDays(10).Year).Build())
+                    .WithTestDate(BASE_DATE.AddDays(10))
+                    .WithExamResult(ExamResultType.Incomplete)
+                    .Build());
+
+            _registrations.CMPRegistrations.Add(
+                builder
+                    .WithCMPExam(summaryBuilder.WithCertificationId(_certificationId).WithNoConsequenceYear(BASE_DATE.AddDays(10).Year).Build())
+                    .WithTestDate(BASE_DATE.AddDays(50))
+                    .WithExamResult(ExamResultType.Pass)
                     .Build());
         }
     }
@@ -744,6 +891,39 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
                     .WithNoConsequence(true)
                     .WithExamType(ExamType.Kci)
                     .WithSeat(BASE_DATE.AddDays(10))
+                    .Build());
+        }
+    }
+
+    public class ShouldReissueWhenNoMOCPassAndBadKCINoConsequencesWithInapplicableAdminDateButHasLaterPass : MBMReissuedScenario
+    {
+        protected override void SetupRegistrations()
+        {
+            base.SetupRegistrations();
+
+            var builder = new RegistrationResourceBuilder();
+
+            _registrations.Registrations = new List<RegistrationResource>(1);
+            _registrations.Registrations.Add(
+                builder
+                    .WithCertificationId(_certificationId)
+                    .WithAdministrationYear(BASE_DATE.AddDays(10).Year)
+                    .WithAdministrationDate(BASE_DATE.AddDays(10))
+                    .WithExamResult(ExamResultType.Fail)
+                    .WithNoConsequence(true)
+                    .WithExamType(ExamType.Kci)
+                    .WithSeat(BASE_DATE.AddDays(10))
+                    .Build());
+
+            _registrations.Registrations.Add(
+                builder
+                    .WithCertificationId(_certificationId)
+                    .WithAdministrationYear(BASE_DATE.AddDays(11).Year)
+                    .WithAdministrationDate(BASE_DATE.AddDays(11))
+                    .WithExamResult(ExamResultType.Pass)
+                    .WithNoConsequence(true)
+                    .WithExamType(ExamType.Kci)
+                    .WithSeat(BASE_DATE.AddDays(11))
                     .Build());
         }
     }

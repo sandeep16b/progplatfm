@@ -29,7 +29,6 @@
 	[WithdrawnDate]			DATETIME2				NULL,
 	[IsInCMP]				BIT						NOT NULL DEFAULT 0,
 	[CMPEnrollmentDate]		DATETIME2				NULL,
-	[CMPUnenrollmentDate]	DATETIME2				NULL,
 	[IsCosponsored]			BIT						NOT NULL DEFAULT 0,
 	[OnBehalfBoardCode]		NVARCHAR(50)			NULL,
 	[OnBehalfBoardName]		NVARCHAR(200)			NULL,

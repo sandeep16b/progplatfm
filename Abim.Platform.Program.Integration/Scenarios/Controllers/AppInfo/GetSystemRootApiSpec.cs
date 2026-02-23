@@ -58,8 +58,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.AppInfo
 
         protected override void PostSetup()
         {
-            Container.Inject(EnumService.Object);
-            Container.Inject(BusControl.Object);
+            Container.Inject<IEnumService>(EnumService.Object);
+            Container.Inject<IBusControl>(BusControl.Object);
             Container.Inject<IConfigurationManager>(new ConfigurationManager());
         }
 
@@ -94,24 +94,18 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.AppInfo
 
         public void AndThenTheResponseShouldHaveASelfLink()
         {
-            // ReSharper disable once AssignNullToNotNullAttribute
-            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             Resource["links"].Any(l => l.ToString().Contains("self"));
         }
 
         public void AndThenTheResponseShouldHaveSourceGetAllLinks()
         {
             //2 for Get and Post
-            // ReSharper disable once AssignNullToNotNullAttribute
-            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             Resource["links"].Count(l => l.ToString().Contains("Get all Sources")).Should().BeGreaterOrEqualTo(2);
         }
 
         public void AndThenTheResponseShouldHaveASourceOptionsLink()
         {
-            // ReSharper disable once AssignNullToNotNullAttribute
-            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-             Resource["links"].Any(l => l.ToString().Contains("Source Options"));
+            Resource["links"].Any(l => l.ToString().Contains("Source Options"));
         }
 
         public void AndThenTheResponseShouldHaveCredentialGetAllLinks()
@@ -122,31 +116,23 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.AppInfo
 
         public void AndThenTheResponseShouldHaveACredentialOptionsLink()
         {
-            // ReSharper disable once AssignNullToNotNullAttribute
-            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             Resource["links"].Any(l => l.ToString().Contains("Credential Options"));
         }
 
         public void AndThenTheResponseShouldHaveCertificationGetAllLinks()
         {
             //2 for Get and Post
-            // ReSharper disable once AssignNullToNotNullAttribute
-            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             Resource["links"].Count(l => l.ToString().Contains("Get all Certifications")).Should().BeGreaterOrEqualTo(2);
         }
 
         public void AndThenTheResponseShouldHaveCertificationGetForCurrentUserLinks()
         {
             //2 for Get and Post
-            // ReSharper disable once AssignNullToNotNullAttribute
-            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             Resource["links"].Count(l => l.ToString().Contains("Get Current User Certifications")).Should().BeGreaterOrEqualTo(2);
         }
 
         public void AndThenTheResponseShouldHaveACertificationOptionsLink()
         {
-            // ReSharper disable once AssignNullToNotNullAttribute
-            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             Resource["links"].Any(l => l.ToString().Contains("Certification Options"));
         }
     }
@@ -169,8 +155,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.AppInfo
 
         protected override void PostSetup()
         {
-            Container.Inject(EnumService.Object);
-            Container.Inject(BusControl.Object);
+            Container.Inject<IEnumService>(EnumService.Object);
+            Container.Inject<IBusControl>(BusControl.Object);
             Container.Inject<IConfigurationManager>(new ConfigurationManager());
         }
 

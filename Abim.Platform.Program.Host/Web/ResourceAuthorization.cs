@@ -22,7 +22,6 @@ namespace Abim.Platform.Program.Host.Classes
         /// </summary>
         protected static readonly ILogger Log = LogManager.GetCurrentClassLogger();
 
-        /// <summary>
         /// backgroundClientId
         /// </summary>
         protected static string backgroundClientId = ConfigurationManager.AppSettings["backgroundClientId"] ?? "";
@@ -43,8 +42,8 @@ namespace Abim.Platform.Program.Host.Classes
             Log.Trace("Started CheckAccessAsync");
 
             // *** get basic info about ***
-            var client = context.Principal.Claims.FirstOrDefault(x => x.Type == "client_id")?.Value ?? "";
-            var userName = context.Principal.Claims.FirstOrDefault(x => x.Type == "preferred_username")?.Value ?? "";
+            var client = context.Principal.Claims.Where(x => x.Type == "client_id")?.FirstOrDefault()?.Value ?? "";
+            var userName = context.Principal.Claims.Where(x => x.Type == "preferred_username")?.FirstOrDefault()?.Value ?? "";
             var requestedBy = $"client:'{client}' userName:'{userName}'";
 
             //*****************************************************************************************************
@@ -66,7 +65,7 @@ namespace Abim.Platform.Program.Host.Classes
             //*****************************************************************************************************
 
             // *** find the user's roles ***
-            var roleClaimNames = context.Principal.Claims.Where(x => x.Type == ClaimTypes.Role).Select(r => r.Value);
+            var roleClaimNames = context.Principal.Claims.Where(x => x.Type == ClaimTypes.Role)?.Select(r => r.Value);
 
             //if they're an admin, they have access to everything
             if (roleClaimNames.Intersect(adminRoleNames).Any())
@@ -80,7 +79,7 @@ namespace Abim.Platform.Program.Host.Classes
             //*****************************************************************************************************
             // find if recource (method) have required Scope (example [ResourceAuthorize(Actions.Create, "Certification")])
             // if nothing there then use lowest scope, which is Actions.View
-            var scopesRequestedOnResource = context.Action.Where(x => x.Type == "name").Select(x => x.Value).FirstOrDefault() ?? Actions.View;
+            var scopesRequestedOnResource = context.Action.Where(x => x.Type == "name")?.Select(x => x.Value).FirstOrDefault() ?? Actions.View;
             var isViewType = Actions.IsViewType(scopesRequestedOnResource);
 
             if (Actions.IsAdminType(scopesRequestedOnResource))
@@ -95,20 +94,20 @@ namespace Abim.Platform.Program.Host.Classes
             var scopesNeeded = isViewType ? Scopes.readScopes : Scopes.writeScopes;
 
             //find the user's scopes
-            var scopesPresent = context.Principal.Claims.Where(c => c.Type == "scope").Select(c => c.Value).ToList();
+            var scopesPresent = context.Principal.Claims.Where(c => c.Type == "scope")?.Select(c => c.Value).ToList();
 
             if (scopesPresent.Intersect(scopesNeeded).Any())
             {
                 Log.Trace($"Granting access to {requestedBy} since scopes '{string.Join(", ", scopesNeeded)}' are present.");
                 return Ok();
             }
-            //// we might need to remove this code below when we fully implement read || write scopes
-            //else if (scopesPresent.Any(a => a.Contains(Scopes.legacyWebApiScope)))
-            //{
-            //    // change to Log.Info type when other platform would be capable to send read_write_scopes
-            //    Log.Trace($"Granting access to {requestedBy} since legacy scope 'webapi' still present.");
-            //    return Ok();
-            //}
+            // we might need to remove this code below when we fully implement read || write scopes
+            else if (scopesPresent.Any(a => a.Contains(Scopes.legacyWebApiScope)))
+            {
+                // change to Log.Info type when other platform would be capable to send read_write_scopes
+                Log.Trace($"Granting access to {requestedBy} since legacy scope 'webapi' still present.");
+                return Ok();
+            }
             else
             {
                 Log.Warn($"Deny access to {requestedBy} since scopes '{string.Join(", ", scopesNeeded)}' are NOT present.");

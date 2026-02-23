@@ -1,8 +1,5 @@
-trigger:
-  branches:
-    include:
-    - master
-    - releases/*
+pool:
+  name: Default
 
 resources:
   repositories:
@@ -11,55 +8,14 @@ resources:
       name: ABIM.TFS.Build
       ref: main
 
-stages:
-- stage: build
-  pool: Default
-  jobs:
-  - job:
-    workspace:
-      clean: all      
-    steps:
-    - template: templates/dotnetframework.yml@templates
-      parameters:
-        EnableCodeCoverage: 'false'
-        BuildArgs: '$(Abim.OctopackMsbuildParams)'
-        BuildPlatform: 'x64'
-        VisualStudioVersion: 17.0
-        NugetProjectsList:
-          - Abim.Enterprise.Core.Program.Interservice/Abim.Enterprise.Core.Program.Interservice.csproj
-          - Abim.Enterprise.Core.Program.Resources/Abim.Enterprise.Core.Program.Resources.csproj
-          - Abim.Platform.Program.Events/Abim.Platform.Program.Events.csproj
-        TestAssemblies: '**\Release\*test*.dll'
-        DotNetRestore: 'true'
-        SolutionPath: './Abim.Platform.Program.sln'
-        snykScan: 'true'
-        snykProjectFolders:
-          - ./Abim.Platform.Program.Host
-          - ./Abim.Platform.Program.Jobs
+steps:
 
-- stage: scan
-  pool: Linux
-  variables:
-    DOCKER_API_VERSION: 1.43
-  jobs:
-  - job:
-    workspace:
-      clean: all
-    steps:
-    - script: |
-        file_path=$(find "$(Build.SourcesDirectory)" -type f -iname "qodana.yaml" | head -n 1)
-        echo $(QODANA_TOKEN)
-        if [ -n "$file_path" ]; then
-          echo "##vso[task.setvariable variable=qodanaFileExists]true"
-        else
-          echo "Qodana file not found"
-        fi
-      displayName: 'Check if file exists'
-    - task: QodanaScan@2024
-      inputs:
-        args: -l,jetbrains/qodana-dotnet:2024.3,--skip-pull
-      env:
-        QODANA_TOKEN: $(QODANA_TOKEN)
-        DOCKER_API_VERSION: 1.43
-      condition: eq(variables['qodanaFileExists'], True)
-  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+- template: templates/dotnetframework.yml@templates
+  parameters:
+    BuildArgs: '$(Abim.OctopackMsbuildParams)'
+    NugetProjectsList:
+      - Abim.Enterprise.Core.Program.Interservice/Abim.Enterprise.Core.Program.Interservice.csproj
+      - Abim.Enterprise.Core.Program.Resources/Abim.Enterprise.Core.Program.Resources.csproj
+      - Abim.Platform.Program.Events/Abim.Platform.Program.Events.csproj
+    TestAssemblies: '**\Release\*test*.dll'
+    DotNetRestore: 'true'

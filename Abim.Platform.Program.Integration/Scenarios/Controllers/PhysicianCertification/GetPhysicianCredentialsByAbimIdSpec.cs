@@ -1,4 +1,5 @@
-﻿using Abim.Platform.Program.MembershipClient;
+﻿using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
+using Abim.Enterprise.Core.Profile.Resource;
 using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.Core.Identity;
 using Abim.Platform.Program.Integration.Scenarios.Controllers.PhysicianCertification.Base;
@@ -18,7 +19,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using TestStack.BDDfy; 
+using TestStack.BDDfy;
+using ProfileSummaryShortResource = Abim.Enterprise.Core.Profile.Resource.ProfileSummaryShortResource;
+using NameResource = Abim.Enterprise.Core.Profile.Resource.NameResource;
 using static Abim.Platform.Program.Resources.ProgramResourceConstants;
 
 
@@ -109,20 +112,6 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         {
             new GetPhysicianCredentialsByAbimId_IMSelectedToBeMaintainedAndNoFPHMExists_ReturnIsFocusPractiseFalseSpec().BDDfy();
         }
-
-        [TestCase]
-        [WorkItem(265918)]
-        public void GetPhysicianCredentialsByAbimId_ReturnsIssuanceStatusWithModifier()
-        {
-            new GetPhysicianCredentialsByAbimId_ReturnsIssuanceStatusWithModifierSpec().BDDfy();
-        }
-
-        [TestCase]
-        [WorkItem(265918)]
-        public void GetPhysicianCredentialsByAbimId_DoesntReturnInActiveFPHM()
-        {
-            new GetPhysicianCredentialsByAbimId_DoesntReturnInActiveFPHMSpec().BDDfy();
-        }
     }
 
     /// <summary>
@@ -135,6 +124,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         {
             var list = base.AdditionalDependencies();
             list.Add(typeof(IEnumService));
+            list.Add(typeof(ICredentialService));
+            list.Add(typeof(IProfileInterservice));
             list.Add(typeof(IAccessTokenService));
             list.Add(typeof(ILogger));
             return list;
@@ -148,8 +139,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
                 code : RandomString.Build(),
                 createdBy:  RandomString.Build());
             var credential = App.Domain.Credential.Create(certification, Guid.NewGuid(), EnumAttributes.RandomEntry<CredentialType>(),
-                  EnumAttributes.RandomEntry<PathwayType>(), null, null, RandomString.Build());
-             
+                EnumAttributes.RandomEntry<PathwayType>(), null, null, RandomString.Build());
+
             credential.IsCosponsored = isCosponsored;
 
             foreach (var i in Enumerable.Range(0, numberOfIssuances))
@@ -179,16 +170,16 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         {
             CredentialDomainObjects = new List<App.Domain.Credential>() { ConstructDomainObject() };
 
-            ProfileResource profileResource = new ProfileResource()
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "Reznit" },
-                Aliases = (new List<ProfileAliasResource>())
-            }; 
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
+            };
 
-            My<IMembershipClientService>()
-               .Setup(o => o.GetProfileByAbimIdAsync(It.IsAny<string>()))
-               .Returns(Task.FromResult(profileResource)); 
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByAbimId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
@@ -197,7 +188,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
                .Setup(o => o.GetAccessToken())
-               .Returns("--token--"); 
+               .Returns("--token--");
+
         }
 
         public void GivenIPassTheCorrectUrl()
@@ -249,21 +241,21 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
             var abimCredential = ConstructDomainObject();
 
             CredentialDomainObjects = new List<App.Domain.Credential>() { abimCredential, ConstructDomainObject(RandomString.Build()) , ConstructDomainObject(RandomString.Build()) };
-             
-            ProfileResource profileResource = new ProfileResource()
+
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "Reznit" },
-                Aliases = new List<ProfileAliasResource>()
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
             };
 
-            My<IMembershipClientService>()
-                .Setup(o => o.GetProfileByAbimIdAsync(It.IsAny<string>()))
-                .ReturnsAsync(profileResource); 
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByAbimId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(CredentialDomainObjects);
+                .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
@@ -332,21 +324,20 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
             CredentialDomainObjects = new List<App.Domain.Credential>() { ConstructDomainObject(SourceCode: "ABIM", numberOfIssuances: 0) , ConstructDomainObject(RandomString.Build()) };
 
-            ProfileResource profileResource = new ProfileResource()
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
-                Id = Guid.NewGuid(),
                 AbimId = "123",
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "Reznit" },
-                Aliases = (new List<ProfileAliasResource>())
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
             };
 
-            My<IMembershipClientService>()
-                .Setup(o => o.GetProfileByAbimIdAsync(It.IsAny<string>()))
-                .ReturnsAsync(profileResource); 
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByAbimId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(CredentialDomainObjects);
+                .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
@@ -414,20 +405,20 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
             // has ABIM cert bu no issuances
             CredentialDomainObjects = new List<App.Domain.Credential>() { ConstructDomainObject(SourceCode : "ABIM", numberOfIssuances: 0) , ConstructDomainObject(RandomString.Build()), ConstructDomainObject(RandomString.Build()) };
 
-            ProfileResource profileResource = new ProfileResource()
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "Reznit" },
-                Aliases = (new List<ProfileAliasResource>())
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
             };
 
-            My<IMembershipClientService>()
-                 .Setup(o => o.GetProfileByAbimIdAsync(It.IsAny<string>()))
-                 .ReturnsAsync(profileResource); 
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByAbimId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(CredentialDomainObjects);
+                .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
@@ -496,20 +487,20 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
                                                                             ConstructDomainObject(SourceCode: "ABIM", numberOfIssuances: 1, isCosponsored:true),
                                                                             ConstructDomainObject(RandomString.Build(), numberOfIssuances: 1, isCosponsored:true) };
 
-            ProfileResource profileResource = new ProfileResource()
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "Reznit" },
-                Aliases = new List<ProfileAliasResource>()
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
             };
 
-            My<IMembershipClientService>()
-                .Setup(o => o.GetProfileByAbimIdAsync(It.IsAny<string>()))
-                .ReturnsAsync(profileResource); 
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByAbimId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(CredentialDomainObjects);
+                .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
@@ -574,25 +565,24 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         protected override void PostSetup()
         {
 
-            CredentialDomainObjects = new List<App.Domain.Credential>() {   ConstructDomainObject( numberOfIssuances: 1, isCosponsored:true), 
+            CredentialDomainObjects = new List<App.Domain.Credential>() {   ConstructDomainObject("ABIM", numberOfIssuances: 1, isCosponsored:true), 
                                                                             ConstructDomainObject(RandomString.Build(), numberOfIssuances: 0, isCosponsored:true),
                                                                             ConstructDomainObject(RandomString.Build(), numberOfIssuances: 1, isCosponsored:true) };
 
-            ProfileResource profileResource = new ProfileResource()
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
-                Id = Guid.NewGuid(),
                 AbimId = "123",
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "CoSponsored" },
-                Aliases = new List<ProfileAliasResource>()
+                Name = new NameResource() { FirstName = "Alex", LastName = "CoSponsored" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
             };
 
-            My<IMembershipClientService>()
-                .Setup(o => o.GetProfileByAbimIdAsync(It.IsAny<string>()))
-                .ReturnsAsync(profileResource); 
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByAbimId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(CredentialDomainObjects);
+                .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
@@ -636,22 +626,22 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PostSetup()
         {
-            CredentialDomainObjects = new List<App.Domain.Credential>();
+            CredentialDomainObjects = new List<App.Domain.Credential>() { };
 
-            ProfileResource profileResource = new ProfileResource()
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "Reznit" },
-                Aliases = new List<ProfileAliasResource>()
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
             };
 
-            My<IMembershipClientService>()
-                 .Setup(o => o.GetProfileByAbimIdAsync(It.IsAny<string>()))
-                 .ReturnsAsync(profileResource); 
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByAbimId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(CredentialDomainObjects);
+                .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
@@ -704,25 +694,25 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PostSetup()
         {
-            CredentialDomainObjects = new List<App.Domain.Credential>();
+            CredentialDomainObjects = new List<App.Domain.Credential>() {};
 
-            ProfileResource profileSummaryShortResource = new ProfileResource()
+            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
             {
-                Id = Guid.NewGuid(),
                 AbimId = "123",
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "Reznit" },
-                Aliases = new List<ProfileAliasResource>()
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
             };
 
-            var ex = new ApiException("Not Found", 404, "", null, null); 
+            var ex = new Enterprise.Core.Profile.Interservice.Util.Extensions.UnsuccessfulStatusException("");
+            ex.StatusCode = HttpStatusCode.NotFound;
 
-            My<IMembershipClientService>()
-                .Setup(o => o.GetProfileByAbimIdAsync(It.IsAny<string>()))
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByAbimId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                  .Throws(ex);
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(CredentialDomainObjects);
+                .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
@@ -764,17 +754,17 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         IEnumerable<App.Domain.Credential> Credentials { get; set; }
 
-        ProfileResource profileResource { get; set; }  
+        ProfileSummaryShortResource profileSummaryShortResource { get; set; }
 
         protected override void PreSetup()
         {
             Log = new Mock<ILogger>();
 
-            profileResource = new ProfileResource()
+            profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "Reznit" },
-                Aliases = new List<ProfileAliasResource>()
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
             };
 
             //****  Credentials *****
@@ -819,13 +809,13 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PostSetup()
         {
-            My<IMembershipClientService>()
-                .Setup(o => o.GetProfileByAbimIdAsync(It.IsAny<string>()))
-                .ReturnsAsync(profileResource); 
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByAbimId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(Credentials);
+                .Returns(Task.FromResult(Credentials));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
@@ -872,7 +862,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         public void AndThenMyResourceIsFocusPracticeShouldBeTrue()
         {
             Resource.IsFocusPractice.Should().BeTrue();
-        } 
+        }
+
     }
 
     /// <summary>
@@ -884,17 +875,17 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         IEnumerable<App.Domain.Credential> Credentials { get; set; }
 
-        ProfileResource profilResource { get; set; }  
+        ProfileSummaryShortResource profileSummaryShortResource { get; set; }
 
         protected override void PreSetup()
         {
             Log = new Mock<ILogger>();
 
-            profilResource = new ProfileResource()
+            profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "Reznit" },
-                Aliases = new List<ProfileAliasResource>()
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
             };
 
             //****  Credentials *****
@@ -939,13 +930,13 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PostSetup()
         {
-            My<IMembershipClientService>()
-               .Setup(o => o.GetProfileByAbimIdAsync(It.IsAny<string>()))
-               .ReturnsAsync(profilResource);
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByAbimId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(Credentials);
+                .Returns(Task.FromResult(Credentials));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
@@ -1005,17 +996,17 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         IEnumerable<App.Domain.Credential> Credentials { get; set; }
 
-        ProfileResource profileResource { get; set; }
+        ProfileSummaryShortResource profileSummaryShortResource { get; set; }
 
         protected override void PreSetup()
         {
             Log = new Mock<ILogger>();
 
-            profileResource = new ProfileResource()
+            profileSummaryShortResource = new ProfileSummaryShortResource()
             {
                 AbimId = "123",
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "Reznit" },
-                Aliases = new List<ProfileAliasResource>()
+                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
+                NameAliases = new List<ProfileNameAliasSummaryResource>()
             };
 
             //****  Credentials *****
@@ -1049,13 +1040,13 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PostSetup()
         {
-            My<IMembershipClientService>()
-                .Setup(o => o.GetProfileByAbimIdAsync(It.IsAny<string>()))
-                 .ReturnsAsync(profileResource);
+            My<IProfileInterservice>()
+                .Setup(o => o.SearchProfilesByAbimId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(profileSummaryShortResource));
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(Credentials);
+                .Returns(Task.FromResult(Credentials));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
@@ -1104,277 +1095,5 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         }
 
     }
-
-
-    /// <summary>
-    /// Returns IssuanceStatusWithModifier
-    /// </summary>
-    public class GetPhysicianCredentialsByAbimId_ReturnsIssuanceStatusWithModifierSpec : GetPhyCredentialByAbimIdScenario
-    {
-        PhysicianCertificationsPublicResource Resource { get; set; }
-
-        IEnumerable<App.Domain.Credential> Credentials { get; set; }
-
-        ProfileResource profilResource { get; set; }
-
-
-        protected override void PreSetup()
-        {
-            Log = new Mock<ILogger>();
-
-            profilResource = new ProfileResource()
-            {
-                AbimId = "123",
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "Reznit" },
-                Aliases = new List<ProfileAliasResource>()
-            };
-
-            //****  Credentials *****
-            var source = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
-
-            //Issuance Status: Active
-            var credActive = CredentialBuilder.BuildWithoutRandoms(source, "IM", "Internal Medicine", CertificationType.Primary, CredentialType.General, PathwayType.MOC);
-
-            credActive.AddIssuance(IssuanceBuilder.BuildWithoutRandoms(source: source,
-                                                                    issuanceStatus: IssuanceStatusType.Active,
-                                                                    issuanceDate: new DateTime(2010, 11, 02),
-                                                                    durationType: DurationType.Continuous,
-                                                                    maintenanceRequirement: MaintenanceRequirementType.Required,
-                                                                    maintenanceStatus: MaintenanceStatusType.Maintained,
-                                                                    occurrenceType: OccurrenceType.Initial));
-
-            //Issuance Status: InActive
-            var credInActive = CredentialBuilder.BuildWithoutRandoms(source, "GERI", "Geriatric Medicine", CertificationType.FocusPractice, CredentialType.Subspecialty, PathwayType.MOC);
-            credInActive.AddIssuance(IssuanceBuilder.BuildWithoutRandoms(source: source,
-                                                                    issuanceStatus: IssuanceStatusType.Inactive,
-                                                                    issuanceDate: new DateTime(2015, 11, 4),
-                                                                    durationType: DurationType.Continuous,
-                                                                    maintenanceRequirement: MaintenanceRequirementType.Required,
-                                                                    maintenanceStatus: MaintenanceStatusType.Maintained,
-                                                                    occurrenceType: OccurrenceType.Initial));
-
-
-            //Issuance Status: Surrendered
-            var credSurrendered = CredentialBuilder.BuildWithoutRandoms(source, "GERI", "Geriatric Medicine", CertificationType.Subspecialty, CredentialType.Subspecialty, PathwayType.MOC);
-            credSurrendered.AddIssuance(IssuanceBuilder.BuildWithoutRandoms(source: source,
-                                                                    issuanceStatus: IssuanceStatusType.Surrendered,
-                                                                    issuanceDate: new DateTime(2018, 11, 4),
-                                                                    durationType: DurationType.Continuous,
-                                                                    maintenanceRequirement: MaintenanceRequirementType.Required,
-                                                                    maintenanceStatus: MaintenanceStatusType.Maintained,
-                                                                    occurrenceType: OccurrenceType.Initial));
-
-            
-
-            //Issuance Status: Expired
-
-            var credExpired = CredentialBuilder.BuildWithoutRandoms(source, "NCARD", "Nuclear Cardiology", CertificationType.FocusPractice, CredentialType.Subspecialty, PathwayType.MOC);
-            credExpired.AddIssuance(IssuanceBuilder.BuildWithoutRandoms(source: source,
-                                                                    issuanceStatus: IssuanceStatusType.Expired,
-                                                                    issuanceDate: new DateTime(2015, 11, 4),
-                                                                    durationType: DurationType.Continuous,
-                                                                    maintenanceRequirement: MaintenanceRequirementType.Required,
-                                                                    maintenanceStatus: MaintenanceStatusType.Maintained,
-                                                                    occurrenceType: OccurrenceType.Initial));
-
-
-            //Issuance Status: Suspended
-            var credSuspended = CredentialBuilder.BuildWithoutRandoms(source, "GERI", "Geriatric Medicine", CertificationType.Subspecialty, CredentialType.Subspecialty, PathwayType.MOC);
-            credSuspended.AddIssuance(IssuanceBuilder.BuildWithoutRandoms(source: source,
-                                                                    issuanceStatus: IssuanceStatusType.Suspended,
-                                                                    issuanceDate: new DateTime(2018, 11, 4),
-                                                                    durationType: DurationType.Continuous,
-                                                                    maintenanceRequirement: MaintenanceRequirementType.Required,
-                                                                    maintenanceStatus: MaintenanceStatusType.Maintained,
-                                                                    occurrenceType: OccurrenceType.Initial));
-
-
-            //Issuance Status: Revoked
-            var credRevoked = CredentialBuilder.BuildWithoutRandoms(source, "GERI", "Geriatric Medicine", CertificationType.Subspecialty, CredentialType.Subspecialty, PathwayType.MOC);
-            credRevoked.AddIssuance(IssuanceBuilder.BuildWithoutRandoms(source: source,
-                                                                    issuanceStatus: IssuanceStatusType.Revoked,
-                                                                    issuanceDate: new DateTime(2018, 11, 4),
-                                                                    durationType: DurationType.Continuous,
-                                                                    maintenanceRequirement: MaintenanceRequirementType.Required,
-                                                                    maintenanceStatus: MaintenanceStatusType.Maintained,
-                                                                    occurrenceType: OccurrenceType.Initial));
-            //Issuance Status: Cancelled
-
-            var credCancelled = CredentialBuilder.BuildWithoutRandoms(source, "HEMA", "Hematology", CertificationType.FocusPractice, CredentialType.Subspecialty, PathwayType.MOC);
-            credCancelled.AddIssuance(IssuanceBuilder.BuildWithoutRandoms(source: source,
-                                                                    issuanceStatus: IssuanceStatusType.Cancelled,
-                                                                    issuanceDate: new DateTime(2015, 11, 4),
-                                                                    durationType: DurationType.Continuous,
-                                                                    maintenanceRequirement: MaintenanceRequirementType.Required,
-                                                                    maintenanceStatus: MaintenanceStatusType.Maintained,
-                                                                    occurrenceType: OccurrenceType.Initial));
-
-            Credentials = new List<App.Domain.Credential>() { credActive, credInActive, credSurrendered, credExpired, credSuspended, credRevoked, credCancelled };
-
-        }
-
-        protected override void PostSetup()
-        {
-            My<IMembershipClientService>()
-                .Setup(o => o.GetProfileByAbimIdAsync(It.IsAny<string>()))
-                .Returns(Task.FromResult(profilResource));
-
-
-            My<ICredentialService>()
-                .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .Returns(Task.FromResult(Credentials));
-
-            // ***  AccessTokenServiceMock ---
-            My<IAccessTokenService>()
-               .Setup(o => o.GetAccessToken())
-               .Returns("--token--");
-
-        }
-
-        public void GivenIPassTheCorrectUrl()
-        {
-            Url = "/api/v1.0/physicianCredentials/abimId/" + "12345";
-        }
-
-        public async Task WhenICallGetPhyCredential()
-        {
-            Result = await HttpServer.CreateRequest(Url)
-                .GetAsync();
-            ResponseContent = await Result.Content.ReadAsStringAsync();
-            Resource = JsonConvert.DeserializeObject<PhysicianCertificationsPublicResource>(ResponseContent);
-        }
-
-        public void ThenIGetAnOkResponse()
-        {
-            Result.StatusCode.Should().Be(HttpStatusCode.OK);
-        }
-
-        public void AndThenMyResourceShouldNotBeNull()
-        {
-            Resource.Should().NotBeNull();
-        }
-         
-
-        public void AndThenMyResourceShouldContainProperStatus()
-        {
-            Resource.Certifications.Where(c => c.Status == IssuanceStatusType.Active).First().IssuanceStatusWithModifier.Should().Be("Certified");
-            Resource.Certifications.Where(c => c.Status == IssuanceStatusType.Inactive).First().IssuanceStatusWithModifier.Should().Be("Not Certified");
-            Resource.Certifications.Where(c => c.Status == IssuanceStatusType.Surrendered).First().IssuanceStatusWithModifier.Should().Be("Not Certified");
-            Resource.Certifications.Where(c => c.Status == IssuanceStatusType.Suspended).First().IssuanceStatusWithModifier.Should().Be("Not Certified, Suspended");
-            Resource.Certifications.Where(c => c.Status == IssuanceStatusType.Revoked).First().IssuanceStatusWithModifier.Should().Be("Not Certified, Revoked");
-            Resource.Certifications.Where(c => c.Status == IssuanceStatusType.Expired).First().IssuanceStatusWithModifier.Should().Be("Not Certified, Lapsed");
-            Resource.Certifications.Where(c => c.Status == IssuanceStatusType.Cancelled).First().IssuanceStatusWithModifier.Should().Be("Not Certified");
-
-        }
-    }
-
-    /// <summary>
-    /// Returns IssuanceStatusWithModifier
-    /// </summary>
-    public class GetPhysicianCredentialsByAbimId_DoesntReturnInActiveFPHMSpec : GetPhyCredentialByAbimIdScenario
-    {
-        PhysicianCertificationsPublicResource Resource { get; set; }
-
-        IEnumerable<App.Domain.Credential> Credentials { get; set; }
-
-        ProfileResource profileResource { get; set; }
-
-        protected override void PreSetup()
-        {
-            Log = new Mock<ILogger>();
-
-            profileResource = new ProfileResource()
-            {
-                AbimId = "123",
-
-                Name = new ProfileNameResource() { FirstName = "Alex", LastName = "Reznit" },
-                Aliases = (new List<ProfileAliasResource>())
-
-            };
-
-            //****  Credentials *****
-            var source = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
-
-            //Issuance Status: Active
-            var credActive = CredentialBuilder.BuildWithoutRandoms(source, "HOSP", "Focused Practice in Hospital Medicine", CertificationType.Primary, CredentialType.General, PathwayType.MOC);
-
-            credActive.AddIssuance(IssuanceBuilder.BuildWithoutRandoms(source: source,
-                                                                    issuanceStatus: IssuanceStatusType.Active,
-                                                                    issuanceDate: new DateTime(2010, 11, 02),
-                                                                    durationType: DurationType.Continuous,
-                                                                    maintenanceRequirement: MaintenanceRequirementType.Required,
-                                                                    maintenanceStatus: MaintenanceStatusType.Maintained,
-                                                                    occurrenceType: OccurrenceType.Initial));
-
-            //Issuance Status: InActive
-            var credInActive = CredentialBuilder.BuildWithoutRandoms(source, "HOSP", "Focused Practice in Hospital Medicine", CertificationType.FocusPractice, CredentialType.Subspecialty, PathwayType.MOC);
-            credInActive.AddIssuance(IssuanceBuilder.BuildWithoutRandoms(source: source,
-                                                                    issuanceStatus: IssuanceStatusType.Inactive,
-                                                                    issuanceDate: new DateTime(2015, 11, 4),
-                                                                    durationType: DurationType.Continuous,
-                                                                    maintenanceRequirement: MaintenanceRequirementType.Required,
-                                                                    maintenanceStatus: MaintenanceStatusType.Maintained,
-                                                                    occurrenceType: OccurrenceType.Initial));
-
-
-          
-            Credentials = new List<App.Domain.Credential>() { credActive, credInActive };
-
-        }
-
-        protected override void PostSetup()
-        {
-            My<IMembershipClientService>()
-                .Setup(o => o.GetProfileByAbimIdAsync(It.IsAny<string>()))
-                .Returns(Task.FromResult(profileResource));
-
-            My<ICredentialService>()
-                .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .Returns(Task.FromResult(Credentials));
-
-            // ***  AccessTokenServiceMock ---
-            My<IAccessTokenService>()
-               .Setup(o => o.GetAccessToken())
-               .Returns("--token--");
-
-        }
-
-        public void GivenIPassTheCorrectUrl()
-        {
-            Url = "/api/v1.0/physicianCredentials/abimId/" + "12345";
-        }
-
-        public async Task WhenICallGetPhyCredential()
-        {
-            Result = await HttpServer.CreateRequest(Url)
-                .GetAsync();
-            ResponseContent = await Result.Content.ReadAsStringAsync();
-            Resource = JsonConvert.DeserializeObject<PhysicianCertificationsPublicResource>(ResponseContent);
-        }
-
-        public void ThenIGetAnOkResponse()
-        {
-            Result.StatusCode.Should().Be(HttpStatusCode.OK);
-        }
-
-        public void AndThenMyResourceShouldNotBeNull()
-        {
-            Resource.Should().NotBeNull();
-        }
-
-
-        public void AndThenMyResourceShouldContainActiveStatusForFPHM()
-        {
-            Resource.Certifications.Where(c => c.Status == IssuanceStatusType.Active).First().Name.Should().Be(CertificationName.IMwithFPHM);
-            
-        }
-
-        public void AndThenMyResourceShouldNotContainInActiveStatusForFPHM()
-        {
-            Resource.Certifications.Where(c => c.Status != IssuanceStatusType.Active).FirstOrDefault().Should().BeNull();
-
-        }
-    }
-
     #endregion
 }

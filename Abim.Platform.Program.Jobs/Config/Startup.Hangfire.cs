@@ -32,27 +32,25 @@ namespace Abim.Platform.Program.Jobs.Config
                 //Queues = new[] { ApiConstants.HangfireInfo.ProgramQueueName }
             };
 
-            var enviroment = configurationManager.AppSettings["Abim.Common.Env"];
-
             //Add Year End Look Back
             //This is a recurring job that should never occur as scheduled, only when 
             //initiated manually. See this URL for info on the CRON expression used:
             //https://stackoverflow.com/questions/37587167/set-an-on-demand-only-job-in-hangfire
-            RecurringJob.AddOrUpdate<YearEndLookbackJob>(x => x.Execute(null, null), Cron.Never(), TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate<YearEndLookbackJob>(x => x.Execute(null, null), "0 0 29 2/12000 WED", TimeZoneInfo.Local);
 
             //Add Lock Out Process 
             //This is a recurring job that should never occur as scheduled, only when 
             //initiated manually. See this URL for info on the CRON expression used:
             //https://stackoverflow.com/questions/37587167/set-an-on-demand-only-job-in-hangfire
-            RecurringJob.AddOrUpdate<CoSponsoredLockOutJob>(x => x.Execute(null, null), Cron.Never(), TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate<CoSponsoredLockOutJob>(x => x.Execute(null, null), "0 0 29 2/12000 WED", TimeZoneInfo.Local);
 
             //Add Year End Look Back Test Job. This also is a recurring job that should never occur as scheduled, 
             //only when initiated manually.
-            RecurringJob.AddOrUpdate<YearEndLookbackTestJob>(x => x.Execute(null, null), Cron.Never(), TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate<YearEndLookbackTestJob>(x => x.Execute(null, null), "0 0 29 2/12000 WED", TimeZoneInfo.Local);
 
             //Add Lock Out Process Test Job. This also is a recurring job that should never occur as scheduled, 
             //only when initiated manually.
-            RecurringJob.AddOrUpdate<CoSponsoredLockOutTestJob>(x => x.Execute(null, null), Cron.Never(), TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate<CoSponsoredLockOutTestJob>(x => x.Execute(null, null), "0 0 29 2/12000 WED", TimeZoneInfo.Local);
 
             // will fire on September 01 each year.
             RecurringJob.AddOrUpdate<ExpireByTimeLimitJob>(x => x.Execute(null, null, null), Cron.Yearly(9, 1), TimeZoneInfo.Local);
@@ -60,16 +58,8 @@ namespace Abim.Platform.Program.Jobs.Config
             // will fire on January 01 each year.
             RecurringJob.AddOrUpdate<EarlyYearEndLookbackJob>(x => x.Execute(null, null, null, null), Cron.Yearly(1, 1), TimeZoneInfo.Local);
 
-            if (enviroment == "PROD")
-            {
-                // will fire on April 01 each year.
-                RecurringJob.AddOrUpdate<DeselectCertificateJob>(x => x.Execute(null, null), Cron.Yearly(4, 1), TimeZoneInfo.Local);
-            }
-            else
-            {
-                //only when initiated manually.
-                RecurringJob.AddOrUpdate<DeselectCertificateJob>(x => x.Execute(null, null), Cron.Never(), TimeZoneInfo.Local);
-            }
+            // will fire on February 01 each year.
+            RecurringJob.AddOrUpdate<DeselectCertificateJob>(x => x.Execute(null, null), Cron.Yearly(2, 1), TimeZoneInfo.Local);
 
             app.UseHangfireServer(options);
 

@@ -1,0 +1,7 @@
+﻿CREATE SCHEMA [IdentityData]
+    AUTHORIZATION [dbo];
+
+
+
+
+

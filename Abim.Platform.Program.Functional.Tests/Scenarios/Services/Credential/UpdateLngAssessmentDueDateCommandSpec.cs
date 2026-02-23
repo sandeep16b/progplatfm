@@ -55,7 +55,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
         [WorkItem(181022)]
         [WorkItem(181023)]
         [WorkItem(181024)]
-        [WorkItem(246471)]
         public void UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_NotLapsedCert_NonCoSponsoredCert_NotInSummativeYear_AdvanceExamDueDate()
         {
             new UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_NotLapsedCert_NonCoSponsoredCer_NotInSummativeYear_AdvanceExamDueDateScenario().BDDfy();
@@ -65,7 +64,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
         [WorkItem(181022)]
         [WorkItem(181023)]
         [WorkItem(181024)]
-        [WorkItem(287070)]
         public void UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_LapsedCert_NonCoSponsoredCert_NotInSummativeYear_NoChangeToExamDueDate()
         {
             new UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_LapsedCert_NonCoSponsoredCert_NotInSummativeYear_NoChangeToExamDueDateScenario().BDDfy();
@@ -84,38 +82,9 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
         [WorkItem(181022)]
         [WorkItem(181023)]
         [WorkItem(181024)]
-        [WorkItem(288090)]
-        public void UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_NotInDueYear_CoSponsoredCert_NotInSummativeYear_AdvanceExamDueDate()
+        public void UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_NotInDueYear_CoSponsoredCert_NotInSummativeYear_NoChangeToExamDueDate()
         {
-            new UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_NotInDueYear_CoSponsoredCert_NotInSummativeYear_AdvanceExamDueDateScenario().BDDfy();
-        }
-
-        [TestCase]
-        [WorkItem(285458)]
-        public void UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_ActiveGrandFatherCertHasLapsedLatestTimeLimitedIssuance_NonCoSponsoredCer_NotInSummativeYear_AdvanceExamDueDate()
-        {
-            new UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_ActiveGrandFatherCertHasLapsedLatestTimeLimitedIssuance_NonCoSponsoredCer_NotInSummativeYear_AdvanceExamDueDateScenario().BDDfy();
-        } 
-
-        [TestCase]
-        [WorkItem(285458)]
-        public void UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_ExpiredGrandFatherCertHasLapsedLatestTimeLimitedIssuance_NonCoSponsoredCer_NotInSummativeYear_NoChangeToExamDueDate()
-        {
-            new UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_ExpiredGrandFatherCertHasLapsedLatestTimeLimitedIssuance_NonCoSponsoredCer_NotInSummativeYear_NoChangeToExamDueDateScenario().BDDfy();
-        }
-
-        [TestCase]
-        [WorkItem(285458)]
-        public void UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_ExpireGrandFatherCertHasActiveLatestTimeLimitedIssuance_NonCoSponsoredCer_NotInSummativeYear_AdvanceExamDueDate()
-        {
-            new UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_ExpireGrandFatherCertHasActiveLatestTimeLimitedIssuance_NonCoSponsoredCer_NotInSummativeYear_AdvanceExamDueDateScenario().BDDfy();
-        }
-
-        [TestCase]
-        [WorkItem(287070)]
-        public void UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_IsNotLapsedDueToPointNotActiveMBM_NonCoSponsoredCer_NotInSummativeYear_AdvanceExamDueDate()
-        {
-            new UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_IsNotLapsedDueToPointNotActiveMBM_NonCoSponsoredCer_NotInSummativeYear_AdvanceExamDueDateScenario().BDDfy();
+            new UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_NotInDueYear_CoSponsoredCert_NotInSummativeYear_NoChangeToExamDueDateScenario().BDDfy();
         }
 
         [TestCase]
@@ -126,6 +95,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
         {
             new UpdateLngAssessmentDueDateCommandHandle_FailMetParticipationStatus_NoChangeToExamDueDateScenario().BDDfy();
         }
+
 
         [TestCase]
         [WorkItem(181022)]
@@ -171,7 +141,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
         public void UpdateLngAssessmentDueDateCommandHandle_ReturnsRejectedWhenDatabaseSaveFailsDomainValidation()
         {
             new UpdateLngAssessmentDueDateCommandHandleReturnsRejectedWhenDatabaseSaveFailsDomainValidationScenario().BDDfy();
-        } 
+        }
 
         #region Scenario Base Classes
         private abstract class UpdateLngAssessmentDueDateCommandServiceScenario : CredentialServiceScenario
@@ -202,7 +172,8 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
                 types.Add(typeof(IValidator<UpdateLngAssessmentDueDateCommand>));
                 return types;
             }
-             
+
+
             /// <summary>
             /// Primary setup
             /// </summary>
@@ -396,7 +367,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             public void AndThenThereShouldBeAnEndTrace()
             {
-                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle UpdateLngAssessmentDueDateCommand for Credential:"));
+                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle for"));
             }
 
         }
@@ -420,8 +391,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
                 base.SetupCredential();
                 Credential.IsCosponsored = false; // set CoSponsored flag
                 Credential.Issuances[0].IssuanceStatus = IssuanceStatusType.Active;
-                Credential.AssessmentMetDate = null;
-                Credential.AssessmentMet = false;
             }
 
             public void AndThenTheCommandResultStatusShouldBeAccepted()
@@ -443,15 +412,15 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 CommandResult.Data.ExamDueDate.Value.ShouldBe(new DateTime(Command.Year + 1, 12, 31));
                 CommandResult.Data.AssessmentMet.Should().BeTrue(); // The certificate is not lapsed and meets their annual longitudinal participation requirement and is NOT in summative decision year
-                CommandResult.Data.AssessmentMetDate.ShouldBe(new DateTime(Command.Year, 12, 31));
             }
 
             public void AndThenThereShouldBeAnEndTrace()
             {
-                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle UpdateLngAssessmentDueDateCommand for Credential:"));
+                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle for"));
             }
 
         }
+
 
         private class UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_InDueYear_CoSponsored_InSummativeYear_NoChangeToExamDueDateScenario : UpdateLngAssessmentDueDateCommandServiceScenario
         {
@@ -496,12 +465,12 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             public void AndThenThereShouldBeAnEndTrace()
             {
-                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle UpdateLngAssessmentDueDateCommand for Credential:"));
+                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle for"));
             }
 
         }
 
-        private class UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_NotInDueYear_CoSponsoredCert_NotInSummativeYear_AdvanceExamDueDateScenario : UpdateLngAssessmentDueDateCommandServiceScenario
+        private class UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_NotInDueYear_CoSponsoredCert_NotInSummativeYear_NoChangeToExamDueDateScenario : UpdateLngAssessmentDueDateCommandServiceScenario
         {
             public void GivenIInputAValidCommand()
             {
@@ -538,14 +507,13 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             public void AndThenAssessmentDueDateShouldBeSetToCorrectValues()
             {
-                CommandResult.Data.ExamDueDate.Value.ShouldBe(new DateTime(Command.Year + 1, 12, 31));
-                CommandResult.Data.AssessmentMet.Should().BeTrue(); // The certificate is not lapsed and meets their annual longitudinal participation requirement and is NOT in summative decision year
-                CommandResult.Data.AssessmentMetDate.ShouldBe(new DateTime(Command.Year, 12, 31));
+                CommandResult.Data.ExamDueDate.Value.ShouldBe(Credential.ExamDueDate.Value);
+                CommandResult.Data.AssessmentMet.Should().BeFalse();
             }
 
             public void AndThenThereShouldBeAnEndTrace()
             {
-                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle UpdateLngAssessmentDueDateCommand for Credential:"));
+                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle for"));
             }
         }
 
@@ -568,7 +536,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
                 base.SetupCredential();
                 Credential.IsCosponsored = false; // set CoSponsored flag
                 Credential.Issuances[0].IssuanceStatus = IssuanceStatusType.Expired; // lapsed cert
-                Credential.AssessmentMet = false; // lapsed due to the assessment
             }
 
             public void AndThenTheCommandResultStatusShouldBeAccepted()
@@ -594,7 +561,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             public void AndThenThereShouldBeAnEndTrace()
             {
-                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle UpdateLngAssessmentDueDateCommand for Credential:"));
+                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle for"));
             }
         }
 
@@ -618,12 +585,12 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
                 var issuance =
                     IssuanceBuilder.BuildWithoutRandoms(
                         source,
-                        IssuanceStatusType.Expired, // !!!
+                        Resources.IssuanceStatusType.Expired, // !!!
                         new DateTime(2010, 1, 1), // Issuance Date 
-                        DurationType.Timelimited,
-                        MaintenanceRequirementType.NotRequired,
-                        MaintenanceStatusType.NotMaintained,
-                        OccurrenceType.Recertification);
+                        Resources.DurationType.Timelimited,
+                        Resources.MaintenanceRequirementType.NotRequired,
+                        Resources.MaintenanceStatusType.NotMaintained,
+                        Resources.OccurrenceType.Recertification);
 
                 Issuance[] issuances = { issuance };
 
@@ -682,7 +649,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             public void AndThenThereShouldBeAnEndTrace()
             {
-                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle UpdateLngAssessmentDueDateCommand for Credential:"));
+                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle for"));
             }
 
         }
@@ -754,7 +721,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             public void AndThenThereShouldBeAnEndTrace()
             {
-                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle UpdateLngAssessmentDueDateCommand for Credential:"));
+                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle for"));
             }
 
         }
@@ -796,332 +763,10 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             public void AndThenThereShouldBeAnEndTrace()
             {
-                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle UpdateLngAssessmentDueDateCommand for Credential:"));
+                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle for"));
             }
 
         }
-
-        private class UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_ActiveGrandFatherCertHasLapsedLatestTimeLimitedIssuance_NonCoSponsoredCer_NotInSummativeYear_AdvanceExamDueDateScenario : UpdateLngAssessmentDueDateCommandServiceScenario
-        {
-            public void GivenIInputAValidCommand()
-            {
-                Command = CommandBuilder<UpdateLngAssessmentDueDateCommand>
-                            .Valid()
-                            .With(cmd => cmd.Year = 2022)
-                            .With(cmd => cmd.PassSummativeDecision = null)
-                            .With(cmd => cmd.MetParticipationStatus = true)
-                            .With(cmd => cmd.IsSummativeDecisionYear = false)
-                            .With(cmd => cmd.CredentialId = Guid.NewGuid())
-                            .Build();
-            }
-
-            protected override void SetupCredential()
-            { 
-                var source = SourceBuilder.BuildAbim();
-              
-                Issuance[] issuances = new Issuance[2];
-                issuances[0] = IssuanceBuilder.BuildWithoutRandoms(
-                        null,
-                        IssuanceStatusType.Active,
-                        new DateTime(1990, 12, 31),
-                        DurationType.Lifetime,
-                        MaintenanceRequirementType.NotRequired,
-                        MaintenanceStatusType.Maintained,
-                        OccurrenceType.Initial);
-
-                issuances[1] = IssuanceBuilder.BuildWithoutRandoms(
-                        source,
-                        IssuanceStatusType.Expired,
-                        new DateTime(2010, 1, 1),
-                        DurationType.Timelimited,
-                        MaintenanceRequirementType.Required,
-                        MaintenanceStatusType.Maintained,
-                        OccurrenceType.Recertification);
-
-                Credential =
-                    CredentialBuilder.BuildWithoutRandoms(
-                        source,
-                        "IM",
-                        "Internal Medicine",
-                        CertificationType.Primary,
-                        CredentialType.General,
-                        PathwayType.LNG,
-                        issuances);
-                 
-                Credential.IsCosponsored = false;
-                Credential.ExamDueDate = new DateTime(2021, 12, 31);
-            }
-
-            public void AndThenTheCommandResultStatusShouldBeAccepted()
-            {
-                CommandResult.Status.Should().Be(CommandStatus.Accepted);
-            }
-
-            public void AndThenTheCommandResultDotSucceededShouldBeTrue()
-            {
-                CommandResult.Succeeded.Should().BeTrue();
-            }
-
-            public void AndThenTheCommandResultValidationShouldShowSuccess()
-            {
-                CommandResult.Validation.Succeeded.Should().BeTrue();
-            }
-
-            public void AndThenAssessmentDueDateShouldBeSetToCorrectValues()
-            {
-                CommandResult.Data.ExamDueDate.Value.ShouldBe(new DateTime(Command.Year + 1, 12, 31));
-                CommandResult.Data.AssessmentMet.Should().BeTrue(); 
-                CommandResult.Data.AssessmentMetDate.ShouldBe(new DateTime(Command.Year, 12, 31));
-            }
-
-            public void AndThenThereShouldBeAnEndTrace()
-            {
-                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle UpdateLngAssessmentDueDateCommand for Credential:"));
-            }
-
-        }
-
-        private class UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_ExpireGrandFatherCertHasActiveLatestTimeLimitedIssuance_NonCoSponsoredCer_NotInSummativeYear_AdvanceExamDueDateScenario : UpdateLngAssessmentDueDateCommandServiceScenario
-        {
-            public void GivenIInputAValidCommand()
-            {
-                Command = CommandBuilder<UpdateLngAssessmentDueDateCommand>
-                            .Valid()
-                            .With(cmd => cmd.Year = 2022)
-                            .With(cmd => cmd.PassSummativeDecision = null)
-                            .With(cmd => cmd.MetParticipationStatus = true)
-                            .With(cmd => cmd.IsSummativeDecisionYear = false)
-                            .With(cmd => cmd.CredentialId = Guid.NewGuid())
-                            .Build();
-            }
-
-            protected override void SetupCredential()
-            {
-                var source = SourceBuilder.BuildAbim();
-
-                Issuance[] issuances = new Issuance[2];
-                issuances[0] = IssuanceBuilder.BuildWithoutRandoms(
-                        null,
-                        IssuanceStatusType.Expired,
-                        new DateTime(1990, 12, 31),
-                        DurationType.Lifetime,
-                        MaintenanceRequirementType.NotRequired,
-                        MaintenanceStatusType.Maintained,
-                        OccurrenceType.Initial);
-
-                issuances[1] = IssuanceBuilder.BuildWithoutRandoms(
-                        source,
-                        IssuanceStatusType.Active,
-                        new DateTime(2014, 1, 1),
-                        DurationType.Timelimited,
-                        MaintenanceRequirementType.Required,
-                        MaintenanceStatusType.Maintained,
-                        OccurrenceType.Recertification);
-
-                Credential =
-                    CredentialBuilder.BuildWithoutRandoms(
-                        source,
-                        "IM",
-                        "Internal Medicine",
-                        CertificationType.Primary,
-                        CredentialType.General,
-                        PathwayType.LNG,
-                        issuances);
-
-                Credential.IsCosponsored = false;
-                Credential.ExamDueDate = new DateTime(2021, 12, 31);
-            }
-
-            public void AndThenTheCommandResultStatusShouldBeAccepted()
-            {
-                CommandResult.Status.Should().Be(CommandStatus.Accepted);
-            }
-
-            public void AndThenTheCommandResultDotSucceededShouldBeTrue()
-            {
-                CommandResult.Succeeded.Should().BeTrue();
-            }
-
-            public void AndThenTheCommandResultValidationShouldShowSuccess()
-            {
-                CommandResult.Validation.Succeeded.Should().BeTrue();
-            }
-
-            public void AndThenAssessmentDueDateShouldBeSetToCorrectValues()
-            {
-                CommandResult.Data.ExamDueDate.Value.ShouldBe(new DateTime(Command.Year + 1, 12, 31));
-                CommandResult.Data.AssessmentMet.Should().BeTrue();
-                CommandResult.Data.AssessmentMetDate.ShouldBe(new DateTime(Command.Year, 12, 31));
-            }
-
-            public void AndThenThereShouldBeAnEndTrace()
-            {
-                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle UpdateLngAssessmentDueDateCommand for Credential:"));
-            }
-
-        }
-
-        private class UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_IsNotLapsedDueToPointNotActiveMBM_NonCoSponsoredCer_NotInSummativeYear_AdvanceExamDueDateScenario : UpdateLngAssessmentDueDateCommandServiceScenario
-        {
-            public void GivenIInputAValidCommand()
-            {
-                Command = CommandBuilder<UpdateLngAssessmentDueDateCommand>
-                            .Valid()
-                            .With(cmd => cmd.Year = 2022)
-                            .With(cmd => cmd.PassSummativeDecision = null)
-                            .With(cmd => cmd.MetParticipationStatus = true)
-                            .With(cmd => cmd.IsSummativeDecisionYear = false)
-                            .With(cmd => cmd.CredentialId = Guid.NewGuid())
-                            .Build();
-            }
-
-            protected override void SetupCredential()
-            {
-                var source = SourceBuilder.BuildAbim();
-
-                Issuance[] issuances = new Issuance[1];
-                issuances[0] = IssuanceBuilder.BuildWithoutRandoms(
-                        null,
-                        IssuanceStatusType.Expired,
-                        new DateTime(1990, 12, 31),
-                        DurationType.Continuous,
-                        MaintenanceRequirementType.Required,
-                        MaintenanceStatusType.NotMaintained,
-                        OccurrenceType.Initial);
-
-                Credential =
-                    CredentialBuilder.BuildWithoutRandoms(
-                        source,
-                        "IM",
-                        "Internal Medicine",
-                        CertificationType.Primary,
-                        CredentialType.General,
-                        PathwayType.LNG,
-                        issuances);
-
-                Credential.IsCosponsored = false;
-                Credential.AssessmentMet = true;
-            }
-
-            public void AndThenTheCommandResultStatusShouldBeAccepted()
-            {
-                CommandResult.Status.Should().Be(CommandStatus.Accepted);
-            }
-
-            public void AndThenTheCommandResultDotSucceededShouldBeTrue()
-            {
-                CommandResult.Succeeded.Should().BeTrue();
-            }
-
-            public void AndThenTheCommandResultValidationShouldShowSuccess()
-            {
-                CommandResult.Validation.Succeeded.Should().BeTrue();
-            }
-
-            public void AndThenAssessmentDueDateShouldBeSetToCorrectValues()
-            {
-                CommandResult.Data.ExamDueDate.Value.ShouldBe(new DateTime(Command.Year + 1, 12, 31));
-                CommandResult.Data.AssessmentMet.Should().BeTrue();
-            }
-
-            public void AndThenThereShouldBeAnEndTrace()
-            {
-                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle UpdateLngAssessmentDueDateCommand for Credential:"));
-            }
-
-        }
-
-        private class UpdateLngAssessmentDueDateCommandHandle_MetParticipationStatus_ExpiredGrandFatherCertHasLapsedLatestTimeLimitedIssuance_NonCoSponsoredCer_NotInSummativeYear_NoChangeToExamDueDateScenario : UpdateLngAssessmentDueDateCommandServiceScenario
-        {
-            public void GivenIInputAValidCommand()
-            {
-                Command = CommandBuilder<UpdateLngAssessmentDueDateCommand>
-                            .Valid()
-                            .With(cmd => cmd.Year = 2022)
-                            .With(cmd => cmd.PassSummativeDecision = null)
-                            .With(cmd => cmd.MetParticipationStatus = true)
-                            .With(cmd => cmd.IsSummativeDecisionYear = false)
-                            .With(cmd => cmd.CredentialId = Guid.NewGuid())
-                            .Build();
-            }
-
-            protected override void SetupCredential()
-            {
-                var source = SourceBuilder.BuildAbim();
-
-                Issuance[] issuances = new Issuance[2];
-                issuances[0] = IssuanceBuilder.BuildWithoutRandoms(
-                        null,
-                        IssuanceStatusType.Expired,
-                        new DateTime(1990, 12, 31),
-                        DurationType.Lifetime,
-                        MaintenanceRequirementType.NotRequired,
-                        MaintenanceStatusType.Maintained,
-                        OccurrenceType.Initial);
-
-                issuances[1] = IssuanceBuilder.BuildWithoutRandoms(
-                        source,
-                        IssuanceStatusType.Expired,
-                        new DateTime(2010, 1, 1),
-                        DurationType.Timelimited,
-                        MaintenanceRequirementType.Required,
-                        MaintenanceStatusType.Maintained,
-                        OccurrenceType.Recertification);
-
-                Credential =
-                    CredentialBuilder.BuildWithoutRandoms(
-                        source,
-                        "IM",
-                        "Internal Medicine",
-                        CertificationType.Primary,
-                        CredentialType.General,
-                        PathwayType.LNG,
-                        issuances);
-
-
-                Credential.ExamDueDate = new DateTime(2022, 12, 31); 
-                Credential.AssessmentMet = false; 
-            }
-
-            public void AndThenTheCommandResultStatusShouldBeAccepted()
-            {
-                CommandResult.Status.Should().Be(CommandStatus.Accepted);
-            }
-
-            public void AndThenTheCommandResultDotSucceededShouldBeTrue()
-            {
-                CommandResult.Succeeded.Should().BeTrue();
-            }
-
-            public void AndThenTheCommandResultValidationShouldShowSuccess()
-            {
-                CommandResult.Validation.Succeeded.Should().BeTrue();
-            }
-
-            public void AndThenAssessmentDueDateShouldBeSetToCorrectValues()
-            {
-                CommandResult.Data.ExamDueDate.Value.ShouldBe(new DateTime(Command.Year, 12, 31));
-                CommandResult.Data.AssessmentMet.Should().BeFalse();
-            }
-
-            public void AndThenCorrectiveActionRun()
-            {
-                My<IProgramRulesService>()
-                    .Verify(mock => mock.RunCorrectiveActionForMember(
-                        It.IsAny<Guid>(),
-                        It.IsAny<DateTime>(),
-                        It.IsAny<DateTime>(),
-                        It.IsAny<TriggeringEvent>(),
-                        null), Times.Never);
-            }
-
-            public void AndThenThereShouldBeAnEndTrace()
-            {
-                LogTest.Traces.Should().Contain(s => s.StartsWith("Returning from Handle UpdateLngAssessmentDueDateCommand for Credential:"));
-            }
-
-        }
-
         #endregion Successful Scenario
 
         #region Failed Validation Scenario

@@ -2,12 +2,6 @@
 Post-Deployment Script To Fill Lookup Tables
 */
 
-:r ".\dbo\Jobs\CMPIncorrectPathwayNotification.sql"
-GO
-
-:r ".\dbo\Jobs\IssuancesCreatedYesterdayNotification.sql"
-GO
-
 -- CertificationType
  ;with cte_data(Value,Description,Created,Modified,CreatedBy,ModifiedBy)
 as (select * from (values
@@ -127,8 +121,7 @@ as (select * from (values
 ('Inactive','Inactive',SYSDATETIME(), SYSDATETIME(),'System','System'),
 ('Revoked','Revoked',SYSDATETIME(), SYSDATETIME(),'System','System'),
 ('Surrendered','Surrendered',SYSDATETIME(), SYSDATETIME(),'System','System'),
-('Suspended','Suspended',SYSDATETIME(), SYSDATETIME(),'System','System'),
-('Cancelled','Cancelled',SYSDATETIME(), NULL,'System',NULL)
+('Suspended','Suspended',SYSDATETIME(), SYSDATETIME(),'System','System')
 )c(Value,Description,Created,Modified,CreatedBy,ModifiedBy))
 merge	dbo.IssuanceStatusType as t
 using	cte_data as s
@@ -302,36 +295,36 @@ when not matched by target then
 
 
 -- Certification (ABIM source only)
- ;with cte_data(Code, CertificationGuid, Name, AddedQualification, ConsecutiveAttempt, Type, IsCertificateRetired, CertificateRetiredDate, Created, CreatedBy, SourceId)
+ ;with cte_data(Code, CertificationGuid, Name, AddedQualification, ConsecutiveAttempt, Type, Created, CreatedBy, SourceId)
 as (select *, (select SourceId 
 			  from dbo.Source 
 			  where code = 'ABIM') as SourceId
 from (values
-('ACHD', '0271AD17-9920-E711-8101-005056AB0196', 'Adult Congenital Heart Disease', 1, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('ADOL', '0171AD17-9920-E711-8101-005056AB0196', 'Adolescent Medicine', 1, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('AHFTC', '0371AD17-9920-E711-8101-005056AB0197', 'Advanced Heart Failure and Transplant Cardiology', 1, 3, 'Subspecialty', 0, NULL,  sysdatetime(), 'System'),
-('CARD', '0571AD17-9920-E711-8101-005056AB0198', 'Cardiovascular Disease', 0, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('CCEP', '0671AD17-9920-E711-8101-005056AB0198', 'Clinical Cardiac Electrophysiology', 1, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('CRIT', '0871AD17-9920-E711-8101-005056AB0199', 'Critical Care Medicine', 0, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('ENDO', '1071AD17-9920-E711-8101-005056AB0200', 'Endocrinology, Diabetes and Metabolism', 0, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('GAST', '1271AD17-9920-E711-8101-005056AB0201', 'Gastroenterology', 0, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('GERI', '1371AD17-9920-E711-8101-005056AB0202', 'Geriatric Medicine', 0, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('HEMA', '1471AD17-9920-E711-8101-005056AB0202', 'Hematology', 0, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('HOSP', '1171AD17-9920-E711-8101-005056AB0201', 'Focused Practice in Hospital Medicine', 0, 3, 'FocusPractice', 1, CAST('2023-12-21' AS DATETIME), sysdatetime(), 'System'),
-('HPM', '1571AD17-9920-E711-8101-005056AB0203', 'Hospice and Palliative Medicine', 1, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('ICARD', '1871AD17-9920-E711-8101-005056AB0204', 'Interventional Cardiology', 1, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('ID', '1671AD17-9920-E711-8101-005056AB0203', 'Infectious Disease', 0, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('IM', '1771AD17-9920-E711-8101-005056AB0204', 'Internal Medicine', 0, 3, 'Primary', 0, NULL, sysdatetime(), 'System'),
-('NEPH', '2071AD17-9920-E711-8101-005056AB0205', 'Nephrology', 0, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('ONCO', '1971AD17-9920-E711-8101-005056AB0205', 'Medical Oncology', 0, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('PTHEP', '2171AD17-9920-E711-8101-005056AB0206', 'Pediatric Transplant Hepatology', 1, 3, 'Subspecialty', 1, CAST('2025-12-01' AS DATETIME), sysdatetime(), 'System'),
-('PULM', '2271AD17-9920-E711-8101-005056AB0206', 'Pulmonary Disease', 0, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('RHEUM', '2371AD17-9920-E711-8101-005056AB0207', 'Rheumatology', 0, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('SLEEP', '2471AD17-9920-E711-8101-005056AB0207', 'Sleep Medicine', 1, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('SPORT', '2571AD17-9920-E711-8101-005056AB0208', 'Sports Medicine', 1, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('THEP', '2671AD17-9920-E711-8101-005056AB0208', 'Transplant Hepatology', 1, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System'),
-('NCC', 'B6AD945A-D9C2-EA11-8136-005056AB4ABF','Neurocritical Care',1, 3, 'Subspecialty', 0, NULL, sysdatetime(), 'System')
-)c(Code, CertificationGuid, Name, AddedQualification, ConsecutiveAttempt, Type, IsCertificateRetired, CertificateRetiredDate, Created, CreatedBy))
+('ACHD', '0271AD17-9920-E711-8101-005056AB0196', 'Adult Congenital Heart Disease', 1, 3, 'Subspecialty', sysdatetime(), 'System'),
+('ADOL', '0171AD17-9920-E711-8101-005056AB0196', 'Adolescent Medicine', 1, 3, 'Subspecialty', sysdatetime(), 'System'),
+('AHFTC', '0371AD17-9920-E711-8101-005056AB0197', 'Advanced Heart Failure and Transplant Cardiology', 1, 3, 'Subspecialty', sysdatetime(), 'System'),
+('CARD', '0571AD17-9920-E711-8101-005056AB0198', 'Cardiovascular Disease', 0, 3, 'Subspecialty', sysdatetime(), 'System'),
+('CCEP', '0671AD17-9920-E711-8101-005056AB0198', 'Clinical Cardiac Electrophysiology', 1, 3, 'Subspecialty', sysdatetime(), 'System'),
+('CRIT', '0871AD17-9920-E711-8101-005056AB0199', 'Critical Care Medicine', 0, 3, 'Subspecialty', sysdatetime(), 'System'),
+('ENDO', '1071AD17-9920-E711-8101-005056AB0200', 'Endocrinology, Diabetes and Metabolism', 0, 3, 'Subspecialty', sysdatetime(), 'System'),
+('GAST', '1271AD17-9920-E711-8101-005056AB0201', 'Gastroenterology', 0, 3, 'Subspecialty', sysdatetime(), 'System'),
+('GERI', '1371AD17-9920-E711-8101-005056AB0202', 'Geriatric Medicine', 0, 3, 'Subspecialty', sysdatetime(), 'System'),
+('HEMA', '1471AD17-9920-E711-8101-005056AB0202', 'Hematology', 0, 3, 'Subspecialty', sysdatetime(), 'System'),
+('HOSP', '1171AD17-9920-E711-8101-005056AB0201', 'Focused Practice in Hospital Medicine', 0, 3, 'FocusPractice', sysdatetime(), 'System'),
+('HPM', '1571AD17-9920-E711-8101-005056AB0203', 'Hospice and Palliative Medicine', 1, 3, 'Subspecialty', sysdatetime(), 'System'),
+('ICARD', '1871AD17-9920-E711-8101-005056AB0204', 'Interventional Cardiology', 1, 3, 'Subspecialty', sysdatetime(), 'System'),
+('ID', '1671AD17-9920-E711-8101-005056AB0203', 'Infectious Disease', 0, 3, 'Subspecialty', sysdatetime(), 'System'),
+('IM', '1771AD17-9920-E711-8101-005056AB0204', 'Internal Medicine', 0, 3, 'Primary', sysdatetime(), 'System'),
+('NEPH', '2071AD17-9920-E711-8101-005056AB0205', 'Nephrology', 0, 3, 'Subspecialty', sysdatetime(), 'System'),
+('ONCO', '1971AD17-9920-E711-8101-005056AB0205', 'Medical Oncology', 0, 3, 'Subspecialty', sysdatetime(), 'System'),
+('PTHEP', '2171AD17-9920-E711-8101-005056AB0206', 'Pediatric Transplant Hepatology', 1, 3, 'Subspecialty', sysdatetime(), 'System'),
+('PULM', '2271AD17-9920-E711-8101-005056AB0206', 'Pulmonary Disease', 0, 3, 'Subspecialty', sysdatetime(), 'System'),
+('RHEUM', '2371AD17-9920-E711-8101-005056AB0207', 'Rheumatology', 0, 3, 'Subspecialty', sysdatetime(), 'System'),
+('SLEEP', '2471AD17-9920-E711-8101-005056AB0207', 'Sleep Medicine', 1, 3, 'Subspecialty', sysdatetime(), 'System'),
+('SPORT', '2571AD17-9920-E711-8101-005056AB0208', 'Sports Medicine', 1, 3, 'Subspecialty', sysdatetime(), 'System'),
+('THEP', '2671AD17-9920-E711-8101-005056AB0208', 'Transplant Hepatology', 1, 3, 'Subspecialty', sysdatetime(), 'System'),
+('NCC', 'B6AD945A-D9C2-EA11-8136-005056AB4ABF','Neurocritical Care',1, 3, 'Subspecialty', sysdatetime(), 'System')
+)c(Code, CertificationGuid, Name, AddedQualification, ConsecutiveAttempt, Type, Created, CreatedBy))
 merge	dbo.Certification as t
 using	cte_data as s
 on		t.Code = s.Code
@@ -342,12 +335,10 @@ when matched then
 	CertificationGuid = s.CertificationGuid,
 	AddedQualification = s.AddedQualification,
 	ConsecutiveAttempt = s.ConsecutiveAttempt,
-	Type = s.Type,
-	IsCertificateRetired = s.IsCertificateRetired,
-	CertificateRetiredDate = s.CertificateRetiredDate
+	Type = s.Type
 when not matched by target then
-	insert(Code, CertificationGuid, Name, AddedQualification, ConsecutiveAttempt, Type, IsCertificateRetired, CertificateRetiredDate, Created, CreatedBy, SourceId)
-	values(s.Code, s.CertificationGuid, s.Name, s.AddedQualification, s.ConsecutiveAttempt, s.Type, s.IsCertificateRetired, s.CertificateRetiredDate, s.Created, s.CreatedBy, s.SourceId);
+	insert(Code, CertificationGuid, Name, AddedQualification, ConsecutiveAttempt, Type, Created, CreatedBy, SourceId)
+	values(s.Code, s.CertificationGuid, s.Name, s.AddedQualification, s.ConsecutiveAttempt, s.Type, s.Created, s.CreatedBy, s.SourceId);
 
 -- ActionType
 ;with cte_data(Value,Description,Created,Modified,CreatedBy,ModifiedBy)
@@ -371,9 +362,7 @@ when not matched by target then
 as (select * from (values
 (1,'Cert',SYSDATETIME(), SYSDATETIME(),'System','System'),
 (2,'MOC',SYSDATETIME(), SYSDATETIME(),'System','System'),
-(3,'KCI',SYSDATETIME(), SYSDATETIME(),'System','System'),
- (4,'LKA Only',SYSDATETIME(),SYSDATETIME(),'System','System'),
-(6,'Only MOC',SYSDATETIME(),SYSDATETIME(),'System','System')
+(3,'KCI',SYSDATETIME(), SYSDATETIME(),'System','System')
 )c(Value,Description,Created,Modified,CreatedBy,ModifiedBy))
 merge	Cosponsored.CertMOCType as t
 using	cte_data as s
@@ -572,9 +561,9 @@ end
 
 set @sql = 'create view dbo.UserProfile as 
 select 
-	p.value as [AbimId]
-	, u.UserAccountsGuid as [MemberID]
-	, u.UserAccountsId as [ProfileKey]
+	i.value as [AbimId]
+	, u.ID as [MemberID]
+	, u.[Key] as [ProfileKey]
 	, u.email as [EmailAddress]
 	, u.LastName 
 	, u.FirstName 
@@ -584,15 +573,18 @@ select
 	, u.MaidenName
 	, u.Gender
 	, u.BirthDate
+	, u.Username
+	, u.IsAccountClosed
+	, u.IsLoginAllowed
 	, u.Created as [CreatedDate]
 from 
 	' +  @dbprefix + 'IdentityData'  + '.dbo.UserAccounts u with (nolock)
 join 
-	' +  @dbprefix + 'IdentityData'  + '.dbo.ProfileProperty p
+	' +  @dbprefix + 'IdentityData'  + '.dbo.UserClaims i
 on 
-	p.UserAccountsId = u.UserAccountsId
+	i.ParentKey = u.[key]
 and 
-	p.Type = ''http://schemas.abim.org/2016/identifier/abim'''
+	i.Type = ''http://schemas.abim.org/2016/identifier/abim'''
 
 Execute sp_executesql @sql
 
@@ -692,58 +684,4 @@ if  object_id('dbo.SeatRegistration','SN') is null
 begin
 	Set @sql = 'CREATE SYNONYM [dbo].[SeatRegistration] FOR [' + @dbprefix + 'Registration].[dbo].[SeatRegistration]'
 	Execute sp_executesql @sql
-END
---229806
-if  object_id('dbo.Attestation','SN') is null
-begin
-	Set @sql = 'CREATE SYNONYM [dbo].[Attestation] FOR [' + @dbprefix + 'Attestation].[dbo].[Attestation]'
-	Execute sp_executesql @sql
-END
-
-if  object_id('dbo.AttestationInstance','SN') is null
-begin
-	Set @sql = 'CREATE SYNONYM [dbo].[AttestationInstance] FOR [' + @dbprefix + 'Attestation].[dbo].[AttestationInstance]'
-	Execute sp_executesql @sql
-END
----------
-if  object_id('IdentityData.UserAccounts','SN') is null
-begin
-	Set @sql = 'CREATE SYNONYM [IdentityData].[UserAccounts] FOR [' + @dbprefix + 'IdentityData].[dbo].[UserAccounts]'
-	Execute sp_executesql @sql
-END
-
-if  object_id('IdentityData.ProfileProperty','SN') is null
-begin
-	Set @sql = 'CREATE SYNONYM [IdentityData].[ProfileProperty] FOR [' + @dbprefix + 'IdentityData].[dbo].[ProfileProperty]'
-	Execute sp_executesql @sql
-END
-
-if  object_id('IdentityData.Addresses','SN') is null
-begin
-	Set @sql = 'CREATE SYNONYM [IdentityData].[Addresses] FOR [' + @dbprefix + 'IdentityData].[dbo].[Addresses]'
-	Execute sp_executesql @sql
-END
-
-if  object_id('IdentityData.Region','SN') is null
-begin
-	Set @sql = 'CREATE SYNONYM [IdentityData].[Region] FOR [' + @dbprefix + 'IdentityData].[dbo].[Region]'
-	Execute sp_executesql @sql
-END
-
-if  object_id('IdentityData.Country','SN') is null
-begin
-	Set @sql = 'CREATE SYNONYM [IdentityData].[Country] FOR [' + @dbprefix + 'IdentityData].[dbo].[Country]'
-	Execute sp_executesql @sql
-END
-
-if  object_id('IdentityData.RestrictionFeature','SN') is null
-begin
-	Set @sql = 'CREATE SYNONYM [IdentityData].[RestrictionFeature] FOR [' + @dbprefix + 'IdentityData].[dbo].[RestrictionFeature]'
-	Execute sp_executesql @sql
-END
-
-if  object_id('IdentityData.UserAccountsRestriction','SN') is null
-begin
-	Set @sql = 'CREATE SYNONYM [IdentityData].[UserAccountsRestriction] FOR [' + @dbprefix + 'IdentityData].[dbo].[UserAccountsRestriction]'
-	Execute sp_executesql @sql
-END
+end

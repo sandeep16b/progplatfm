@@ -1,3 +1,4 @@
+using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
 using Abim.Enterprise.Core.Registration.Interservice;
 using Abim.Platform.Product.Interservices.Interfaces;
 using Abim.Platform.Program.App.Services;
@@ -28,7 +29,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceInte
                 typeof(IValidationFactory),
                 typeof(IAccessTokenService),
                 typeof(ICorrectiveActionResultService),
-                typeof(IMembershipClientService),
+                typeof(IProfileInterservice),
                 typeof(ILookBackDatesInfoService),
                 typeof(ILookbackLogService)
             };

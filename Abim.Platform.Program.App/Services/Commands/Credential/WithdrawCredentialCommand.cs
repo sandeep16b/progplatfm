@@ -19,7 +19,7 @@ namespace Abim.Platform.Program.App.Services.Commands
         public Guid CredentialId { get; set; }
 
         /// <summary>
-        /// The Withdrawn Status ( Can only be Inactive, Revoked, Surrendered, Suspended )
+        /// The Withdrawn Status ( Can only be Revoked, Surrendered, Suspended )
         /// </summary>
         public IssuanceStatusType WithdrawnStatus { get; set; }
 

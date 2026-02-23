@@ -90,7 +90,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         App.Domain.Credential DomainObject { get; set; }
        
         protected override void PreSetup()
-        { 
+        {
+            OverrideAndInjectUnacceptableScope();
         }
 
         protected override void PostSetup()
@@ -140,7 +141,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PreSetup()
         {
-            OverrideAndInjectUnacceptableScope();
+            OverrideScope();
         }
 
         protected override void PostSetup()

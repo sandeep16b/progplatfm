@@ -1,32 +1,31 @@
 ﻿using System;
 
-namespace ServiceBus.Events
+namespace Abim.Enterprise.Core.ServiceBus.Program
 {
-    public class IssuanceChanged : IIssuanceChanged
+
+    public class IssuanceChangedEvent : IIssuanceChangedEvent
     {
         public Guid MemberId { get; set; }
-        public Guid CredentialGuid { get; set; }
-        public string Code { get; set; }
-        public string Status { get; set; }
-        public string Occurrence { get; set; }
+        public string CertificationCode { get; set; }
+        public Guid CertificationGuid { get; set; }
         public DateTime IssuanceDate { get; set; }
         public DateTime? ExpirationDate { get; set; }
-        public bool New { get; set; }
-        public bool Cosponsored { get; set; }
+        public string IssuanceStatus { get; set; }
+        public bool IsNew { get; set; }
+        public string Occurrence { get; set; } 
         public DateTime ProcessingDate { get; set; }
     }
 
-    public interface IIssuanceChanged
+    public interface IIssuanceChangedEvent
     {
         Guid MemberId { get; set; }
-        Guid CredentialGuid { get; set; }
-        string Code { get; set; }
-        string Status { get; set; }
-        string Occurrence { get; set; }
+        string CertificationCode { get; set; }
+        Guid CertificationGuid { get; set; }
         DateTime IssuanceDate { get; set; }
         DateTime? ExpirationDate { get; set; }
-        bool New { get; set; }
-        bool Cosponsored { get; set; }
+        string	IssuanceStatus { get; set; }
+        bool IsNew { get; set; }
+        string Occurrence { get; set; }
         DateTime ProcessingDate { get; set; }
     }
 

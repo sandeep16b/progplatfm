@@ -58,7 +58,7 @@ namespace Abim.Platform.Program.Jobs
 
             Logger.Info("Stopping " + serverName);
             WebApplication.Dispose();
-            Logger.Info("{0} Stopped", serverName);
+            Logger.Info(string.Format("{0} Stopped", serverName));
         }
 
         /// <summary>

@@ -55,7 +55,7 @@ namespace Abim.Platform.Program.App.HangFireJobs.Impl
                 DateTime lookbackDate = new DateTime(DateTime.Now.AddYears(-1).Year, 12, 31);
                 Log.Info($"Excecuting YearEndLookbackTestJob for lookback date {lookbackDate}.");
 
-                using (var dbCommand = GetDbCommand())
+                using (var dbCommand = GetDbCommand(lookbackDate))
                 {
                     IEnumerable<Guid> memberIds = GetDiplomateIds(dbCommand);
 
@@ -74,7 +74,7 @@ namespace Abim.Platform.Program.App.HangFireJobs.Impl
             }
         }
 
-        private IDbCommand GetDbCommand()
+        private IDbCommand GetDbCommand(DateTime lookbackDate)
         {
             var dbCommand = _session.Connection.CreateCommand();
 

@@ -1,4 +1,6 @@
-﻿extern alias SharedOldServiceBus; 
+﻿extern alias SharedOldServiceBus;
+using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
+using Abim.Enterprise.Core.Profile.Resource;
 using Abim.Enterprise.Core.Registration.Interservice;
 using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.App.Services.Impl;
@@ -19,7 +21,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using TestStack.BDDfy;
 using static Abim.Platform.Program.App.Util.Constants;
-using Abim.Platform.Program.MembershipClient;
 
 namespace Abim.Platform.Registration.Tests.Scenarios.Services.Helper
 {
@@ -47,7 +48,7 @@ namespace Abim.Platform.Registration.Tests.Scenarios.Services.Helper
     /// </summary>
     public abstract class TriggerReactivateCertificationsScenario : HelperServiceScenarioEx
     {
-        protected ProfileResource profile;
+        protected ProfileNestedResource profile;
         protected IList<string> certNames;
         protected NotificationEvent notificationEvent;
 
@@ -93,25 +94,23 @@ namespace Abim.Platform.Registration.Tests.Scenarios.Services.Helper
             certNames = new List<string>() { "Critical Care Medicine", "Hospice and Palliative Medicine", };
 
             // set up Profile
-            profile = new ProfileResource();
+            profile = new ProfileNestedResource();
             profile.AbimId = "123456";
-            profile.Name = new ProfileNameResource { LastName = "Smith" };
-            profile.EmailAddress = "ASmith@fakemail.com";
-
+            profile.Name = new NameResource { LastName = "Smith" };
+            profile.EmailAddress = new EmailAddressSummaryResource { EmailAddress = "ASmith@fakemail.com" };
 
             // set up NotificationEvent
             notificationEvent = new NotificationEvent()
             {
                 TemplateExternalKey = TriggeredCommunicationTemplateExternalKey.Reactivate_Certification,
-                EmailAddress = profile.EmailAddress,
+                EmailAddress = profile.EmailAddress.EmailAddress,
                 Parameters = new Dictionary<string, string> {
                     { "LastName", profile.Name.LastName},
                     { "CertificationNames", GetDelimitedCertNames(certNames, "<br />", true) },
                     { "CertificationNames_TV", GetDelimitedCertNames(certNames, ", ", false) },
-                    { "EmailAddress", profile.EmailAddress},
+                    { "EmailAddress", profile.EmailAddress.EmailAddress},
                     { "SubscriberKey", profile.AbimId},
-                    { "IID", profile.AbimId},
-                    { "Env", "DEV"}
+                    { "IID", profile.AbimId}
                 }
             };
 
@@ -123,13 +122,13 @@ namespace Abim.Platform.Registration.Tests.Scenarios.Services.Helper
         protected override void PostSetup()
         {
             // *** set up Profile Interservice
-            My<IMembershipClientService>()
-                .Setup(o => o.GetProfileByMemberIdAsync(It.IsAny<Guid>()))
+            My<IProfileInterservice>()
+                .Setup(o => o.GetProfileById(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Guid>()))
                 .Returns(Task.FromResult(profile));
 
             // *** Bus ----
             My<IBusControl>()
-                .Setup(mock => mock.Publish(
+                .Setup(mock => mock.Publish<NotificationEvent>(
                     It.IsAny<NotificationEvent>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(true));
@@ -160,11 +159,12 @@ namespace Abim.Platform.Registration.Tests.Scenarios.Services.Helper
         }
 
 
-        public void AndProfileMembershipShouldBeCalled()
+        public void AndProfileInterserviceShouldBeCalled()
         {
-            My<IMembershipClientService>()
+            My<IProfileInterservice>()
                 .Verify(mock =>
-                    mock.GetProfileByMemberIdAsync(It.IsAny<Guid>()),
+                    mock.GetProfileById(
+                        It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Guid>()),
                         Times.Once);
         }
 

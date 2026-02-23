@@ -45,7 +45,7 @@ namespace Abim.Platform.Program.Util.Extensions
         {
             try
             {
-                return assembly.GetTypes().Where(t => t != null);
+                return assembly.GetTypes().Where(t => t != null) ?? new List<Type>();
             }
             catch(ReflectionTypeLoadException ex)
             {
@@ -152,13 +152,9 @@ namespace Abim.Platform.Program.Util.Extensions
         {
             ParameterExpression value = Expression.Parameter(typeof(TClass), "value");
             var methodInfo = typeof(TClass).GetMethod(methodName, parameterTypes);
-            if (methodInfo != null)
-            {
-                Expression setupCall = Expression.Call(value, methodInfo, parameterValues.Select(p => Expression.Constant(p)).ToArray<Expression>());
-                var func = Expression.Lambda<Func<TClass, TReturnType>>(setupCall, value);
-                return func;
-            }
-            return null;
+            Expression setupCall = Expression.Call(value, methodInfo, parameterValues.Select(p => Expression.Constant(p)).ToArray());
+            var func = Expression.Lambda<Func<TClass, TReturnType>>(setupCall, value);
+            return func;
         }
     }
 }

@@ -41,12 +41,10 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
             protected override void PostSetup()
             {
-             
             }
 
             protected override void PreSetup()
             {
-                Scopes = "c.r";
             }
 
             public void GivenIPassTheCorrectUrl()

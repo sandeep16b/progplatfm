@@ -98,17 +98,47 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         [WorkItem(135089)]
         [WorkItem(134116)]
         [WorkItem(144627)]
-        [WorkItem(281204)]
-        public void Should_Keep_Issuance_As_Active_Even_WhenNotEnough_Points_At_LookbackDate_But_Have_NewIssuance_After_WithAsessmentMetTrue()
+        public void Should_Keep_Issuance_As_Active_Even_WhenNotEnough_Points_At_LookbackDate_But_Have_NewIssuance_After()
         {
-            new ShouldKeepIssuanceAsActiveEvenWhenNotEnoughPointsAtLookbackDateButHaveNewIssuanceAfterWithAssessmentMetTrue().BDDfy();
+            new ShouldKeepIssuanceAsActiveEvenWhenNotEnoughPointsAtLookbackDateButHaveNewIssuanceAfter().BDDfy();
+        }
+
+        /* 
+         Pbi 216370 : Certification & Participation Status Changes for 2020 and 2021 MOC Requirements(COVID 4)
+            For 2020, 2021, and 2022, a diplomate will not experience a negative status change (from certified to not certified or participating to not participating) for any of the following reasons:           
+            *** Diplomate does not meet an MOC assessment requirement that is due in 2020 or 2021 or 2022
+            *** Diplomate does not meet an MOC attestation requirement that is due in 2020 or 2021 or 2022
+            *** Diplomate does not meet the two or five year point requirement due in 2020 or 2021 or 2022
+         ============================================================================================================================================================================================
+          Pbi 208254 : (Release 2.35) Certification & Participation Status Changes for 2020 and 2021 MOC Requirements (Not COVID 4)
+              For 2020 and 2021, a diplomate will not experience a negative status change (from certified to not certified or participating to not participating) for any of the following reasons:           
+              *** Diplomate does not meet an MOC assessment requirement that is due in 2020 or 2021
+              *** Diplomate does not meet an MOC attestation requirement that is due in 2020 or 2021
+              *** Diplomate does not meet the two or five year point requirement due in 2020 or 2021
+        ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        */
+        [Test]
+        [WorkItem(216370)]
+        [WorkItem(208254)]
+        public void Should_Keep_Issuance_As_Active_Even_WhenNotEnough_Points_At_LookbackDate_In_2021 ()
+        {
+            new ShouldKeepIssuanceAsActiveEvenWhenNotEnoughPointsAtLookbackDateIn2021().BDDfy();
         }
 
         [Test]
-        [WorkItem(281204)]
-        public void Should_Expire_Issuance_WhenNotEnough_Points_At_LookbackDate_But_Have_NewIssuance_After_WithAssessmentMetFalse()
+        [WorkItem(216370)]
+        [WorkItem(208254)]
+        public void Should_Keep_Issuance_As_Active_Even_WhenNotEnough_Points_At_LookbackDate_In_2022_Covid4()
         {
-            new ShouldExpireIssuanceWhenNotEnoughPointsAtLookbackDateButHaveNewIssuanceAfterWithAssessmentMetFalse().BDDfy();
+            new ShouldKeepIssuanceAsActiveEvenWhenNotEnoughPointsAtLookbackDateIn2022_Covid4().BDDfy();
+        }
+
+        [Test]
+        [WorkItem(216370)]
+        [WorkItem(208254)]
+        public void Should_Expire_Issuance_WhenNotEnough_Points_At_LookbackDate_In_2022_NotCovid4()
+        {
+            new ShouldExpireIssuanceWhenNotEnoughPointsAtLookbackDateIn2022_NotCovid4().BDDfy();
         }
 
         //===============================================================
@@ -662,7 +692,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             }
         }
 
-        private class ShouldKeepIssuanceAsActiveEvenWhenNotEnoughPointsAtLookbackDateButHaveNewIssuanceAfterWithAssessmentMetTrue : CertStatusSpec
+        private class ShouldKeepIssuanceAsActiveEvenWhenNotEnoughPointsAtLookbackDateButHaveNewIssuanceAfter : CertStatusSpec
         {
             private string _startingIssuanceModifiedBy;
 
@@ -674,8 +704,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 var cred = CredentialBuilder.BuildWithoutRandoms(abimSource, "IM", "Internal Medicine",
                     CertificationType.Primary, CredentialType.General, Resources.PathwayType.MOC);
                 cred.IsActive = true;
-
-                cred.AssessmentMet = true; // !!! pib 281204
 
                 _creds.Add(cred);
 
@@ -739,12 +767,15 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             }
         }
 
-        private class ShouldExpireIssuanceWhenNotEnoughPointsAtLookbackDateButHaveNewIssuanceAfterWithAssessmentMetFalse : CertStatusSpec
+        private class ShouldKeepIssuanceAsActiveEvenWhenNotEnoughPointsAtLookbackDateIn2021 : CertStatusSpec
         {
             private string _startingIssuanceModifiedBy;
 
             protected override void SetupCredentials()
             {
+
+                _lookbackDate = new DateTime(2021, 12, 31); // !!!! It is exception in 2021 year
+
                 var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
                 _creds = new List<Credential>(1);
 
@@ -752,22 +783,16 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                     CertificationType.Primary, CredentialType.General, Resources.PathwayType.MOC);
                 cred.IsActive = true;
 
-                cred.AssessmentMet = false; // !!! pib 281204
-
                 _creds.Add(cred);
 
                 // first issuance
                 DateTime issuanceDate = _lookbackDate.AddYears(-10); // make sure it is before _lookbackDate
-                var issuance1 = IssuanceBuilder.BuildWithoutRandoms(abimSource, IssuanceStatusType.Expired, issuanceDate, DurationType.Timelimited,
+                var issuance1 = IssuanceBuilder.BuildWithoutRandoms(abimSource, IssuanceStatusType.Active, issuanceDate, DurationType.Timelimited,
                             MaintenanceRequirementType.Required, MaintenanceStatusType.Maintained, OccurrenceType.Initial);
+
+                issuance1.ExpirationDate = _lookbackDate; // expires in 2021
+
                 _creds[0].AddIssuance(issuance1);
-
-                // second issuance after look back date
-                DateTime issuanceDateAfterLookBack = _lookbackDate.AddDays(2); // make sure it is after _lookbackDate
-                var issuance2 = IssuanceBuilder.BuildWithoutRandoms(abimSource, IssuanceStatusType.Active, issuanceDateAfterLookBack, DurationType.Continuous,
-                            MaintenanceRequirementType.Required, MaintenanceStatusType.Maintained, OccurrenceType.Initial);
-                _creds[0].AddIssuance(issuance2);
-
 
                 _startingIssuanceModifiedBy = _creds[0].Issuances[0].AuditData.ModifiedBy;
             }
@@ -786,15 +811,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                         .WithActivityResult(ActivityResultType.Pass)
                         .WithProduct(product)
                         .WithCompletedDate(_lookbackDate.AddYears(-1))
-                        .WithTotalMOCPoints(80)
-                        .Build());
-
-                activites.Data.Add(
-                    builder
-                        .WithActivityResult(ActivityResultType.Pass)
-                        .WithProduct(product)
-                        .WithCompletedDate((_lookbackDate.AddDays(1)))
-                        .WithTotalMOCPoints(20)
+                        .WithTotalMOCPoints(80) //!!! only 80 out of 100
                         .Build());
 
                 base.SetupProductInterserviceMock();
@@ -803,16 +820,170 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                     .Returns(Task.FromResult(activites));
 
             }
-            protected void AndTheRecentIssuanceShouldExpired()
+
+            protected void AndTheRecentIssuanceShouldRemainAsItWasBefore()
             {
-                _creds[0].Issuances[0].IssuanceStatus.Should().Be(IssuanceStatusType.Expired);
+                _creds[0].Issuances[0].IssuanceStatus.Should().Be(IssuanceStatusType.Active);
                 _creds[0].Issuances[0].AuditData.ModifiedBy.Should().Be(_startingIssuanceModifiedBy);
             }
 
-            protected void AndTheCredentialShouldStillBeNotActive()
+            protected void AndTheCredentialShouldStillBeActive()
+            {
+                _creds[0].IsActive.Should().BeTrue();
+            }
+
+            protected void AndTheCredentialShouldUpdatedLookBackDate()
+            {
+                _creds[0].LookbackDate.Should().Be(_lookbackDate);
+                _creds[0].AuditData.ModifiedBy.Should().Be("YearEnd");
+            }
+
+        }
+
+        private class ShouldKeepIssuanceAsActiveEvenWhenNotEnoughPointsAtLookbackDateIn2022_Covid4 : CertStatusSpec
+        {
+            private string _startingIssuanceModifiedBy;
+
+            protected override void SetupCredentials()
+            {
+
+                _lookbackDate = new DateTime(2022, 12, 31); // !!!! It is exception in 2022 year
+
+                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
+                _creds = new List<Credential>(1);
+
+                var cred = CredentialBuilder.BuildWithoutRandoms(abimSource, ProgramResourceConstants.CertificationCode.InfectiousDisease , "Infectious Disease", // !!!
+                    CertificationType.Primary, CredentialType.General, Resources.PathwayType.MOC);
+                cred.IsActive = true;
+
+                _creds.Add(cred);
+
+                // first issuance
+                DateTime issuanceDate = _lookbackDate.AddYears(-10); // make sure it is before _lookbackDate
+                var issuance1 = IssuanceBuilder.BuildWithoutRandoms(abimSource, IssuanceStatusType.Active, issuanceDate, DurationType.Timelimited,
+                            MaintenanceRequirementType.Required, MaintenanceStatusType.Maintained, OccurrenceType.Initial);
+
+                issuance1.ExpirationDate = _lookbackDate; // expires in 2022
+
+                _creds[0].AddIssuance(issuance1);
+
+                _startingIssuanceModifiedBy = _creds[0].Issuances[0].AuditData.ModifiedBy;
+            }
+
+            protected override void SetupProductInterserviceMock()
+            {
+                var activites = new ActivityFullCollectionResource();
+
+                var product = new ProductResource();
+                product.Code = "erwre2342342";
+
+                var builder = new ActivityResourceBuilder();
+                activites.Data = new List<ActivityResource>(2);
+                activites.Data.Add(
+                    builder
+                        .WithActivityResult(ActivityResultType.Pass)
+                        .WithProduct(product)
+                        .WithCompletedDate(_lookbackDate.AddYears(-1))
+                        .WithTotalMOCPoints(80) //!!! only 80 out of 100
+                        .Build());
+
+                base.SetupProductInterserviceMock();
+                _prodInterSvcMock
+                    .Setup(x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                    .Returns(Task.FromResult(activites));
+
+            }
+
+            protected void AndTheRecentIssuanceShouldRemainAsItWasBefore()
+            {
+                _creds[0].Issuances[0].IssuanceStatus.Should().Be(IssuanceStatusType.Active);
+                _creds[0].Issuances[0].AuditData.ModifiedBy.Should().Be(_startingIssuanceModifiedBy);
+            }
+
+            protected void AndTheCredentialShouldStillBeActive()
+            {
+                _creds[0].IsActive.Should().BeTrue();
+            }
+
+            protected void AndTheCredentialShouldUpdatedLookBackDate()
+            {
+                _creds[0].LookbackDate.Should().Be(_lookbackDate);
+                _creds[0].AuditData.ModifiedBy.Should().Be("YearEnd");
+            }
+
+        }
+
+        private class ShouldExpireIssuanceWhenNotEnoughPointsAtLookbackDateIn2022_NotCovid4 : CertStatusSpec
+        {
+            private string _startingIssuanceModifiedBy;
+
+            protected override void SetupCredentials()
+            {
+
+                _lookbackDate = new DateTime(2022, 12, 31); // !!!! It is exception in 2022 year
+
+                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
+                _creds = new List<Credential>(1);
+
+                var cred = CredentialBuilder.BuildWithoutRandoms(abimSource, ProgramResourceConstants.CertificationCode.GeriatricMedicine, "Geriatric Medicine", // !!!
+                    CertificationType.Primary, CredentialType.General, Resources.PathwayType.MOC);
+                cred.IsActive = true;
+
+                _creds.Add(cred);
+
+                // first issuance
+                DateTime issuanceDate = _lookbackDate.AddYears(-10); // make sure it is before _lookbackDate
+                var issuance1 = IssuanceBuilder.BuildWithoutRandoms(abimSource, IssuanceStatusType.Active, issuanceDate, DurationType.Timelimited,
+                            MaintenanceRequirementType.Required, MaintenanceStatusType.Maintained, OccurrenceType.Initial);
+
+                issuance1.ExpirationDate = _lookbackDate; // expires in 2022
+
+                _creds[0].AddIssuance(issuance1);
+
+                _startingIssuanceModifiedBy = _creds[0].Issuances[0].AuditData.ModifiedBy;
+            }
+
+            protected override void SetupProductInterserviceMock()
+            {
+                var activites = new ActivityFullCollectionResource();
+
+                var product = new ProductResource();
+                product.Code = "erwre2342342";
+
+                var builder = new ActivityResourceBuilder();
+                activites.Data = new List<ActivityResource>(2);
+                activites.Data.Add(
+                    builder
+                        .WithActivityResult(ActivityResultType.Pass)
+                        .WithProduct(product)
+                        .WithCompletedDate(_lookbackDate.AddYears(-1))
+                        .WithTotalMOCPoints(80) //!!! only 80 out of 100
+                        .Build());
+
+                base.SetupProductInterserviceMock();
+                _prodInterSvcMock
+                    .Setup(x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                    .Returns(Task.FromResult(activites));
+
+            }
+
+            protected void AndTheRecentIssuanceShouldExpired()
+            {
+                _creds[0].Issuances[0].IssuanceStatus.Should().Be(IssuanceStatusType.Expired);
+                _creds[0].Issuances[0].AuditData.ModifiedBy.Should().Be("CertStatus");
+            }
+
+            protected void AndTheCredentialShouldNotBeActive()
             {
                 _creds[0].IsActive.Should().BeFalse();
             }
+
+            protected void AndTheCredentialShouldUpdatedLookBackDate()
+            {
+                _creds[0].LookbackDate.Should().Be(_lookbackDate);
+                _creds[0].AuditData.ModifiedBy.Should().Be("YearEnd");
+            }
+
         }
 
         private class ShouldAddGracePeriodWhenLkaParticipationIsNotMet_CurrentlyMeetingParticipationFlag : CertStatusSpec

@@ -172,12 +172,12 @@ namespace Abim.Platform.Program.App.Domain
         /// <summary>
         /// Flag if issuance has been changed by current process
         /// </summary>
-        public virtual bool HasChanged { get; protected internal set; }
+        public virtual bool HasChanged { get; protected internal set; } = false;
 
         /// <summary>
         /// Flag if issuance has been added by current process
         /// </summary>
-        public virtual bool HasAdded { get; protected internal set; }
+        public virtual bool HasAdded { get; protected internal set; } = false;
         #endregion
 
         #region Factory

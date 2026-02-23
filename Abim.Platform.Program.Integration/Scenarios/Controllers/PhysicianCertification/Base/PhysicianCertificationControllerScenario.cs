@@ -9,6 +9,7 @@ using MassTransit;
 using Owin;
 using System;
 using System.Collections.Generic;
+using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
 
 namespace Abim.Platform.Program.Integration.Scenarios.Controllers.PhysicianCertification.Base
 {
@@ -22,9 +23,10 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.PhysicianCerti
             list.Add(typeof(IBusControl));
             list.Add(typeof(IBackgroundJobClient));
             list.Add(typeof(IValidationFactory));
-            list.Add(typeof(ISourceService)); 
+            list.Add(typeof(ISourceService));
+            list.Add(typeof(ICredentialService));
             list.Add(typeof(IHelperService));
-            list.Add(typeof(IMembershipClientService));
+            list.Add(typeof(IProfileInterservice));
             return list;
         }
 

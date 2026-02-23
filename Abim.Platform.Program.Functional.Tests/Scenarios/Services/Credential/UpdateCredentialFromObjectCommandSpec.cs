@@ -1,4 +1,4 @@
-﻿using ServiceBus.Events;
+﻿using Abim.Enterprise.Core.ServiceBus.Program;
 using Abim.Platform.Program.App.Services.CommandResults;
 using Abim.Platform.Program.App.Services.Commands;
 using Abim.Platform.Program.Relational.Validation;
@@ -227,12 +227,12 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
                 //all what we expected them to be.
                 _busControlMock.Verify(
                     x => x.Publish(
-                        It.Is<IssuanceChanged>(e => 
-                            e.Code == issuance.Credential.Certification.Code
-                            && e.CredentialGuid == cred.ExternalId
+                        It.Is<IssuanceChangedEvent>(e => 
+                            e.CertificationCode == issuance.Credential.Certification.Code
+                            && e.CertificationGuid == issuance.Credential.Certification.ExternalId
                             && e.ExpirationDate == issuance.ExpirationDate
                             && e.IssuanceDate == issuance.IssuanceDate
-                            && e.Status == issuance.IssuanceStatus.ToString()
+                            && e.IssuanceStatus == issuance.IssuanceStatus.ToString()
                             && e.MemberId == issuance.Credential.MemberId
                             && e.Occurrence == issuance.Occurrence.ToString()
                             && e.ProcessingDate > DateTime.Now.AddMinutes(-5) //Not a great test, but value is set to DateTime.Now, so...

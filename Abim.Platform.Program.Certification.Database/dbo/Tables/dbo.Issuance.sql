@@ -60,9 +60,6 @@ CREATE NONCLUSTERED INDEX [IK_Issuance_DeselectionEffectiveDate] ON [dbo].[Issua
 GO
 CREATE NONCLUSTERED INDEX [IK_Issuance_DeselectionProcessedDate] ON [dbo].[Issuance] ([DeSelectionProcessedDate])
 GO
-CREATE NONCLUSTERED INDEX [NK_Issuance2] ON [dbo].[Issuance] ([Duration],[IssuanceStatus],[SourceId],[ExpirationDate])
-INCLUDE ([CredentialId])
-GO
 
   EXEC Sp_addextendedproperty 
   @name = N'MS_Description', 
