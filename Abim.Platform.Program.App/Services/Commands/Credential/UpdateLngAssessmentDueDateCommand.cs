@@ -28,7 +28,7 @@ namespace Abim.Platform.Program.App.Services.Commands
         /// <summary>
         /// IsSummativeDecisionYear
         /// </summary>
-        public bool IsSummativeDecisionYear { get; set; } = false;
+        public bool IsSummativeDecisionYear { get; set; }
 
         /// <summary>
         /// MetParticipationStatus

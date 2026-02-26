@@ -13,6 +13,8 @@ CREATE TABLE [dbo].[Certification] (
 	[ConsecutiveAttempt]	INT					  NULL,
     [Name]                  NVARCHAR (255)        NOT NULL,
     [Type]                  NVARCHAR (50)         NOT NULL,
+    [IsCertificateRetired]  BIT 				  NOT NULL DEFAULT 0, -- PBI 327905, Task 333082
+    [CertificateRetiredDate] DATETIME			  NULL, -- PBI 327905, Task 333082
     --System Audit Fields
 	[Created]				DATETIME              NOT NULL DEFAULT(CURRENT_TIMESTAMP),
 	[CreatedBy]				NVARCHAR (255)        NOT NULL,
@@ -127,3 +129,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'Certification',
     @level2type = N'COLUMN',
     @level2name = N'Type'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Flag indicating that this certificate is retired.',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'Certification',
+    @level2type = N'COLUMN',
+    @level2name = N'IsCertificateRetired'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Date the certificate was retired.',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'Certification',
+    @level2type = N'COLUMN',
+    @level2name = N'CertificateRetiredDate'

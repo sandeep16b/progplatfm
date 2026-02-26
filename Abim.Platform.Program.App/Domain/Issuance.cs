@@ -1,9 +1,9 @@
-﻿using System;
-using Abim.Platform.Program.Relational.Domain;
+﻿using Abim.Platform.Program.Relational.Domain;
 using Abim.Platform.Program.Relational.Domain.Types;
 using Abim.Platform.Program.Relational.Validation;
 using Abim.Platform.Program.Resources;
 using FluentValidation;
+using System;
 
 namespace Abim.Platform.Program.App.Domain
 {
@@ -22,7 +22,7 @@ namespace Abim.Platform.Program.App.Domain
         /// The credential.
         /// </value>
         public virtual Credential Credential { get; protected internal set; }
-        
+
         /// <summary>
         /// Gets or sets the duration.
         /// </summary>
@@ -46,7 +46,7 @@ namespace Abim.Platform.Program.App.Domain
         /// The status.
         /// </value>
         public virtual MaintenanceStatusType MaintenanceStatus { get; protected internal set; }
-        
+
         /// <summary>
         /// Gets or sets the occurrence.
         /// </summary>
@@ -141,6 +141,14 @@ namespace Abim.Platform.Program.App.Domain
         public virtual DateTime? DeselectionProcessedDate { get; protected internal set; }
 
         /// <summary>
+        /// Gets the Deselection Type.
+        /// </summary>
+        /// <value>
+        /// The Deselection Type.
+        /// </value>
+        public virtual DeselectionType? DeselectionType { get; protected internal set; }
+
+        /// <summary>
         /// Get property check if an active issuance expiring in current year
         /// </summary>
         public virtual bool ExpiringThisYear
@@ -172,12 +180,12 @@ namespace Abim.Platform.Program.App.Domain
         /// <summary>
         /// Flag if issuance has been changed by current process
         /// </summary>
-        public virtual bool HasChanged { get; protected internal set; } = false;
+        public virtual bool HasChanged { get; protected internal set; }
 
         /// <summary>
         /// Flag if issuance has been added by current process
         /// </summary>
-        public virtual bool HasAdded { get; protected internal set; } = false;
+        public virtual bool HasAdded { get; protected internal set; }
         #endregion
 
         #region Factory
@@ -187,7 +195,7 @@ namespace Abim.Platform.Program.App.Domain
         /// </summary>
         protected Issuance()
         {
-            
+
         }
 
         /// <summary>
@@ -217,21 +225,21 @@ namespace Abim.Platform.Program.App.Domain
         /// <param name="effectiveDate">The issuance date.</param>
         /// <param name="createdBy">The CreatedBy audit field</param>
         /// <returns></returns>
-        public static Issuance Create(Source source, DurationType duration, MaintenanceRequirementType maintenanceRequirement, 
+        public static Issuance Create(Source source, DurationType duration, MaintenanceRequirementType maintenanceRequirement,
             MaintenanceStatusType maintenanceStatus, OccurrenceType occurrence, IssuanceStatusType issuanceStatus, DateTime issuanceDate,
             DateTime effectiveDate, string createdBy)
         {
             var issuance = new Issuance()
             {
-                Source                 = source,
-                Duration               = duration,
+                Source = source,
+                Duration = duration,
                 MaintenanceRequirement = maintenanceRequirement,
-                MaintenanceStatus      = maintenanceStatus,
-                Occurrence             = occurrence,
-                IssuanceStatus         = issuanceStatus,
-                IssuanceDate           = issuanceDate,
-                EffectiveDate          = effectiveDate,
-                AuditData              = AuditData.Create(createdBy)
+                MaintenanceStatus = maintenanceStatus,
+                Occurrence = occurrence,
+                IssuanceStatus = issuanceStatus,
+                IssuanceDate = issuanceDate,
+                EffectiveDate = effectiveDate,
+                AuditData = AuditData.Create(createdBy)
             };
 
             issuance.HasAdded = true;
@@ -286,7 +294,7 @@ namespace Abim.Platform.Program.App.Domain
         /// <param name="expirationDate"></param>
         /// <param name="modifiedBy"></param>
         public virtual void ApplyUpdateIssuanceEvent(Source source, DurationType duration, MaintenanceRequirementType maintenanceRequirement,
-            MaintenanceStatusType maintenanceStatus, OccurrenceType occurrence, IssuanceStatusType issuanceStatus, DateTime issuanceDate, 
+            MaintenanceStatusType maintenanceStatus, OccurrenceType occurrence, IssuanceStatusType issuanceStatus, DateTime issuanceDate,
             DateTime effectiveDate, DateTime? expirationDate, string modifiedBy)
         {
             Source = source;
@@ -316,7 +324,7 @@ namespace Abim.Platform.Program.App.Domain
         /// <param name="maintenanceStatus">The maintenance status.</param>
         public virtual void Expire(IssuanceStatusType status, MaintenanceStatusType maintenanceStatus)
         {
-            if(!CanExpire)
+            if (!CanExpire)
                 throw new Exception(string.Format($"Issuance {Id} cannot expire and so cannot apply an ExpireIssuanceEvent"));
             IssuanceStatus = status;
             MaintenanceStatus = maintenanceStatus;   //MaintenanceStatusType.NotMaintained;
@@ -333,6 +341,7 @@ namespace Abim.Platform.Program.App.Domain
         {
             DeselectionSubmittedDate = DateTime.Now;
             DeselectionEffectiveDate = effectiveDate;
+            DeselectionType = Resources.DeselectionType.Self;
 
             AuditData.Modified = DateTime.Now;
             AuditData.ModifiedBy = modifiedBy;
@@ -348,6 +357,7 @@ namespace Abim.Platform.Program.App.Domain
         {
             DeselectionSubmittedDate = null;
             DeselectionEffectiveDate = null;
+            DeselectionType = null;
 
             AuditData.Modified = DateTime.Now;
             AuditData.ModifiedBy = modifiedBy;
@@ -367,7 +377,7 @@ namespace Abim.Platform.Program.App.Domain
             var other = obj as Issuance;
             if (other == null)
                 return false;
-            
+
             return (Id == other.Id);
         }
         /// <summary>
@@ -399,13 +409,13 @@ namespace Abim.Platform.Program.App.Domain
             RuleFor(x => x.Source).NotNull()
                 .WithMessage("Source is required");
             RuleFor(x => x.Source).SetValidator(factory.GetValidatorInstance<Source>());
-            
+
             RuleFor(x => x.Credential).NotNull()
                 .WithMessage("CredentialId is required");
-            
+
             RuleFor(x => x.IssuanceDate).NotEqual(DateTime.MinValue)
                 .WithMessage("IssuanceDate is required");
-                
+
             RuleFor(x => x.AuditData).NotNull()
                 .WithMessage("AuditData cannot be null");
             RuleFor(x => x.AuditData).SetValidator(factory.GetValidatorInstance<AuditData>());

@@ -47,6 +47,8 @@ namespace Abim.Platform.Program.Resources
         public virtual bool IsSubspecialtyACHD { get; set; }
         [DataMember(Order = 13)]
         public virtual bool IsSubspecialtySpecificArea { get; set; }
+        [DataMember(Order = 14)]
+        public virtual bool IsCertificateRetired { get; set; }
     }
 
     /// <summary>

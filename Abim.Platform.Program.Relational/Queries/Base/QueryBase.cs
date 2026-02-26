@@ -21,7 +21,7 @@ namespace Abim.Platform.Program.Relational.Queries.Base
         /// <summary>
         /// Flag for whether Dispose has already been called
         /// </summary>
-        protected bool Disposed = false;
+        protected bool Disposed;
 
         /// <summary>
         /// The log
@@ -152,11 +152,6 @@ namespace Abim.Platform.Program.Relational.Queries.Base
             catch(ObjectDisposedException ex)
             {
                 Log.Debug("Transaction was already disposed", ex);
-            }
-            #pragma warning disable 0168
-            catch(Exception ex)
-            {
-                throw;
             }
         }
 

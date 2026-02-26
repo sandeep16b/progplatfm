@@ -137,11 +137,6 @@ namespace Abim.Platform.Program.App.Data.Mappings
                 .CustomSqlType("datetime2(7)")
                 .Nullable();
 
-            Map(o => o.GrandfatherMOCPrintDate)
-                .Column("GrandfatherMOCPrintDate")
-                .CustomSqlType("datetime2(7)")
-                .Nullable();
-
             HasMany(o => o.Issuances)
                 .Access
                 .LowerCaseField()
@@ -168,6 +163,11 @@ namespace Abim.Platform.Program.App.Data.Mappings
 
             Map(o => o.CMPEnrollmentDate)
                 .Column("CMPEnrollmentDate")
+                .CustomSqlType("datetime2(7)")
+                .Nullable();
+
+            Map(o => o.CMPUnenrollmentDate)
+                .Column("CMPUnenrollmentDate")
                 .CustomSqlType("datetime2(7)")
                 .Nullable();
 

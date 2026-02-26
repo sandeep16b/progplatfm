@@ -67,7 +67,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Repositories
             {
                 try
                 {
-                    _expiringCredsFromAllSources = _sut.GetExpiredCredentials(DateTime.Now, new DateTime(DateTime.Now.Year, 12, 31), false);
+                    _expiringCredsFromAllSources = _sut.GetExpiredCredentials(DateTime.Now, new DateTime(DateTime.Now.Year, 12, 31));
                 }
                 catch (Exception ex)
                 {

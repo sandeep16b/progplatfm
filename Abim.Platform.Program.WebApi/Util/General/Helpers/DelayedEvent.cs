@@ -128,8 +128,8 @@ namespace Abim.Platform.Program.WebApi.Util.General.Extensions
         {
             try
             {
-                var @event = JsonData.Parse<TEvent>(json, true);
-                BusControl.Publish(@event, default(CancellationToken));
+                var @event = JsonData.Parse<TEvent>(json);
+                BusControl.Publish(@event);
             }
             catch(Exception ex)
             {

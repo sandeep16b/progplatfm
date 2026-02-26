@@ -40,13 +40,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
 
         [Test]
         [WorkItem(137824)]
-        public void Should_Log_ForAnActive_MbmCredential_ThatDoesNotMeet_TheTwoYearRequirement()
-        {
-            new ShouldLogForAnActiveMbmCredentialThatDoesNotMeetTheTwoYearRequirement().BDDfy();
-        }
-
-        [Test]
-        [WorkItem(137824)]
         public void Should_Log_WhenCredentialIsNotActive_AndIsMbm()
         {
             new ShouldLogWhenCredentialIsNotActiveAndIsMbm().BDDfy();
@@ -57,13 +50,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         public void Should_Log_WhenCredentialIsTimeLimited_AndIsNotActive()
         {
             new ShouldLogWhenCredentialIsTimeLimitedAndIsNotActive().BDDfy();
-        }
-
-        [Test]
-        [WorkItem(137824)]
-        public void Should_Log_ForAnActiveTimeLimitedCredential_ThatDoesNotMeet_TheTwoYearRequirement()
-        {
-            new ShouldLogForAnActiveTimeLimitedCredentialThatDoesNotMeetTheTwoYearRequirement().BDDfy();
         }
 
         [Test]
@@ -104,6 +90,10 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         
         [Test]
         [WorkItem(137824)]
+        [WorkItem(296003)]
+        [WorkItem(296004)]
+        [WorkItem(296005)]
+        [WorkItem(296006)]
         public void Should_Log_ForAGrandfatherCredential_ThatDoesNotMeet_TheTwoYearRequirement()
         {
             new ShouldLogForAGrandfatherCredentialThatDoesNotMeetTheTwoYearRequirement().BDDfy();
@@ -253,7 +243,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                     .Returns(Task.FromResult(true));
             }
 
-            protected void GivenThatIHaveParameters()
+            protected virtual void GivenThatIHaveParameters()
             {
                 _memberId = Guid.NewGuid();
                 _processingDate = new DateTime(_lookbackDate.Year + 1, 2, 2);
@@ -339,97 +329,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 _lookbackLogSvcMock.Verify(o => o.Handle(It.IsAny<AddParticipationLookbackLog>()), Times.Never());
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private class ShouldLogForAnActiveMbmCredentialThatDoesNotMeetTheTwoYearRequirement
-           : ParticipationStatusLoggingSpec
-        {
-            protected override void SetupCredentials()
-            {
-                FirstIssuanceDate = new DateTime(DateTime.Now.Year - 5, 2, 21);
-                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
-                _creds = new List<Credential>(1);
-                _creds.Add(CredentialBuilder.BuildWithoutRandoms(abimSource, "IM", "Internal Medicine", CertificationType.Primary, CredentialType.General, Resources.PathwayType.MOC));
-                _creds[0].AddIssuance(IssuanceBuilder.BuildWithoutRandoms(abimSource, IssuanceStatusType.Active, new DateTime(DateTime.Now.Year - 5, 2, 3), DurationType.Timelimited, MaintenanceRequirementType.Required, MaintenanceStatusType.Maintained, OccurrenceType.Recertification));
-                _creds[0].Issuances[0].ExpirationDate = _lookbackDate;
-                _creds[0].ApplyChangesAfterCreatingCredential(true, DateTime.Now.AddYears(-3), DateTime.Now.AddYears(-2), null, null, null, null, false, null);
-                _creds[0].AssessmentMet = true;
-                _creds[0].AssessmentMetDate = _lookbackDate.AddDays(-5);
-            }
-
-            protected override void SetupRegistrationInterserviceMock()
-            {
-                //Give this diplomate some pending exam results
-                var regResourceBuilder = new RegistrationResourceBuilder();
-                var registrations = new UserRegistrationsAndCMPRegistrationsResource();
-
-                registrations.Registrations = new List<RegistrationResource>(1);
-                registrations.CMPRegistrations = new List<CMPRegistrationResource>(0);
-
-                registrations.Registrations.Add(
-                    regResourceBuilder
-                        .WithCertificationId(_creds[0].Certification.ExternalId)
-                        .WithExamType(ExamType.Kci)
-                        .WithAdministrationYear(2016)
-                        .WithExamResult(ExamResultType.Pending)
-                        .WithResult("Pending")
-                        .Build());
-
-                _regInterSvcMock = new Mock<IRegistrationInterservice>(MockBehavior.Strict);
-                _regInterSvcMock
-                    .Setup(x => x.GetAllRegistrationsAndCMPRegistrationsForUser(It.IsAny<string>(), It.IsAny<Guid>()))
-                    .Returns(Task.FromResult(registrations));
-            }
-
-            protected override void SetupProductInterserviceMock()
-            {
-                var product = new ProductResource();
-                product.Code = "erwre2342342";//can't do Reciprocity
-
-
-                var builder = new ActivityResourceBuilder();
-                var activities = new ActivityFullCollectionResource();
-                activities.Data = new List<ActivityResource>(1);
-
-                activities.Data.Add(
-                    builder
-                        .WithActivityResult(ActivityResultType.Pass)
-                        .WithCompletedDate(_lookbackDate.AddYears(-3))
-                        .WithTotalMOCPoints(100)
-                        .WithProduct(product)
-                        .Build());
-
-                activities.Data.Add(
-                    builder
-                        .WithActivityResult(ActivityResultType.Pass)
-                        .WithCompletedDate(_lookbackDate.AddDays(-5))
-                        .WithTotalMOCPoints(0)
-                        .WithProduct(product)
-                        .Build());
-
-                _prodInterSvcMock = new Mock<IProductInterservice>(MockBehavior.Strict);
-                _prodInterSvcMock
-                    .Setup(x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                    .Returns(Task.FromResult(activities));
-            }
-
-            private void AndItShouldHaveLoggedThatTheTwoYearReqWasNotMet()
-            {
-                _lookbackLogSvcMock.Verify(x => x.Handle(
-                    It.Is<AddParticipationLookbackLog>(
-                        cmd =>
-                        cmd.CredentialId == _creds[0].ExternalId
-                        && cmd.Action == LookbackActionType.FailurePoint
-                        && cmd.Reason == LookbackReasonType.TwoYear
-                        && cmd.IsPendingAction == true
-                        && cmd.LookbackLogDate == _lookbackDate
-                        && cmd.UserName == "ParticipationYearly"
-                        )), Times.Once);
-            }
-        }
-        
+    
         private class ShouldLogWhenCredentialIsNotActiveAndIsMbm : ParticipationStatusLoggingSpec
         {
             private void AndItShouldHaveLoggedThatTheCertificationReqWasNotMet()
@@ -498,95 +398,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                         )), Times.Once);
             }
         }
-
-
-        private class ShouldLogForAnActiveTimeLimitedCredentialThatDoesNotMeetTheTwoYearRequirement
-           : ParticipationStatusLoggingSpec
-        {
-            protected override void SetupCredentials()
-            {
-                //FirstIssuanceDate = new DateTime(DateTime.Now.Year - 5, 2, 21);
-
-                var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
-                _creds = new List<Credential>(1);
-                _creds.Add(CredentialBuilder.BuildWithoutRandoms(abimSource, "IM", "Internal Medicine", CertificationType.Primary, CredentialType.General, Resources.PathwayType.MOC));
-                _creds[0].AddIssuance(IssuanceBuilder.BuildWithoutRandoms(abimSource, IssuanceStatusType.Active, new DateTime(DateTime.Now.Year - 5, 2, 3), DurationType.Timelimited, MaintenanceRequirementType.NotRequired, MaintenanceStatusType.NotMaintained, OccurrenceType.Recertification));
-                _creds[0].Issuances[0].ExpirationDate = _lookbackDate;
-                _creds[0].ApplyChangesAfterCreatingCredential(true, new DateTime(_lookbackDate.Year, 1, 1), new DateTime(_lookbackDate.Year + 1, 12, 31), null, null, null, null, false, null);
-                _creds[0].AssessmentMet = true;
-                _creds[0].AssessmentMetDate = _lookbackDate.AddDays(-5);
-            }
-
-            protected override void SetupRegistrationInterserviceMock()
-            {
-                //Give this diplomate some pending exam results
-                var regResourceBuilder = new RegistrationResourceBuilder();
-                var registrations = new UserRegistrationsAndCMPRegistrationsResource();
-
-                registrations.Registrations = new List<RegistrationResource>(1);
-                registrations.CMPRegistrations = new List<CMPRegistrationResource>(0);
-
-                registrations.Registrations.Add(
-                    regResourceBuilder
-                        .WithCertificationId(_creds[0].Certification.ExternalId)
-                        .WithExamType(ExamType.Kci)
-                        .WithAdministrationYear(2019)
-                        .WithExamResult(ExamResultType.Pending)
-                        .WithResult("Pending")
-                        .Build());
-
-                _regInterSvcMock = new Mock<IRegistrationInterservice>(MockBehavior.Strict);
-                _regInterSvcMock
-                    .Setup(x => x.GetAllRegistrationsAndCMPRegistrationsForUser(It.IsAny<string>(), It.IsAny<Guid>()))
-                    .Returns(Task.FromResult(registrations));
-            }
-
-            protected override void SetupProductInterserviceMock()
-            {
-                var product = new ProductResource();
-                product.Code = "erwre2342342";
-
-                var builder = new ActivityResourceBuilder();
-                var activities = new ActivityFullCollectionResource();
-                activities.Data = new List<ActivityResource>(1);
-
-                activities.Data.Add(
-                    builder
-                        .WithActivityResult(ActivityResultType.Pass)
-                        .WithCompletedDate(_lookbackDate.AddYears(-3))
-                        .WithTotalMOCPoints(100)
-                        .WithProduct(product)
-                        .Build());
-
-                activities.Data.Add(
-                    builder
-                        .WithActivityResult(ActivityResultType.Pass)
-                        .WithCompletedDate(_lookbackDate.AddDays(-5))
-                        .WithTotalMOCPoints(0)
-                        .WithProduct(product)
-                        .Build());
-
-                _prodInterSvcMock = new Mock<IProductInterservice>(MockBehavior.Strict);
-                _prodInterSvcMock
-                    .Setup(x => x.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                    .Returns(Task.FromResult(activities));
-            }
-
-            private void AndItShouldHaveLoggedThatTheTwoYearReqWasNotMet()
-            {
-                _lookbackLogSvcMock.Verify(x => x.Handle(
-                    It.Is<AddParticipationLookbackLog>(
-                        cmd =>
-                        cmd.CredentialId == _creds[0].ExternalId
-                        && cmd.Action == LookbackActionType.FailurePoint
-                        && cmd.Reason == LookbackReasonType.TwoYear
-                        && cmd.IsPendingAction == true
-                        && cmd.LookbackLogDate == _lookbackDate
-                        && cmd.UserName == "ParticipationYearly"
-                        )), Times.Once);
-            }
-        }
-
 
         private class ShouldNotLogForAnActiveTimeLimitedCredentialThatDoesMeetTheTwoYearRequirement
          : ParticipationStatusLoggingSpec
@@ -1030,18 +841,31 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                     .Returns(Task.FromResult(activities));
             }
 
-            private void AndItShouldHaveLoggedThatTheTwoYearReqWasNotMet()
+            private void AndItShouldLogProperParticipationLookback()
             {
+                // Log failed FiveYear participation
                 _lookbackLogSvcMock.Verify(x => x.Handle(
                     It.Is<AddParticipationLookbackLog>(
                         cmd =>
                         cmd.CredentialId == _creds[0].ExternalId
                         && cmd.Action == LookbackActionType.FailurePoint
-                        && cmd.Reason == LookbackReasonType.TwoYear
+                        && cmd.Reason == LookbackReasonType.FiveYear //!!!!
                         && cmd.IsPendingAction == true
                         && cmd.LookbackLogDate == _lookbackDate
                         && cmd.UserName == "ParticipationYearly"
-                        )), Times.Once);
+                        )), Times.Once); //!!!
+
+                // Not failed TwoYear participation
+                _lookbackLogSvcMock.Verify(x => x.Handle(
+                    It.Is<AddParticipationLookbackLog>(
+                        cmd =>
+                        cmd.CredentialId == _creds[0].ExternalId
+                        && cmd.Action == LookbackActionType.FailurePoint
+                        && cmd.Reason == LookbackReasonType.TwoYear //!!!!
+                        && cmd.IsPendingAction == true
+                        && cmd.LookbackLogDate == _lookbackDate
+                        && cmd.UserName == "ParticipationYearly"
+                        )), Times.Never); //!!!
             }
         }
 
@@ -1428,7 +1252,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 var abimSource = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
                 _creds = new List<Credential>(1);
                 _creds.Add(CredentialBuilder.BuildWithoutRandoms(abimSource, "ICARD", "Interventional Cardiology", CertificationType.Primary, CredentialType.General, Resources.PathwayType.MOC));
-                var issuance = IssuanceBuilder.BuildWithoutRandoms(abimSource, IssuanceStatusType.Active, new DateTime(DateTime.Now.Year - 5, 2, 3), DurationType.Lifetime, MaintenanceRequirementType.NotRequired, MaintenanceStatusType.NotMaintained, OccurrenceType.Recertification);
+                var issuance = IssuanceBuilder.BuildWithoutRandoms(abimSource, IssuanceStatusType.Active, new DateTime(DateTime.Now.Year - 7, 2, 3), DurationType.Lifetime, MaintenanceRequirementType.NotRequired, MaintenanceStatusType.NotMaintained, OccurrenceType.Recertification);
                 _creds[0].AddIssuance(issuance);
                 _creds[0].Issuances[0].ExpirationDate = _lookbackDate.AddYears(2);
                 _creds[0].ApplyChangesAfterCreatingCredential(true, DateTime.Now.AddYears(-3), DateTime.Now.AddYears(-2), null, null, null, null, false, null);
@@ -1482,7 +1306,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                     .Returns(Task.FromResult(activities));
             }
 
-            private void AndItShouldHaveLoggedThatTheAssessmentReqWasNotMet()
+            private void AndItShouldHaveLoggedThatTheAssessmentReqWasNotMet() //
             {
                 _lookbackLogSvcMock.Verify(x => x.Handle(
                     It.Is<AddParticipationLookbackLog>(

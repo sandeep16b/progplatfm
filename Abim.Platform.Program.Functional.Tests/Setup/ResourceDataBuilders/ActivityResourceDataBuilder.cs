@@ -8,7 +8,7 @@ namespace Abim.Platform.Program.Tests.Setup.ResourceDataBuilders
 {
     public class ActivityResourceDataBuilder : Enterprise.Core.Testing.Setup.DataBuilders.ResourceDataBuilder<ActivityResource, ActivityResourceDataBuilder>
     {
-        private ActivityResource _activity;
+        // private ActivityResource _activity;
 
         public ActivityResourceDataBuilder(ActivityResource activity) : base(activity)
         {

@@ -74,7 +74,21 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
         public void MarkCertificateForDeselectCommandHandleReturnsRejectedWhenExceptionOccurs()
         {
             new MarkCertificateForDeselectCommandHandleReturnsRejectedWhenExceptionOccursScenario().BDDfy();
+        } 
+
+        [TestCase]
+        [WorkItem(293547)]
+        public void MarkCertificateForDeselectCommandHandleReturnsRejectedWhenWarningForDeselectionElectedAlreadyProcesseddOccurs()
+        {
+            new MarkCertificateForDeselectCommandHandleReturnsRejectedWhenWarningForDeselectionElectedAlreadyProcesseddOccursScenario().BDDfy();
         }
+
+        [TestCase]
+        [WorkItem(293547)]
+        public void MarkCertificateForDeselectCommandHandleReturnsRejectedWhenWarningForDeselectionElectedNotProcessedOc()
+        {
+            new MarkCertificateForDeselectCommandHandleReturnsRejectedWhenWarningForDeselectionElectedNotProcessedOccursScenario().BDDfy();
+        } 
 
         #region Scenario Base Classes
         private abstract class MarkCertificateForDeselectCommandServiceScenario : CredentialServiceScenario
@@ -283,6 +297,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
                 latestIssuance.DeselectionSubmittedDate.ShouldNotBeNull();
                 latestIssuance.DeselectionEffectiveDate.ShouldNotBeNull(); //TODO: Refine
                 latestIssuance.AuditData.Modified.ShouldNotBeNull();
+                latestIssuance.DeselectionType.ShouldBe(Resources.DeselectionType.Self);
                 latestIssuance.AuditData.ModifiedBy.ShouldBe(Command.UserInfo.Username);
             }
 
@@ -451,6 +466,100 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             }
         }
         #endregion Exception Scenario
+
+        #region Warning - Already Deselection Elected Scenario
+        private class MarkCertificateForDeselectCommandHandleReturnsRejectedWhenWarningForDeselectionElectedAlreadyProcesseddOccursScenario : MarkCertificateForDeselectCommandHandleReturnsRejectedScenario
+        {
+            public MarkCertificateForDeselectCommandHandleReturnsRejectedWhenWarningForDeselectionElectedAlreadyProcesseddOccursScenario() : base("")
+            {
+            }
+
+            public void GivenIInputAValidCommand()
+            {
+                Command = CommandBuilder<MarkCertificateForDeselectCommand>
+                             .Valid()
+                             .With(cmd => cmd.UserInfo = new UserInfo()
+                             {
+                                 Username = "bdickinson",
+                                 AbimId = "123456"
+                             })
+                             .With(cmd => cmd.SubmittedDate = new DateTime(2020, 9, 18))
+                             .With(cmd => cmd.CredentialId = Guid.NewGuid())
+                             .Build();
+            }
+
+            protected override void SetupCredential()
+            {
+                base.SetupCredential();
+                var latestIssuance = Credential.Issuances.OrderByDescending(issuance => issuance.IssuanceDate).First();
+                Credential.ExternalId = Guid.NewGuid();
+                latestIssuance.DeselectionProcessedDate = new DateTime(2020, 11, 1);
+                latestIssuance.DeselectionSubmittedDate = new DateTime(2020, 11, 1);
+                GivenIInputAValidCommand();
+                resultMessageShouldContain = $"Credential {Credential.ExternalId} was already marked for deselection, and processed on {latestIssuance.DeselectionProcessedDate}.";
+            }
+
+            public void AndThenTheCommandResultValidationShouldShowSuccess()
+            {
+                CommandResult.Validation.Succeeded.Should().BeTrue();
+            }
+
+            public void AndThenThereShouldBeAWarningMessage()
+            {
+                LogTest.Should().Match<LogTest>(log =>
+                    log.Warns.Any(s => s.StartsWith(resultMessageShouldContain)) &&
+                    log.Errors.All(s => s.Equals("")));
+            }
+
+        }
+        #endregion Warning - Already Deselection Elected Scenario 
+
+        #region Warning - Deselection Elected Not Processed Scenario
+        private class MarkCertificateForDeselectCommandHandleReturnsRejectedWhenWarningForDeselectionElectedNotProcessedOccursScenario : MarkCertificateForDeselectCommandHandleReturnsRejectedScenario
+        {
+            public MarkCertificateForDeselectCommandHandleReturnsRejectedWhenWarningForDeselectionElectedNotProcessedOccursScenario() : base("")
+            {
+            }
+
+            public void GivenIInputAValidCommand()
+            {
+                Command = CommandBuilder<MarkCertificateForDeselectCommand>
+                             .Valid()
+                             .With(cmd => cmd.UserInfo = new UserInfo()
+                             {
+                                 Username = "bdickinson",
+                                 AbimId = "123456"
+                             })
+                             .With(cmd => cmd.SubmittedDate = new DateTime(2020, 9, 18))
+                             .With(cmd => cmd.CredentialId = Guid.NewGuid())
+                             .Build();
+            }
+
+            protected override void SetupCredential()
+            {
+                base.SetupCredential();
+                var latestIssuance = Credential.Issuances.OrderByDescending(issuance => issuance.IssuanceDate).First();
+                Credential.ExternalId = Guid.NewGuid();
+                latestIssuance.DeselectionProcessedDate = null;
+                latestIssuance.DeselectionSubmittedDate = new DateTime(2020, 11, 1);
+                GivenIInputAValidCommand();
+                resultMessageShouldContain = $"Credential {Credential.ExternalId} has already marked for deselection.";
+            }
+
+            public void AndThenTheCommandResultValidationShouldShowSuccess()
+            {
+                CommandResult.Validation.Succeeded.Should().BeTrue();
+            }
+
+            public void AndThenThereShouldBeAWarningMessage()
+            {
+                LogTest.Should().Match<LogTest>(log =>
+                    log.Warns.Any(s => s.StartsWith(resultMessageShouldContain)) &&
+                    log.Errors.All(s => s.Equals("")));
+            }
+
+        }
+        #endregion Warning - Deselection Elected Not Processed Scenario
 
         #endregion Scenarios
     }

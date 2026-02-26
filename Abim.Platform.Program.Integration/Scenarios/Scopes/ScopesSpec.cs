@@ -1,8 +1,7 @@
-﻿using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
-using Abim.Platform.Program.App.Data;
+﻿using Abim.Platform.Program.App.Data;
 using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.App.Services.CommandResults;
-using Abim.Platform.Program.App.Services.Commands;
+using Abim.Platform.Program.App.Services.Commands; 
 using Abim.Platform.Program.Core.Identity;
 using Abim.Platform.Program.Host.Config;
 using Abim.Platform.Program.Relational;
@@ -12,7 +11,7 @@ using Abim.Platform.Program.Resources;
 using Abim.Platform.Program.WebApi.Api.Constants;
 using Abim.Platform.Program.WebApi.Authentication;
 using Abim.Platform.Program.WebApi.Objects;
-using Abim.Platform.Program.WebApi.Testing.Setup;
+using Abim.Platform.Program.WebApi.Testing.Setup; 
 using FluentAssertions;
 using Hangfire;
 using MassTransit;
@@ -94,7 +93,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Scopes
             list.Add(typeof(ISourceService));
             list.Add(typeof(ICredentialService));
             list.Add(typeof(IHelperService));
-            list.Add(typeof(IProfileInterservice));
+            list.Add(typeof(IMembershipClientService));
             return list;
         }
 
@@ -106,18 +105,15 @@ namespace Abim.Platform.Program.Integration.Scenarios.Scopes
                 Startup.UseIdentityClientConfig(app);
                 Startup.UseResourceAuthorization(app);
                 Startup.UseHttpConfig(app);
-                Startup.UseMappings();
-
+                Startup.UseMappings(); 
                 Container.Inject(My<IAccessTokenService>().Object);
-                Container.Inject(My<IEnumService>().Object);
-
+                Container.Inject(My<IEnumService>().Object); 
                 Container.Inject(My<ILogger>().Object);
                 Container.Inject(My<ICertificationService>().Object);
                 Container.Inject(My<ISourceService>().Object);
                 Container.Inject(My<IProgramRulesService>().Object);
-                Container.Inject(My<IBackgroundJobClient>().Object);
-
-                Container.Inject(My<IProfileInterservice>().Object);
+                Container.Inject(My<IBackgroundJobClient>().Object); 
+                Container.Inject(My<IMembershipClientService>().Object);
             };
             return action;
         }
@@ -142,7 +138,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Scopes
 
         protected override void PreSetup()
         {
-            Scopes = "program_read";
+            Scopes = "c.r";
             GrantType = GrantTypes.Client_credentials;
         }
 
@@ -187,7 +183,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Scopes
 
         protected override void PreSetup()
         {
-            Scopes = "program_read-write";
+            Scopes = "c.r c.w";
             GrantType = GrantTypes.Client_credentials;
         }
 
@@ -251,7 +247,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Scopes
 
         protected override void PreSetup()
         {
-            OverrideScope();
+            OverrideAndInjectUnacceptableScope();
         }
 
         protected override void PostSetup()
@@ -314,7 +310,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Scopes
 
         protected override void PreSetup()
         {
-            Scopes = "webapi";
+            Scopes = "c.r";
             GrantType = GrantTypes.Client_credentials;
         }
 
@@ -359,7 +355,10 @@ namespace Abim.Platform.Program.Integration.Scenarios.Scopes
 
         protected override void PreSetup()
         {
-            OverrideScope();
+            //   New Identity will return invalid scope if we pass the wrong scope, not Forbidden,
+            //   and change GrandType to Password to create a token, which will return forbidden.
+            OverrideScope("openid");
+            GrantType = GrantTypes.Password;
         }
 
         protected override void PostSetup()
@@ -403,7 +402,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Scopes
 
         protected override void PreSetup()
         {
-            OverrideAndInjectUnacceptableScope();
+            OverrideScope("u.r"); 
         }
 
         protected override void PostSetup()

@@ -47,7 +47,7 @@ namespace Abim.Platform.Program.WebApi.Filters
                 return;
             
             string headerValue = headerItem.Value.First();
-            Guid guid = Guid.Empty;
+            Guid guid;
             if(Guid.TryParse(headerValue, out guid))
             {
                 actionContext.ActionArguments[ControllerArgument] = guid;

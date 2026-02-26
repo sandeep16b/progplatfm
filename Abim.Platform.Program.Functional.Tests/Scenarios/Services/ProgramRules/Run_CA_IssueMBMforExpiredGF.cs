@@ -11,7 +11,6 @@ using Abim.Platform.Program.Core.Identity;
 using Abim.Platform.Program.Relational.Validation;
 using Abim.Platform.Program.Resources;
 using Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest.Base;
-using Abim.Platform.Program.WebApi.Testing.Setup;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
@@ -433,7 +432,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 Set_SuT_Registration(credential: credential,
                                     administrationDate: FirstIssuanceDate,
                                     seatDateCert: FirstIssuanceDate,
-                                    withMOC: false);
+                                    withMOC: true);
 
                 Set_CurrentLookBackDatesInfo();
             }
@@ -508,7 +507,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 Set_SuT_Registration(credential: credential,
                                     administrationDate: FirstIssuanceDate,
                                     seatDateCert: FirstIssuanceDate,
-                                    withMOC: false);
+                                    withMOC: true);
 
                 Set_CurrentLookBackDatesInfo();
             }

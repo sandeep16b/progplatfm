@@ -153,6 +153,7 @@ namespace Abim.Platform.Program.App.Services.Impl
             if ((oldVal.HasValue && !newVal.HasValue) || (!oldVal.HasValue && newVal.HasValue))
                 return true;
 
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (!oldVal.HasValue && !newVal.HasValue)
                 return false;
 
@@ -170,7 +171,7 @@ namespace Abim.Platform.Program.App.Services.Impl
         {
             var lookBackDatesInfo = Load(memberId);
 
-            return Task.FromResult<LookBackDatesInfo>(lookBackDatesInfo);
+            return Task.FromResult(lookBackDatesInfo);
         }
 
         /// <summary>
@@ -182,7 +183,7 @@ namespace Abim.Platform.Program.App.Services.Impl
         {
             var lookBackDatesInfo = Repository.GetExpiredYearEndLookBackDatesInfo(expiredDate);
 
-            return Task.FromResult<IEnumerable<LookBackDatesInfo>>(lookBackDatesInfo); 
+            return Task.FromResult(lookBackDatesInfo); 
         }
 
         #endregion

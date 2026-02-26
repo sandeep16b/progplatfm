@@ -142,7 +142,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.HangfireJobs
 
             public void AndTheCredentialServiceShouldHaveBeenQueriedForCredentialIds()
             {
-                _credentialServiceMock.Verify(mock => mock.GetInfoOfCredentialsMarkedForDeselection(new DateTime(DateTime.Now.Year, 2, 1)), Times.Once);
+                _credentialServiceMock.Verify(mock => mock.GetInfoOfCredentialsMarkedForDeselection(new DateTime(DateTime.Now.Year, 4, 1)), Times.Once);
             }
 
             public void AndAChildJobShouldHaveBeenEnqueuedForEachMemberId()
@@ -181,7 +181,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.HangfireJobs
             {
                 _credentialServiceMock.Verify(
                     mock => 
-                        mock.GetInfoOfCredentialsMarkedForDeselection(new DateTime(DateTime.Now.Year, 2, 1)), 
+                        mock.GetInfoOfCredentialsMarkedForDeselection(new DateTime(DateTime.Now.Year, 4, 1)), 
                         Times.Never);
             }
 

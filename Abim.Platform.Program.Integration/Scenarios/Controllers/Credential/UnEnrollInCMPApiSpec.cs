@@ -190,7 +190,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PreSetup()
         {
-            OverrideScope();
+            OverrideAndInjectUnacceptableScope();
         }
 
         protected override void PostSetup()

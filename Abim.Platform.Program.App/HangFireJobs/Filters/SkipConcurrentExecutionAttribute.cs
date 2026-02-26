@@ -34,10 +34,11 @@ namespace Abim.Platform.Program.App.HangFireJobs.Filters
         /// <param name="filterContext"></param>
         public void OnPerforming(PerformingContext filterContext)
         {
+            // filterContext.Job is obsolete
             var resource = String.Format(
                                  "{0}.{1}",
-                                filterContext.Job.Type.FullName,
-                                filterContext.Job.Method.Name);
+                                filterContext.BackgroundJob.Job.Type.FullName,
+                                filterContext.BackgroundJob.Job.Method.Name);
 
             var timeout = TimeSpan.FromSeconds(_timeoutInSeconds);
 
@@ -49,7 +50,7 @@ namespace Abim.Platform.Program.App.HangFireJobs.Filters
             catch (Exception)
             {
                 filterContext.Canceled = true;
-                logger.Warn("Cancelling run for {0} job, id: {1} ", resource, filterContext.JobId);
+                logger.Warn("Cancelling run for {0} job, id: {1} ", resource, filterContext.BackgroundJob.Id);
             }
         }
 

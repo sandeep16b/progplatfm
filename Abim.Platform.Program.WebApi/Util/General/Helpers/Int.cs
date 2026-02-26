@@ -36,8 +36,7 @@ namespace Abim.Platform.Program.WebApi.Util.General.Helpers
         /// <returns></returns>
         public static bool TryParse(string text)
         {
-            int outIntTheCallerDoesntCareAbout;
-            return int.TryParse(text, out outIntTheCallerDoesntCareAbout);
+            return int.TryParse(text, out _);
         }
     }
 }

@@ -45,6 +45,16 @@ namespace Abim.Platform.Program.App.Data.Mappings
             Map(o => o.AddedQualification)
                 .Not.Nullable();
 
+            Map(o => o.IsCertificateRetired)
+                .Column("IsCertificateRetired")
+                .CustomSqlType("bit")
+                .Not.Nullable();
+
+            Map(o => o.CertificateRetiredDate)
+                .Column("CertificateRetiredDate")
+                .CustomSqlType("datetime")
+                .Nullable();
+
             References(o => o.Source, "SourceId")
                 .Cascade.None();
             //ar@10/25/2015: Temporary removed until solution is found: .Fetch.Join();

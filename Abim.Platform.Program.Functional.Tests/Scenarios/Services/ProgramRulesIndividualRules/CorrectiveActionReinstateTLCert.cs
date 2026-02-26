@@ -32,13 +32,13 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
         {
             new CorrectiveActionReinstate_TL_MeetRules_100_Points().BDDfy();
         }
-
+        
         [Test]
         public void CorrectiveActionReinstate_TL_FutureDates_MeetRules100Points()
         {
             new CorrectiveActionReinstate_TL_FutureDates_MeetRules_100_Points().BDDfy();
         }
-
+        
         [Test]
         public void CorrectiveActionReinstate_TL_MeetRulesReciprocity()
         {
@@ -71,9 +71,9 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
 
         //***  negative cases 
         [Test]
-        public void CorrectiveActionReinstate_TL_DontMeetRulesNoAttestation()
+        public void CorrectiveActionReinstate_TL_MeetRulesNoAttestation_FPHMException()
         {
-            new CorrectiveActionReinstate_TL_DontMeetRules_NoAttestation().BDDfy();
+            new CorrectiveActionReinstate_TL_MeetRules_NoAttestation().BDDfy();
         }
 
         [Test]
@@ -237,7 +237,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
             }
         }
 
-
         private class CorrectiveActionReinstate_TL_FutureDates_MeetRules_100_Points : CorrectiveActionReinstate_TL_SpecScenario
         {
             /// <summary>
@@ -249,7 +248,8 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
                 InitializeDataProperties();
 
                 EventDate = new DateTime(2018, 01, 13);
-                ProcessingDate = DateTime.Now;
+                // we cannot set today's date to ProcessingDate because 5-year Look Back would move, but points would be in older lookback 
+                ProcessingDate = new DateTime(2023, 12, 01);  //pbi 279364:Restore and Correct Program Platform Unit Tests Disabled During 1/6/2024 Deployment 
                 FirstIssuanceDate = new DateTime(2008, 11, 01);
 
                 DateTime ActivityCompletedDate = new DateTime(2018, 12, 01);
@@ -808,7 +808,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
             }
         }
 
-        private class CorrectiveActionReinstate_TL_DontMeetRules_NoAttestation : CorrectiveActionReinstate_TL_SpecScenario
+        private class CorrectiveActionReinstate_TL_MeetRules_NoAttestation : CorrectiveActionReinstate_TL_SpecScenario
         {
             /// <summary>
             /// Primary setup
@@ -870,9 +870,9 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
                 ExceptionCaught.Should().BeNull();
             }
 
-            public void ThenResultShouldBeFalse()
+            public void ThenResultShouldBeTrue()
             {
-                RuleResult.MeetRuleRequirement.Should().Be(false);
+                RuleResult.MeetRuleRequirement.Should().Be(true);
             }
         }
 

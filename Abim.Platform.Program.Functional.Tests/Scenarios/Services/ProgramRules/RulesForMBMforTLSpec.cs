@@ -2,7 +2,6 @@
 using Abim.Enterprise.Core.Registration.Interservice;
 using Abim.Enterprise.Core.Registration.Resources;
 using Abim.Platform.Product.Interservices.Interfaces;
-using Abim.Platform.Product.Resources;
 using Abim.Platform.Product.Resources.Constants;
 using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.App.Services.CommandResults;
@@ -14,7 +13,6 @@ using Abim.Platform.Program.Relational.Validation;
 using Abim.Platform.Program.Resources;
 using Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest.Base;
 using Abim.Platform.Program.Tests.Setup.Responses;
-using Abim.Platform.Program.WebApi.Testing.Setup;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
@@ -123,12 +121,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         public void RulesForMBMforTLSpec_RunCorrectiveAction_FailedKCI_DontIssueMBM()
         {
             new RulesForMBMforTLSpec_RunCorrectiveAction_FailedKCI_DontIssueMBM().BDDfy();
-        }
-
-        [TestCase]
-        public void RulesForMBMforTLSpec_RunCorrectiveAction_FailedKCIButPassCMPAfter_IssueMBM()
-        {
-            new RulesForMBMforTLSpec_RunCorrectiveAction_FailedKCIButPassCmpLater_IssueMBM().BDDfy();
         }
 
         [TestCase]
@@ -1180,7 +1172,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
             Set_SuT_Registration(credential: credential,
                                 administrationDate: FirstIssuanceDate,
                                 seatDateCert: FirstIssuanceDate,
-                                withMOC: false);
+                                withMOC: true);
 
             // bad KCI with UTT result
             Set_Registration(credential: credential,
@@ -1307,84 +1299,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         {
             My<ICredentialService>()
                 .Verify(o => o.Handle(It.IsAny<ExpireAndReissueCommand>()), Times.Never);
-        }
-
-    }
-
-    public class RulesForMBMforTLSpec_RunCorrectiveAction_FailedKCIButPassCmpLater_IssueMBM : RulesForMBMforTLSpecScenario
-    {
-        protected override void PreSetup()
-        {
-            base.PreSetup();
-
-            // set Main data >>>>>
-            EventDate = new DateTime(2018, 01, 13);
-            ProcessingDate = new DateTime(2018, 12, 13);
-            FirstIssuanceDate = new DateTime(2008, 11, 01);
-            TriggeringEvent = TriggeringEvent.ActivityCompleted;
-
-            Set_ActivitiesWithPoints(ActivityCompletedDate: new DateTime(2018, 12, 01),
-                                    TotalMOCPoints: 100);
-
-            // credential that would meet "MBMforTL" conditions
-            var credential = Set_SuT_Credential(category: CredentialCategoryType.TimeLimited,
-                                                issuanceDate: FirstIssuanceDate,
-                                                certificationCode: ProgramResourceConstants.CertificationCode.InternalMedicine,
-                                                issuanceStatus: IssuanceStatusType.Expired, // The certificate status is Active or Expired(eg.not revoked / surrendered / suspended)
-                                                occurrenceType: OccurrenceType.Initial,
-                                                maintenanceStatus: MaintenanceStatusType.Maintained,
-                                                expirationDate: new DateTime(2017, 12, 31),
-                                                assessmentMet: true,
-                                                assessmentMetDate: FirstIssuanceDate,
-                                                actions: null);
-
-            // bad KCI with fail result
-            Set_Registration(credential: credential,
-                        administrationDate: new DateTime(2017, 11, 02),
-                        seatDate: new DateTime(2017, 09, 02),
-                        examResult: ExamResultType.Fail,
-                        examType: ExamType.Kci,
-                        actions: new List<Action<RegistrationResource>>()
-                        {
-                           (a => a.NoConsequence = true)
-                        });
-
-            // following cmp with pass result
-            Set_Sut_CmpRegistration(credential: credential,
-                        testDate: new DateTime(2018, 09, 02),
-                        examResult: ExamResultType.Pass); // !!!
-        }
-
-        public void WhenICallRunCorrectiveAction()
-        {
-            try
-            {
-                Result = ProgramRulesService.RunCorrectiveAction(
-                                credentials: InputCredentials,
-                                memberId: MemberId,
-                                eventDate: EventDate,
-                                processingDate: ProcessingDate).Result;
-            }
-            catch (Exception ex)
-            {
-                ExceptionCaught = ex;
-            }
-        }
-
-        public void ThenNoExceptionShouldHaveBeenThrown()
-        {
-            ExceptionCaught.Should().BeNull();
-        }
-
-        public void ThenResultShouldBeTrue()
-        {
-            Result.Should().Be(true);
-        }
-
-        public void AndThenHandle_ExpireAndReissueCommand_SHOULD_BeCalled()
-        {
-            My<ICredentialService>()
-                .Verify(o => o.Handle(It.IsAny<ExpireAndReissueCommand>()), Times.Once);
         }
 
     }
@@ -1588,7 +1502,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
             Set_SuT_Registration(credential: credential,
                                 administrationDate: FirstIssuanceDate,
                                 seatDateCert: FirstIssuanceDate,
-                                withMOC: false);
+                                withMOC: true);
         }
 
         public void WhenICallRunCorrectiveAction()

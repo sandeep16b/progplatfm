@@ -31,11 +31,11 @@ namespace Abim.Platform.Program.Host
         /// </summary>
         public virtual void Start()
         {
-            Logger.Info(string.Format("Starting {0}", ProductResourceConstants.AppInfo.AssemblyHostName));
+            Logger.Info("Starting {0}", ProductResourceConstants.AppInfo.AssemblyHostName);
             var configurationManager = Startup.ConfigurationManager;
             WebApplication = WebApp.Start<Startup>(configurationManager.AppSettings["OwinUrl"]);
             HostProperties.Status = configurationManager.AppSettings["RunningStatusText"];
-            Logger.Info(string.Format("{0}.ProgramApiServer Started", ProgramResourceConstants.AppInfo.ShortName));
+            Logger.Info("{0}.ProgramApiServer Started", ProgramResourceConstants.AppInfo.ShortName);
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Abim.Platform.Program.Host
             
             Logger.Info("Stopping " + serverName);
             WebApplication.Dispose();
-            Logger.Info(string.Format("{0} Stopped", serverName));
+            Logger.Info("{0} Stopped", serverName);
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace Abim.Platform.Program.Host
         /// </summary>
         public virtual void Pause()
         {
-            Logger.Info(string.Format("{0}.ProgramApiServer Paused", ProgramResourceConstants.AppInfo.ShortName));
+            Logger.Info("{0}.ProgramApiServer Paused", ProgramResourceConstants.AppInfo.ShortName);
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Abim.Platform.Program.Host
         /// </summary>
         public virtual void Continue()
         {
-            Logger.Info(string.Format("{0}.ProgramApiServer Now Running", ProgramResourceConstants.AppInfo.ShortName));
+            Logger.Info("{0}.ProgramApiServer Now Running", ProgramResourceConstants.AppInfo.ShortName);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace Abim.Platform.Program.Host
         /// </summary>
         public virtual void Shutdown()
         {
-            Logger.Info(string.Format("{0}.ProgramApiServer Shutdown Completed", ProgramResourceConstants.AppInfo.ShortName));
+            Logger.Info("{0}.ProgramApiServer Shutdown Completed", ProgramResourceConstants.AppInfo.ShortName);
         }
     }
 }

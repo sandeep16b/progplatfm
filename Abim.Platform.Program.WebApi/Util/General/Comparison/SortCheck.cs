@@ -44,7 +44,7 @@ namespace Abim.Platform.Program.WebApi.Comparison
         /// </returns>
         public static bool IsSortedBy<T>(this IEnumerable<T> collection, Func<T, int> intValue, SortDirection direction)
         {
-            return IsSorted<T>(collection, intValue, direction);
+            return IsSorted(collection, intValue, direction);
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Abim.Platform.Program.WebApi.Comparison
         /// </returns>
         public static bool IsSortedBy<T>(this IEnumerable<T> collection, Func<T, string> stringValue, SortDirection direction)
         {
-            return IsSorted<T>(collection, stringValue, direction);
+            return IsSorted(collection, stringValue, direction);
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Abim.Platform.Program.WebApi.Comparison
         /// </returns>
         public static bool IsSortedBy<T>(this IEnumerable<T> collection, Func<T, Guid> guidValue, SortDirection direction)
         {
-            return IsSorted<T>(collection, guidValue, direction);
+            return IsSorted(collection, guidValue, direction);
         }
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace Abim.Platform.Program.WebApi.Comparison
         /// </returns>
         public static bool IsSortedBy<T>(this IEnumerable<T> collection, Func<T, Object> alphaObjectValue, SortDirection direction)
         {
-            return IsSorted<T>(collection, alphaObjectValue, direction);
+            return IsSorted(collection, alphaObjectValue, direction);
         }
 
         /// <summary>
@@ -204,7 +204,7 @@ namespace Abim.Platform.Program.WebApi.Comparison
         /// </returns>
         public static bool IsSortedOnEnumBy<T>(this IEnumerable<T> collection, Func<T, Object> enumValue, SortDirection direction)
         {
-            return IsSortedOnEnum<T>(collection, enumValue, direction);
+            return IsSortedOnEnum(collection, enumValue, direction);
         }
     }
 }

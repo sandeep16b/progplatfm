@@ -118,9 +118,11 @@ namespace Abim.Platform.Program.Host
         /// <param name="e">The <see cref="UnhandledExceptionEventArgs"/> instance containing the event data.</param>
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            Log.Error("Service Notified of a thread exception... application is terminating:: Message: {0}, IsTerminating: {1}", e.ExceptionObject.ToString(), e.IsTerminating);
+            Log.Error("Service Notified of a thread exception... application is terminating:: Message: {0}, IsTerminating: {1}", e.ExceptionObject, e.IsTerminating);
         }
     }
 }
+
+
 
 

@@ -110,11 +110,7 @@ namespace Abim.Platform.Program.App.Services.Impl
             {
 
                 DateTime examTestDate = registration.MinSeatOrDeliveryDate;
-                ExamResultType effectiveExamResult;
-                if (credential.ExamDueDate.HasValue)
-                    effectiveExamResult = registration.GetEffectiveExamResult(credential.ExamDueDate.Value, credential.ConsecutiveKCIPassRequired);
-                else
-                    effectiveExamResult = registration.ExamResult.Result.ToEnum();
+                ExamResultType effectiveExamResult = registration.ExamResult.Result.ToEnum();
 
                 SetCredentialPathwayFromExamResultIfApplicable(
                     credential, registration.GetExamType(), registration.ExamResult.Result.ToEnum());
@@ -178,14 +174,16 @@ namespace Abim.Platform.Program.App.Services.Impl
                 cred.IsInCMP = false;
                 pathwayChanged = true;
             }
-            else if (eligibleExamResult && examTypeValue == "ACC" && cred.Pathway != PathwayType.OneYear)
-            {
-                //PBI 150806
-                //Switch to 1 year pathway
-                Log.Info($"Changing pathway for credential {cred.ExternalId} to 1 YEAR.");
-                cred.Pathway = PathwayType.OneYear;
-                pathwayChanged = true;
-            }
+            //Bug 238538 : Don't set to 1 year pathway, it is done by the Enrollment In CMP process
+            // we might recieve ACC exam result one or two years later after diplomates decided to switched to MOC or LNG pathway.
+            //else if (eligibleExamResult && examTypeValue == "ACC" && cred.Pathway != PathwayType.OneYear)
+            //{
+            //    //PBI 150806
+            //    //Switch to 1 year pathway
+            //    Log.Info($"Changing pathway for credential {cred.ExternalId} to 1 YEAR.");
+            //    cred.Pathway = PathwayType.OneYear;
+            //    pathwayChanged = true;
+            //}
 
             if (pathwayChanged)
             {
@@ -320,32 +318,6 @@ namespace Abim.Platform.Program.App.Services.Impl
             else if (registration.IsKci && effectiveExamResult == ExamResultType.Pass)
             {
 
-                // PBI 178847 Proj 1474) Display Consequential Due Dates for Two Year Assessments
-                // *** for failed NoConsequence  exam diplomate get 2 years
-                // since Fail/Inc/Ind/Utt for NoConsequence would be counted as Pass in  effectiveExamResult before.
-                if (registration.NoConsequence && 
-                    (      registration.ExamResult.Result.ToEnum() == ExamResultType.Fail  
-                        || registration.ExamResult.Result.ToEnum() == ExamResultType.Incomplete
-                        || registration.ExamResult.Result.ToEnum() == ExamResultType.Indeterminate
-                        || registration.ExamResult.Result.ToEnum() == ExamResultType.UnableToTest) &&
-                    !cred.ConsecutiveKCIPassRequired) // just for readibility of the code, cannot be ConsecutiveKCIPassRequired=true here with Pass results
-                {
-                    Log.Info($"Registration {registration.Id} is KCI and NoConsequence and result Fail/Inc/Ind/Utt; adding 2 years");
-                    cred.DisplayExamDueDate = new List<DateTime?> { new DateTime(adminYear + 2, 12, 31), cred.DisplayExamDueDate }.Max();
-                }
-                else if (!cred.ConsecutiveKCIPassRequired) // this if/else only for NOT ConsecutiveKCIPassRequired.
-                {
-
-                    // PBI 178847 Proj 1474) Display Consequential Due Dates for Two Year Assessments
-                    // **** If the assessment due date was in 2018 and the diplomate passed a two-year assessment in 2018 then the assessment due date is 2022. 
-                    // for each pass they get 4 years from admin date, before was this formula = new List<DateTime?> { new DateTime(adminYear + 4, 12, 31), cred.DisplayExamDueDate }.Max();
-                    //  but that would not work for Test case 1 : Pass in  2018 (moved to 2022) and then Pass in 2020 (moved to 2024).
-                    Log.Info($"Registration {registration.Id} is KCI and Pass; adding 4 years");
-                    cred.DisplayExamDueDate = new List<DateTime?> { new DateTime(adminYear + 4, 12, 31), cred.DisplayExamDueDate }.Max();
-                    //ar@3/11/2021: replaced with the code above
-                    // cred.DisplayExamDueDate = new DateTime(adminYear + 4, 12, 31);
-                }
-
                 /* ar@7/7/2020 removed but please keep it for references
                 //PBI 150794 Update the display due date to the maximum of adminYear+2, mocExamDueDate
                 //Revised per Bug 161596 to use ExamDueDate instead of MOCExamDueDate
@@ -393,8 +365,13 @@ namespace Abim.Platform.Program.App.Services.Impl
                     */
 
                     // PBI 178847 Proj 1474) Display Consequential Due Dates for Two Year Assessments
-                    // *** pretty much as it was before but it is more clear ...
-                    cred.ExamDueDate = cred.KCIExamDueDate = cred.MOCExamDueDate = cred.DisplayExamDueDate;
+                    // **** If the assessment due date was in 2018 and the diplomate passed a two-year assessment in 2018 then the assessment due date is 2022. 
+                    // for each pass they get 4 years from admin date, before was this formula = new List<DateTime?> { new DateTime(adminYear + 4, 12, 31), cred.DisplayExamDueDate }.Max();
+                    //  but that would not work for Test case 1 : Pass in  2018 (moved to 2022) and then Pass in 2020 (moved to 2024).
+                    Log.Info($"Registration {registration.Id} is KCI and Pass; adding 4 years");
+                    cred.ExamDueDate = cred.MOCExamDueDate = cred.DisplayExamDueDate = new List<DateTime?> { new DateTime(adminYear + 4, 12, 31), cred.ExamDueDate }.Max();
+                    //ar@3/11/2021: replaced with the code above
+                    // cred.DisplayExamDueDate = new DateTime(adminYear + 4, 12, 31);
 
                     SetAssessmentMet(cred, examDate);
                     Log.Info($"Registration {registration.Id} is KCI and PASS (effectiveExamResult) (cred.ConsecutiveKCIPassRequired=false)");
@@ -644,7 +621,6 @@ namespace Abim.Platform.Program.App.Services.Impl
                 throw;
             }
 
-            return;
         }
 
         /// <summary>
@@ -655,26 +631,20 @@ namespace Abim.Platform.Program.App.Services.Impl
         public void HandleJob(RunRulesForMustBeMaintainedCertificateCommand command)
         {
             Logger.Debug("*Start HandleJob:RunRulesForMustBeMaintainedCertificateCommand: {0}", command.Dump());
-            try
-            {
-                var credential = CredentialService.Load(command.CredentialId);
+           
+            var credential = CredentialService.Load(command.CredentialId);
 
-                MemberId = credential.MemberId;
-                ProcessingDate = command.ProcessingDate;
-                DateTime evaluationDate = command.ProcessingDate;
+            MemberId = credential.MemberId;
+            ProcessingDate = command.ProcessingDate;
+            DateTime evaluationDate = command.ProcessingDate;
 
-                IssueNewCredentialForTLPC_(new List<Credential>() { credential },
-                                            credential.MemberId,
-                                            command.EventDate,
-                                            command.ProcessingDate)
-                   .UpdateResult((c, p) => UpdateTLPCCredential(c, p), ProcessingDate)
-                   .LogCorrectiveActionResult(async (a) => await CorrectiveActionRunService.Add(a));
-
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            IssueNewCredentialForTLPC_(new List<Credential>() { credential },
+                                        credential.MemberId,
+                                        command.EventDate,
+                                        command.ProcessingDate)
+               .UpdateResult((c, p) => UpdateTLPCCredential(c, p), ProcessingDate)
+               .LogCorrectiveActionResult(async (a) => await CorrectiveActionRunService.Add(a));
+           
         }
 
         /// <summary>

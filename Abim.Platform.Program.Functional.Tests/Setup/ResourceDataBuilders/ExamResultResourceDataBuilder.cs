@@ -5,7 +5,7 @@ namespace Abim.Platform.Program.Tests.Setup.ResourceDataBuilders
 {
     public class ExamResultResourceDataBuilder : ResourceDataBuilder<ExamResultResource, ExamResultResourceDataBuilder>
     {
-        private ExamResultResource _examResult;
+       // private ExamResultResource _examResult;
 
         public ExamResultResourceDataBuilder(ExamResultResource examResult) : base(examResult)
         {

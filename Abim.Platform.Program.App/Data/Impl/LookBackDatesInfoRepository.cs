@@ -7,6 +7,7 @@ using Abim.Platform.Program.Relational.Repository.Base;
 using Abim.Platform.Program.Relational.Queries;
 using Abim.Platform.Program.Relational.Validation;
 using Abim.Platform.Program.Relational.Validation.Impl;
+using System.Linq;
 
 namespace Abim.Platform.Program.App.Data.Impl
 {
@@ -39,7 +40,7 @@ namespace Abim.Platform.Program.App.Data.Impl
                                 && a.Lookback2YearEndDate.Value.Date <= expiredDate.Date) ||
                                 (a.Lookback5YearEndDate!=null
                                 && a.Lookback5YearEndDate.Value.Date <= expiredDate.Date))
-                         .List();
+                         .List().ToList();
         }
 
         /// <summary>

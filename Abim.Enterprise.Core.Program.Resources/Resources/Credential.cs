@@ -78,6 +78,9 @@ namespace Abim.Platform.Program.Resources
 
         [DataMember(Order = 31)]
         public virtual string OnBehalfBoardName { get; set; }
+
+        [DataMember(Order = 32)]
+        public virtual string DeselectionType { get; set; }
     }
 
     /// <summary>

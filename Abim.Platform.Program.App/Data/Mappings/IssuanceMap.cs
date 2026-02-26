@@ -22,7 +22,7 @@ namespace Abim.Platform.Program.App.Data.Mappings
             Cache.ReadWrite();
 
             Id(o => o.Id).Column("IssuanceId").Not.Nullable();
-            
+
             Map(o => o.IssuanceDate)
                 .Column(Constants.Database.IssuanceTable.IssuanceDate)
                 .CustomSqlType("datetime")
@@ -50,7 +50,7 @@ namespace Abim.Platform.Program.App.Data.Mappings
 
             Map(o => o.UnderReview)
                 .Column(Constants.Database.IssuanceTable.UnderReview);
-            
+
             Map(o => o.Duration).Column("Duration")
                 .CustomType<DurationTypeMapping>()
                 .CustomSqlType("nvarchar").Length(50).Not.Nullable();
@@ -96,15 +96,21 @@ namespace Abim.Platform.Program.App.Data.Mappings
             Map(o => o.DeselectionProcessedDate)
                 .Column(Constants.Database.IssuanceTable.DeSelectionProcessedDate)
                 .Nullable();
-            
+
+            Map(o => o.DeselectionType)
+                .Column("DeselectionType").CustomType<DeselectionTypeMapping>()
+                .CustomSqlType("nvarchar")
+                .Length(50)
+                .Nullable();
+
             References(o => o.Source, "SourceId")
                 .Cascade.None()
                 .Not.Nullable();
-            
+
             References(o => o.Credential)
                 .Column("CredentialId")
                 .Cascade.SaveUpdate();
-            
+
             Component(o => o.AuditData);
         }
     }

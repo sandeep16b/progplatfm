@@ -22,13 +22,13 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
         {
             new CorrectiveActionParticipationStatus_GF_MeetRules_100_Points().BDDfy();
         }
-
+        
         [Test]
         public void CorrectiveActionParticipationStatus_GF_FutureDates_MeetRules100Points()
         {
             new CorrectiveActionParticipationStatus_GF_FutureDatesMeetRules_100_Points().BDDfy();
         }
-
+        
         [Test]
         public void CorrectiveActionParticipationStatus_GF_MeetRulesReciprocity()
         {
@@ -149,7 +149,8 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
                 InitializeDataProperties();
 
                 EventDate = new DateTime(2018, 01, 13);
-                ProcessingDate = DateTime.Now;
+                // we cannot set today's date to ProcessingDate because 5-year Look Back would move, but points would be in older lookback 
+                ProcessingDate = new DateTime(2023, 12, 01);  //pbi 279364 : Restore and Correct Program Platform Unit Tests Disabled During 1/6/2024 Deployment 
                 FirstIssuanceDate = new DateTime(2008, 11, 01);
 
                 DateTime ActivityCompletedDate = new DateTime(2018, 12, 01);

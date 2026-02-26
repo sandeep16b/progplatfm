@@ -43,6 +43,9 @@ namespace Abim.Platform.Program.Resources
 
         [DataMember(Order = 13)]
         public virtual bool? IsFocusPractice { get; set; }
+
+        [DataMember(Order = 15)]
+        public virtual string ImageHref { get; set; }
     }
 
     [DataContract]
@@ -75,5 +78,28 @@ namespace Abim.Platform.Program.Resources
         public virtual IssuanceStatusType Status { get; set; }
         [DataMember(Order = 5)]
         public virtual MaintenanceStatusType MaintenanceStatus { get; set; }
+        [DataMember(Order = 6)]
+        public virtual string IssuanceStatusWithModifier
+        {
+            get
+            {
+                switch (Status)
+                {
+                    case IssuanceStatusType.Active:
+                        return "Certified";
+                    case IssuanceStatusType.Suspended:
+                        return "Not Certified, Suspended";
+                    case IssuanceStatusType.Inactive:
+                    case IssuanceStatusType.Surrendered:
+                        return "Not Certified";
+                    case IssuanceStatusType.Expired:
+                        return "Not Certified, Lapsed";
+                    case IssuanceStatusType.Revoked:
+                        return "Not Certified, Revoked";
+                    default:
+                        return "Not Certified";
+                }
+            }
+        }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
-using Abim.Enterprise.Core.Registration.Interservice;
+﻿using Abim.Enterprise.Core.Registration.Interservice;
 using Abim.Enterprise.Core.Registration.Resources;
 using Abim.Platform.Product.Interservices.Interfaces;
 using Abim.Platform.Product.Resources;
@@ -74,12 +73,7 @@ namespace Abim.Platform.Program.App.Services.Impl
         /// <summary>
         /// CorrectiveActionRunService
         /// </summary>
-        protected ICorrectiveActionResultService CorrectiveActionRunService { get; set; }
-
-        /// <summary>
-        /// Profile Interservice
-        /// </summary>
-        protected IProfileInterservice ProfileInterservice { get; set; }
+        protected ICorrectiveActionResultService CorrectiveActionRunService { get; set; } 
 
         /// <summary>
         /// LookBackDatesInfoService

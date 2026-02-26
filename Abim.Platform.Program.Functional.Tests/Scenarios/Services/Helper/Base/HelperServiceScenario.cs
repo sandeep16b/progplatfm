@@ -1,13 +1,11 @@
-﻿using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
-using Abim.Enterprise.Core.Profile.Resource;
+﻿using Abim.Platform.Program.MembershipClient;
 using Abim.Enterprise.Core.Registration.Interservice;
 using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.App.Services.Impl;
 using Abim.Platform.Program.Core.Identity;
 using MassTransit;
 using Moq;
-using System;
-using System.Threading.Tasks;
+using System; 
 
 namespace Abim.Platform.Program.Tests.Scenarios.Services.Helper
 {
@@ -16,7 +14,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.Helper
         protected HelperService _sut;
         protected Mock<IBusControl> _busControlMock;
         protected Mock<IAccessTokenService> _accessTokenServiceMock;
-        protected Mock<IProfileInterservice> _profileInterserviceMock;
+        protected Mock<IMembershipClientService> _membershipClientServiceMock;
         protected Mock<IRegistrationInterservice> _registrationInterserviceMock;
         protected Mock<ICredentialService> _credentialServiceMock;
         protected Exception _exception;
@@ -26,13 +24,13 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.Helper
         {
             SetupBusControlMock();
             SetupAccessTokenServiceMock();
-            SetupProfileInterserviceMock();
+            SetupProfileMembershipMock();
             SetupRegistrationInterserviceMock();
             SetupCredentialServiceMock();
             _sut = new HelperService(
                     _busControlMock.Object, 
-                    _accessTokenServiceMock.Object, 
-                    _profileInterserviceMock.Object, 
+                    _accessTokenServiceMock.Object,
+                    _membershipClientServiceMock.Object, 
                     _registrationInterserviceMock.Object);
         }
 
@@ -49,16 +47,15 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.Helper
                 .Returns("--token--");
         }
 
-        protected virtual void SetupProfileInterserviceMock()
+        protected virtual void SetupProfileMembershipMock()
         {
-            _profileInterserviceMock = new Mock<IProfileInterservice>(MockBehavior.Strict);
+            _membershipClientServiceMock = new Mock<IMembershipClientService>(MockBehavior.Strict);
 
-            var profile = new ProfileNestedResource();
-            profile.Id = _profileGuid;
-
-            _profileInterserviceMock
-                .Setup(x => x.GetProfileByABIMId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Task.FromResult(profile));
+            var profile = new ProfileResource() { Id = _profileGuid };
+            _membershipClientServiceMock.Setup(r => r.GetAccessToken()).Verifiable();
+            _membershipClientServiceMock
+                .Setup(x => x.GetProfileByAbimIdAsync(It.IsAny<string>()))
+                .ReturnsAsync(profile);
         }
 
         protected virtual void SetupRegistrationInterserviceMock()

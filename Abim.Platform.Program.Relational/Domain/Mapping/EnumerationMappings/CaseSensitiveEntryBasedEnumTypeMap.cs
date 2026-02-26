@@ -26,7 +26,7 @@ namespace Abim.Platform.Program.Relational.Domain.Mapping.EnumerationMappings
             #pragma warning disable 0168
             catch(Exception ex)
             {
-                throw new Exception(string.Format("Entry {0} does not exist in enumeration {1}", code.ToString(), typeof(T).Name));
+                throw new Exception(string.Format("Entry {0} does not exist in enumeration {1}", code, typeof(T).Name));
             }
         }
 

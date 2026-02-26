@@ -74,39 +74,39 @@
                 /// <summary>
                 /// The application
                 /// </summary>
-                public const string App = "api/" + ApiInfo.Version;
+                public const string ApiVersion = "api/" + ApiInfo.Version;
 
                 //individual controller prefixes       
                                
                 /// <summary>
                 /// The certification
                 /// </summary>
-                public const string Certification = App /*+ "/certifications"*/;
+                public const string Certification = ApiVersion /*+ "/certifications"*/;
 
                 /// <summary>
                 /// The credential
                 /// </summary>
-                public const string Credential = App /*+ "/credentials"*/;
+                public const string Credential = ApiVersion /*+ "/credentials"*/;
 
                 /// <summary>
                 /// The source
                 /// </summary>
-                public const string Source = App /*+ "/sources"*/;
+                public const string Source = ApiVersion /*+ "/sources"*/;
 
                 /// <summary>
                 /// The enum
                 /// </summary>
-                public const string Enum = App /*+ "/certifications/enums"*/;
+                public const string Enum = ApiVersion /*+ "/certifications/enums"*/;
 
                 /// <summary>
                 /// The program rules
                 /// </summary>
-                public const string ProgramRules = App /*+ "/programRules"*/;
+                public const string ProgramRules = ApiVersion /*+ "/programRules"*/;
 
                 /// <summary>
                 /// The PhysicianCertification for Public Site VOC Page
                 /// </summary>
-                public const string PhysicianCertification = App /*+ "/programRules"*/;
+                public const string PhysicianCertification = ApiVersion /*+ "/programRules"*/;
             }                                         
                                                       
             /// <summary>                             
@@ -451,6 +451,11 @@
                 /// GetCredentialsByAbimId
                 /// </summary>
                 public const string GetPhysicianCredentialsByAbimId = "physicianCredentials/abimid/{abimid}";
+
+                /// <summary>
+                /// GetPhysicianCredentialsById
+                /// </summary>
+                public const string GetPhysicianCredentialsById = "physicianCredentials/Id/{Id}";
             }
         }       
                                                                  

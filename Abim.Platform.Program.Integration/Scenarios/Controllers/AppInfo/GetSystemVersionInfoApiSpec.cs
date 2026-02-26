@@ -50,8 +50,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.AppInfo
 
         protected override void PostSetup()
         {
-            Container.Inject<IEnumService>(EnumService.Object);
-            Container.Inject<IBusControl>(BusControl.Object);
+            Container.Inject(EnumService.Object);
+            Container.Inject(BusControl.Object);
             Container.Inject<IConfigurationManager>(new ConfigurationManager());
         }
 
@@ -87,6 +87,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.AppInfo
         public void AndThenTheResponseShouldHaveASelfLink()
         {
             Resource["links"].Should().NotBeNull();
+            // ReSharper disable once AssignNullToNotNullAttribute
+            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             Resource["links"].Any(l => l.ToString().Contains("self"));
         }
     }

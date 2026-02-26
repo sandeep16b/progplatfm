@@ -10,8 +10,7 @@ namespace Abim.Platform.Program.App.Domain
     /// Use to set the LookBackDatesInfo 
     /// </summary>
     public class LookBackDatesInfo :
-        AggregateRoot<LookBackDatesInfo>,
-        IDomainValidationHandler<LookBackDatesInfo>
+        AggregateRoot<LookBackDatesInfo>
     {
         #region Properties
 

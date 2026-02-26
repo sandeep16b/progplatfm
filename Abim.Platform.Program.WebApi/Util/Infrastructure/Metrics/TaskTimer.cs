@@ -18,7 +18,7 @@ namespace Abim.Platform.Program.WebApi.Util.Testing.Metrics
         /// <summary>
         /// The total timers running
         /// </summary>
-        private static int totalTimersRunning = 0;
+        private static int totalTimersRunning;
 
         /// <summary>
         /// The maximum permitted timers
@@ -142,7 +142,7 @@ namespace Abim.Platform.Program.WebApi.Util.Testing.Metrics
                 {
                     await task;
                 }
-                catch(Exception ex)
+                catch(Exception)
                 {
                     taskWatch.Stop();
                     totalTimersRunning--;

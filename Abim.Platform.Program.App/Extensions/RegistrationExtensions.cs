@@ -8,7 +8,10 @@ using System.Linq;
 using static Abim.Platform.Program.App.Util.Constants;
 
 namespace Abim.Platform.Program.App.Extensions.Registration
-{ 
+{
+    /// <summary>
+    /// RegistrationExtensions
+    /// </summary>
     public static class RegistrationExtensions
     {
         /// <summary>
@@ -21,31 +24,6 @@ namespace Abim.Platform.Program.App.Extensions.Registration
             where TEnum : struct, IConvertible, IComparable, IFormattable
         {
             return EnumAttributes.ToEnum<TEnum>(resource.Code);
-        }
-
-        /// <summary>
-        /// Returns the "effective" exam result. When an exam is a no-consequences exam, 
-        /// FAIL, INDETERMINATE, INCOMPLETE, and UNABLETOTEST are treated as PASS.
-        /// </summary>
-        /// <param name="registration"></param>
-        /// <param name="credentialExamDueDate">The exam due date of the credential this exam registration applies to</param>
-        /// <param name="consecutiveKCIPassRequired">Specifies whether or not the diplomate is required to pass 2 consecutive KCI exams</param>
-        /// <returns>The "effective" exam result as determined by the business criteria</returns>
-        public static ExamResultType GetEffectiveExamResult(
-            this RegistrationResource registration,
-            DateTime credentialExamDueDate,
-            bool consecutiveKCIPassRequired)
-        {
-            string[] effectivePassingResultTypes =
-                new string[] { "FAIL", "INDETERMINATE", "INCOMPLETE", "UNABLETOTEST" };
-
-            if (registration.NoConsequence
-                && effectivePassingResultTypes.Contains(registration.ExamResult.Result.Value.ToUpper())
-                && registration.AdministrationYear <= credentialExamDueDate.Year
-                && !consecutiveKCIPassRequired)
-                return ExamResultType.Pass;
-            else
-                return registration.ExamResult.Result.ToEnum();
         }
 
         // below was added from Core.Interservices 
@@ -117,31 +95,68 @@ namespace Abim.Platform.Program.App.Extensions.Registration
             return (registration.Result == ExamType.Cert.ToString());
         }
 
+        /// <summary>
+        ///   Determines exam  pass or fail .
+        /// </summary>
+        /// <param name="registration">The registration.</param>
+        /// <returns>
+        ///   <c>true</c> or  <c>false</c>.
+        /// </returns>
         public static bool IsPassExam(this RegistrationResource registration)
         {
             return (registration.Result == ExamResultType.Pass.ToString());
         }
-
+        /// <summary>
+        ///  Determines exam fail
+        /// </summary>
+        /// <param name="registration">The registration.</param>
+        /// <returns>
+        ///   <c>true</c> or  <c>false</c>.
+        /// </returns>
         public static bool IsFailExam(this RegistrationResource registration)
         {
             return (registration.Result == ExamResultType.Fail.ToString());
         }
-
+        /// <summary>
+        ///  IsFailIndIncUtt
+        /// </summary>
+        /// <param name="registration">The registration.</param>
+        /// <returns>
+        ///   <c>true</c> or  <c>false</c>.
+        /// </returns>
         public static bool IsFailIndIncUtt(this RegistrationResource registration)
         {
             return ExamResultConstants.ExamResultFailIndIncUtt.Contains(registration.ExamResult.Result.ToEnum());
         }
-
+        /// <summary>
+        ///  IsPassFailIndInvIncUtt
+        /// </summary>
+        /// <param name="registration">The registration.</param>
+        /// <returns>
+        ///   <c>true</c> or  <c>false</c>.
+        /// </returns>
         public static bool IsPassFailIndInvIncUtt(this RegistrationResource registration)
         {
             return ExamResultConstants.ExamResultPassFailIndInvIncUtt.Contains(registration.ExamResult.Result.ToEnum());
         }
-
+        /// <summary>
+        ///  IsPassFailIndIncUtt
+        /// </summary>
+        /// <param name="registration">The registration.</param>
+        /// <returns>
+        ///   <c>true</c> or  <c>false</c>.
+        /// </returns>
         public static bool IsPassFailIndIncUtt(this RegistrationResource registration)
         {
             return ExamResultConstants.ExamResultPassFailIndIncUtt.Contains(registration.ExamResult.Result.ToEnum());
         }
-
+        /// <summary>
+        ///  IsIndIncUtt
+        /// </summary>
+        /// <param name="registration">The registration.</param>
+        /// <returns>
+        ///   <c>true</c> or  <c>false</c>.
+        /// </returns>
         public static bool IsIndIncUtt(this RegistrationResource registration)
         {
             return ExamResultConstants.ExamResultIndIncUtt.Contains(registration.ExamResult.Result.ToEnum());
@@ -155,7 +170,8 @@ namespace Abim.Platform.Program.App.Extensions.Registration
         /// <param name="registrations"></param>
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
-        /// <param name="CertificationGuid"></param>
+        /// <param name="certificationGuid"></param>
+        /// <param name="issuanceDateOfTLCP"></param>
         /// <returns></returns>
         public static bool IfPassExamInRange(this IEnumerable<CMPRegistrationResource> registrations,
                                             DateTime startDate,
@@ -177,13 +193,14 @@ namespace Abim.Platform.Program.App.Extensions.Registration
 
         #region IEnumerable<RegistrationResource>
         /// <summary>
-        /// 
+        /// IfPassExamInRange
         /// </summary>
         /// <param name="registrations"></param>
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <param name="examType"></param>
-        /// <param name="CertificationGuid"></param>
+        /// <param name="certificationGuid"></param>
+        /// <param name="issuanceDateOfTLCP"></param>
         /// <returns></returns>
         public static bool IfPassExamInRange(this IEnumerable<RegistrationResource> registrations,
                                             DateTime startDate,
@@ -204,7 +221,7 @@ namespace Abim.Platform.Program.App.Extensions.Registration
         }
 
         /// <summary>
-        /// Get most Recent Exam Pass Date for given exam type and certificationId
+        /// GetRecentExamPassDate - Get most Recent Exam Pass Date for given exam type and certificationId
         /// </summary>
         /// <param name="registrations"></param>
         /// <param name="examType"></param>

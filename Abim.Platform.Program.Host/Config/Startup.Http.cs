@@ -83,7 +83,7 @@ namespace Abim.Platform.Program.Host.Config
             
             config.Routes.MapHttpRoute(
                 name: "ResourceNotFound",
-                routeTemplate: ProgramResourceConstants.Routes.Prefix.App + "/{*uri}",
+                routeTemplate: ProgramResourceConstants.Routes.Prefix.ApiVersion + "/{*uri}",
                 defaults: new { controller = "AppInfo", action = "ResourceNotFound", uri = RouteParameter.Optional }
             );
             
@@ -126,7 +126,7 @@ namespace Abim.Platform.Program.Host.Config
             
             config.EnsureInitialized();
             
-            var isSwaggerEnabled = true;
+            bool isSwaggerEnabled;
             Boolean.TryParse(ConfigurationManager.AppSettings["EnableSwagger"], out isSwaggerEnabled);
             if (isSwaggerEnabled)
             {
@@ -141,7 +141,7 @@ namespace Abim.Platform.Program.Host.Config
                     c.OAuth2("oauth")
                         .AuthorizationUrl(authorityUri.ToString())
                         .TokenUrl(new Uri(authorityUri, "connect/token").ToString())
-                        .Flow("resource_manager");
+                        .Flow("implicit");
                 }).EnableSwaggerUi(x => x.AddResourceOwnerFlowSupport());
             }
             

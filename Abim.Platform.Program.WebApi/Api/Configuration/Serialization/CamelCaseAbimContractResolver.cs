@@ -24,8 +24,9 @@ namespace Abim.Platform.Program.WebApi.Api.Configuration.Serialization
             //The purpose of this is it to avoid JsonSerializationExceptions such as the common
             //... "Error getting value from 'DefaultValue' on 'NHibernate.Type.DateTimeOffsetType'."
             if(typeof(NHibernate.Proxy.INHibernateProxy).IsAssignableFrom(objectType))
-                return base.CreateContract(objectType.BaseType);
-            
+                if (objectType.BaseType != null)
+                    return base.CreateContract(objectType.BaseType);
+
             return base.CreateContract(objectType);
         }
 

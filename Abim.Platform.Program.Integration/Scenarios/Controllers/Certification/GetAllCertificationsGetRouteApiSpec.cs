@@ -442,6 +442,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Certification
                     sorted = false;
                     break;
                 }
+                previousItem = item;
             }
             sorted.Should().Be(true);
         }
@@ -553,6 +554,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Certification
                     sorted = false;
                     break;
                 }
+                previousItem = item;
             }
             sorted.Should().Be(true);
         }

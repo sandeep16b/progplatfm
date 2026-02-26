@@ -1,5 +1,4 @@
-﻿using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
-using Abim.Platform.Program.App.Data;
+﻿using Abim.Platform.Program.App.Data;
 using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.Core.Identity;
 using Abim.Platform.Program.Host.Config;
@@ -26,10 +25,9 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential.Bas
             list.Add(typeof(IBusControl));
             list.Add(typeof(IBackgroundJobClient));
             list.Add(typeof(IValidationFactory));
-            list.Add(typeof(ISourceService));
-            list.Add(typeof(ICredentialService));
+            list.Add(typeof(ISourceService)); 
             list.Add(typeof(IHelperService));
-            list.Add(typeof(IProfileInterservice));
+            list.Add(typeof(IMembershipClientService));
             return list;
         }
 
@@ -52,7 +50,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential.Bas
                 Container.Inject(My<IProgramRulesService>().Object);
                 Container.Inject(My<IBackgroundJobClient>().Object);
 
-                Container.Inject(My<IProfileInterservice>().Object);
+                Container.Inject(My<IMembershipClientService>().Object);
             };
             return action;
         }

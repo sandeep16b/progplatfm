@@ -25,13 +25,13 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
         {
             new IssueNewCredentialForXGFSpec_MeetRules_100Points().BDDfy();
         }
-
+        
         [Test]
         public void IssueNewCredentialForXGFSpecMeetRules_FutureDates_100Points()
         {
             new IssueNewCredentialForXGFSpec_MeetRules_FutureDates_100Points().BDDfy();
         }
-
+        
         [Test]
         public void IssueNewCredentialForXGFSpecMeetRules_Reciprocity()
         {
@@ -188,7 +188,8 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
 
                 // set Main data >>>>>
                 EventDate = new DateTime(2018, 01, 13);
-                ProcessingDate = DateTime.Now;
+                // we cannot set today's date to ProcessingDate because 5-year Look Back would move, but points would be in older lookback 
+                ProcessingDate = new DateTime(2023, 12, 01);  //pbi 279364:Restore and Correct Program Platform Unit Tests Disabled During 1/6/2024 Deployment 
                 FirstIssuanceDate = new DateTime(2008, 11, 01);
 
 
@@ -430,7 +431,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesIndividualR
                 Set_SuT_Registration(credential: credential,
                                     administrationDate: FirstIssuanceDate,
                                     seatDateCert: FirstIssuanceDate,
-                                    withMOC: false);
+                                    withMOC: true);
             }
 
             /// <summary>

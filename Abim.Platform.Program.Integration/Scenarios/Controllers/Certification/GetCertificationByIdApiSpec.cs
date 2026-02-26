@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -24,13 +25,28 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Certification
         SoThat = "to get a single Certification's details"
         )]
     [TestFixture]
-    public class GetCertificationByIdApiSpec
+    public class GetCertificationByIdApiSpec 
     {
         [TestCase]
         [WorkItem(74793)]
+        [WorkItem(327905)]
         public void GetCertificationReturnsOK()
         {
             new GetCertificationReturnsOK().BDDfy();
+        }
+
+        [TestCase]
+        [WorkItem(327905)]
+        public void GetCertificationReturnsCorrectFieldValues()
+        {
+            new GetCertificationReturnsCorrectFieldValues().BDDfy();
+        }
+
+        [TestCase]
+        [WorkItem(327905)]
+        public void GetCertificationReturnsOtherCorrectFieldValues()
+        {
+            new GetCertificationReturnsOtherCorrectFieldValues().BDDfy();
         }
 
         [TestCase]
@@ -102,6 +118,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Certification
         protected override void PostSetup()
         {
             DomainObject = ConstructDomainObject();
+            DomainObject.IsCertificateRetired = true;
+            DomainObject.CertificateRetiredDate = DateTime.Now.AddDays(-1);
             My<ICertificationService>()
                 .Setup(o => o.Load(It.IsAny<Guid>()))
                 .Returns(DomainObject);
@@ -131,6 +149,11 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Certification
             Resource.Should().NotBeNull();
         }
 
+        public void AndThenIsCertificateRetiredFlagShouldTrue()
+        {
+            Resource.IsCertificateRetired.ShouldBeTrue();
+        }
+
         public void AndThenMyResourceShouldHaveLinks()
         {
             Resource.Links.Should().NotBeNull();
@@ -144,6 +167,128 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Certification
         }
     }
 
+    public class GetCertificationReturnsCorrectFieldValues : GetCertificationByIdScenario
+    {
+        CertificationResource Resource { get; set; }
+        App.Domain.Certification DomainObject { get; set; }
+
+        protected override void PreSetup()
+        {
+        }
+
+        protected override void PostSetup()
+        {
+            DomainObject = ConstructDomainObject();
+            DomainObject.IsCertificateRetired = true;
+            DomainObject.CertificateRetiredDate = DateTime.Now.AddDays(1);
+            My<ICertificationService>()
+                .Setup(o => o.Load(It.IsAny<Guid>()))
+                .Returns(DomainObject);
+        }
+
+        public void GivenIPassTheCorrectUrl()
+        {
+            Url = "/api/v1.0/Certification/" + Guid.NewGuid();
+        }
+
+        public async Task WhenICallGetCertification()
+        {
+            Result = await HttpServer.CreateRequest(Url)
+                .AddHeader("Authorization", "Bearer " + Token)
+                .GetAsync();
+            ResponseContent = await Result.Content.ReadAsStringAsync();
+            Resource = JsonConvert.DeserializeObject<CertificationResource>(ResponseContent);
+        }
+
+        public void ThenIGetAnOkResponse()
+        {
+            Result.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
+
+        public void AndThenMyResourceShouldNotBeNull()
+        {
+            Resource.Should().NotBeNull();
+        }
+
+        public void AndThenIsCertificateRetiredFlagShouldFalse()
+        {
+            Resource.IsCertificateRetired.ShouldBeFalse();
+        }
+
+        public void AndThenMyResourceShouldHaveLinks()
+        {
+            Resource.Links.Should().NotBeNull();
+            Resource.Links.Should().Contain(link => link.Name == "self");
+            Resource.Links.Should().Contain(link => link.Name == "source");
+
+            if (DomainObject.BaseCertification != null)
+                Resource.Links.Should().Contain(link => link.Name == "base");
+            else
+                Resource.Links.Should().NotContain(link => link.Name == "base");
+        }
+    }
+
+    public class GetCertificationReturnsOtherCorrectFieldValues : GetCertificationByIdScenario
+    {
+        CertificationResource Resource { get; set; }
+        App.Domain.Certification DomainObject { get; set; }
+
+        protected override void PreSetup()
+        {
+        }
+
+        protected override void PostSetup()
+        {
+            DomainObject = ConstructDomainObject();
+            DomainObject.IsCertificateRetired = true;
+            // DomainObject.CertificateRetiredDate  is not set
+            My<ICertificationService>()
+                .Setup(o => o.Load(It.IsAny<Guid>()))
+                .Returns(DomainObject);
+        }
+
+        public void GivenIPassTheCorrectUrl()
+        {
+            Url = "/api/v1.0/Certification/" + Guid.NewGuid();
+        }
+
+        public async Task WhenICallGetCertification()
+        {
+            Result = await HttpServer.CreateRequest(Url)
+                .AddHeader("Authorization", "Bearer " + Token)
+                .GetAsync();
+            ResponseContent = await Result.Content.ReadAsStringAsync();
+            Resource = JsonConvert.DeserializeObject<CertificationResource>(ResponseContent);
+        }
+
+        public void ThenIGetAnOkResponse()
+        {
+            Result.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
+
+        public void AndThenMyResourceShouldNotBeNull()
+        {
+            Resource.Should().NotBeNull();
+        }
+
+        public void AndThenIsCertificateRetiredFlagShouldFalse()
+        {
+            Resource.IsCertificateRetired.ShouldBeFalse();
+        }
+
+        public void AndThenMyResourceShouldHaveLinks()
+        {
+            Resource.Links.Should().NotBeNull();
+            Resource.Links.Should().Contain(link => link.Name == "self");
+            Resource.Links.Should().Contain(link => link.Name == "source");
+
+            if (DomainObject.BaseCertification != null)
+                Resource.Links.Should().Contain(link => link.Name == "base");
+            else
+                Resource.Links.Should().NotContain(link => link.Name == "base");
+        }
+    }
+
     public class GetCertificationReturnsForbidden : GetCertificationByIdScenario
     {
         CertificationResource Resource { get; set; }
@@ -151,7 +296,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Certification
 
         protected override void PreSetup()
         {
-            OverrideScope();
+            OverrideAndInjectUnacceptableScope();
         }
 
         protected override void PostSetup()

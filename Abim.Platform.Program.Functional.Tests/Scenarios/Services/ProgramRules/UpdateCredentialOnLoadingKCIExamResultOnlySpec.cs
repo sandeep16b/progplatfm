@@ -13,7 +13,6 @@ using Abim.Platform.Program.Enums;
 using Abim.Platform.Program.Relational.Validation;
 using Abim.Platform.Program.Resources;
 using Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest.Base;
-using Abim.Platform.Program.WebApi.Testing.Setup;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
@@ -39,12 +38,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         //                      Note: current functionality is to advance the assessment due date after the first KCI pass."
 
         #region In Grace Period
-        [TestCase]
-        public void UpdateCredentialOnLoadingKCIExamResultOnlySpec_Pass2ndKCIExamMeetAssessment_AdvancedDueDates()
-        {
-            new Pass2ndKCIExamMeetAssessment_InGracePeriod_AdvancedDueDatesSpec().BDDfy();
-        }
-
         [TestCase]
         public void UpdateCredentialOnLoadingKCIExamResultOnlySpec_Pass2ndKCIExamMeetAssessment_1stKCIPassIsOld_DontAdvancedDueDates()
         {
@@ -84,11 +77,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         #endregion
 
         #region Expired and AssessmentMet is false
-        [TestCase]
-        public void UpdateCredentialOnLoadingKCIExamResultOnlySpec_Pass2ndKCIExamMeetAssessment_notInGP_AdvancedDueDates()
-        {
-            new Pass2ndKCIExamMeetAssessment_NotInGracePeriod_AdvancedDueDatesSpec().BDDfy();
-        }
 
         [TestCase]
         public void UpdateCredentialOnLoadingKCIExamResultOnlySpec_Pass1st_Faild2nd_Pass3rd_DontAdvancedDueDates()
@@ -100,12 +88,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         public void UpdateCredentialOnLoadingKCIExamResultOnlySpec_Pass1st_Faild2nd_Ind3rd_CCC4rd_Pass5rd_DontAdvancedDueDates()
         {
            new UpdateCredentialOnLoadingKCIExamResultOnlySpec_Pass1st_Faild2nd_Ind3rd_CCC4rd_Pass5rd_DontAdvancedDueDatesSpec().BDDfy();
-        }
-
-        [TestCase]
-        public void UpdateCredentialOnLoadingKCIExamResultOnlySpec_Pass1st_Ind2rd_CCC3rd_Pass4rd_AdvancedDueDates()
-        {
-            new UpdateCredentialOnLoadingKCIExamResultOnlySpec_Pass1st_Ind2rd_CCC3rd_Pass4rd_AdvancedDueDatesSpec().BDDfy();
         }
         #endregion
 
@@ -177,119 +159,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
     }
 
     #region Scenarios
-
-    /// <summary>
-    /// The Pass KCI ExamMeet Assessment
-    /// </summary>
-    public class Pass2ndKCIExamMeetAssessment_InGracePeriod_AdvancedDueDatesSpec : UpdateCredentialOnLoadingKCIExamResultOnlySpecScenario
-    {
-        /// <summary>
-        /// PreSetup
-        /// </summary>
-        protected override void PreSetup()
-        {
-            //-----------------------
-            Initialize();
-            InitializeBuilders();
-            InitializeDataProperties();
-
-            // set Main data >>>>>
-            EventDate = new DateTime(2019, 03, 01);
-            ProcessingDate = new DateTime(2019, 03, 10);
-            FirstIssuanceDate = new DateTime(2008, 11, 01);
-            TriggeringEvent = TriggeringEvent.ExamResultMocKci;
-            int GracePeriodYear = 2019;
-
-            Set_ActivitiesWithPoints(ActivityCompletedDate: new DateTime(2018, 12, 01),
-                                    TotalMOCPoints: 100);
-
-            var credential = Set_SuT_Credential(category: CredentialCategoryType.TimeLimited,
-                                                issuanceDate: FirstIssuanceDate,
-                                                certificationCode: ProgramResourceConstants.CertificationCode.InternalMedicine,
-                                                issuanceStatus: IssuanceStatusType.Active,
-                                                occurrenceType: OccurrenceType.Initial,
-                                                maintenanceStatus: MaintenanceStatusType.Maintained,
-                                                expirationDate: new DateTime(2018, 10, 10),
-                                                assessmentMet: false,
-                                                assessmentMetDate: FirstIssuanceDate,
-                                                actions: new List<Action<Credential>>() {
-                                                    (a => a.LookbackDate = new DateTime(ProcessingDate.Year - 1, 12, 31)),
-                                                    (b => b.GracePeriodStartDate=new DateTime(GracePeriodYear,01,01)),
-                                                    (c => c.GracePeriodEndDate=new DateTime(GracePeriodYear,12,31)),
-                                                    (d => d.Pathway=PathwayType.KCI)});
-
-            // initial cert exam
-            Set_Registration(credential: credential,
-                                administrationDate: FirstIssuanceDate,
-                                seatDate: FirstIssuanceDate,
-                                examResult: ExamResultType.Pass,
-                                examType: ExamType.Cert);
-
-            // 1 st KCI pass in Grace period
-            Set_Registration(credential: credential,
-                        administrationDate: new DateTime(GracePeriodYear, 03, 01),
-                        seatDate: new DateTime(GracePeriodYear, 03, 01),
-                        examResult: ExamResultType.Pass,
-                        examType: ExamType.Kci);
-
-            // 2 st KCI pass in Grace period
-            Registration = Set_Registration(credential: credential,
-                        administrationDate: new DateTime(GracePeriodYear, 11, 01),
-                        seatDate: new DateTime(GracePeriodYear, 11, 01),
-                        examResult: ExamResultType.Pass,
-                        examType: ExamType.Kci);
-
-            Set_CurrentLookBackDatesInfo();
-
-            //****** settingh expected results ++++++++++++++++++++++
-            ExpectedTestResult = new ExpectedTestResult()
-            {
-                AssessmentMet = true,
-                ExamDueDate = new DateTime(GracePeriodYear + 4, 12, 31),
-                KCIExamDueDate = new DateTime(GracePeriodYear + 4, 12, 31),
-                DisplayExamDueDate = new DateTime(GracePeriodYear + 4, 12, 31),
-                GracePeriodStartDate = null,
-                GracePeriodEndDate = null,
-                Pathway = PathwayType.KCI
-            };
-
-        }
-
-        public async Task WhenICallRunProcessesOnExamResultEvent()
-        {
-            try
-            {
-                await ProgramRulesService.RunProcessesOnExamResultEvent(It.IsAny<Guid>(), ProcessingDate, ExamRegistrationType.Registration);
-            }
-            catch (Exception ex)
-            {
-                ExceptionCaught = ex;
-            }
-        }
-
-        public void ThenNoExceptionShouldHaveBeenThrown()
-        {
-            ExceptionCaught.Should().BeNull();
-        }
-
-        public void AndThenUpdateCredentialOnExamResultCommandWithExpectedValuesShouldBeCalledOnce()
-        {
-            My<ICredentialService>().Verify(p => p.Handle(
-                It.Is<UpdateCredentialOnExamResultCommand>(y => y.ExamDueDate == ExpectedTestResult.ExamDueDate.Value
-                                                         && y.AssessmentMet == ExpectedTestResult.AssessmentMet
-                                                         && y.GracePeriodStartDate == ExpectedTestResult.GracePeriodStartDate
-                                                         && y.GracePeriodEndDate == ExpectedTestResult.GracePeriodEndDate
-                                                         && y.Pathway == ExpectedTestResult.Pathway
-                                                         && y.DisplayExamDueDate == ExpectedTestResult.DisplayExamDueDate
-                                                         && y.KCIExamDueDate == ExpectedTestResult.KCIExamDueDate
-                                                         )), Times.Once());
-        }
-
-        public void AndThenUpdateTLPCCredentialShouldBeCalledOnce()
-        {
-            My<ICredentialService>().Verify(p => p.Handle(It.IsAny<ExpireAndReissueCommand>()), Times.Once());
-        }
-    }
 
     /// <summary>
     /// The Pass KCI ExamMeet Assessment
@@ -961,128 +830,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
     }
 
     /// <summary>
-    /// The Pass 1st KCI ExamMeet Assessment ! Ind 2rd ! CCC 3rd ! Pass 4rd 
-    /// </summary>
-    public class UpdateCredentialOnLoadingKCIExamResultOnlySpec_Pass1st_Ind2rd_CCC3rd_Pass4rd_AdvancedDueDatesSpec : UpdateCredentialOnLoadingKCIExamResultOnlySpecScenario
-    {
-        /// <summary>
-        /// PreSetup
-        /// </summary>
-        protected override void PreSetup()
-        {
-            //-----------------------
-            Initialize();
-            InitializeBuilders();
-            InitializeDataProperties();
-
-            // set Main data >>>>>
-            EventDate = new DateTime(2020, 11, 02);
-            ProcessingDate = new DateTime(2020, 12, 10);
-            FirstIssuanceDate = new DateTime(2010, 11, 01);
-            TriggeringEvent = TriggeringEvent.ExamResultMocKci;
-            //int GracePeriodYear = 2019;
-
-            Set_ActivitiesWithPoints(ActivityCompletedDate: new DateTime(2019, 12, 01),
-                                    TotalMOCPoints: 100);
-
-            var credential = Set_SuT_Credential(category: CredentialCategoryType.TimeLimited,
-                                                issuanceDate: FirstIssuanceDate,
-                                                certificationCode: ProgramResourceConstants.CertificationCode.InternalMedicine,
-                                                issuanceStatus: IssuanceStatusType.Active,
-                                                occurrenceType: OccurrenceType.Initial,
-                                                maintenanceStatus: MaintenanceStatusType.Maintained,
-                                                expirationDate: new DateTime(2020, 10, 10),
-                                                assessmentMet: false,
-                                                assessmentMetDate: FirstIssuanceDate,
-                                                actions: new List<Action<Credential>>() {
-                                                    (a => a.LookbackDate = new DateTime(ProcessingDate.Year - 1, 12, 31)),
-                                                    (b => b.GracePeriodStartDate=null),
-                                                    (c => c.GracePeriodEndDate=null),
-                                                    (d => d.Pathway=PathwayType.MOC),
-                                                    (d => d.ExamDueDate = new DateTime(2018, 12, 31)),
-                                                    (d => d.KCIExamDueDate = new DateTime(2018, 12, 31)),
-                                                    (d => d.MOCExamDueDate = new DateTime(2018, 12, 31)),
-                                                    (d => d.DisplayExamDueDate = new DateTime(2018, 12, 31))});
-
-            // initial cert exam
-            Set_Registration(credential: credential,
-                                administrationDate: FirstIssuanceDate,
-                                seatDate: FirstIssuanceDate,
-                                examResult: ExamResultType.Pass,
-                                examType: ExamType.Cert);
-
-            // 1 st KCI PASS 
-            Set_Registration(credential: credential,
-                                administrationDate: new DateTime(2020, 05, 02),
-                                seatDate: new DateTime(2020, 03, 07),
-                                examResult: ExamResultType.Pass,
-                                examType: ExamType.Kci);
-
-            // 2 st KCI Ind 
-            Set_Registration(credential: credential,
-                                administrationDate: new DateTime(2020, 08, 10),
-                                seatDate: new DateTime(2020, 08, 15),
-                                examResult: ExamResultType.Indeterminate,
-                                examType: ExamType.Kci);
-
-            // 3 st KCI CCC 
-            Set_Registration(credential: credential,
-                                administrationDate: new DateTime(2020, 08, 15),
-                                seatDate: new DateTime(2020, 08, 20),
-                                examResult: ExamResultType.Cancel,
-                                examType: ExamType.Kci);
-
-            // 4 st KCI PASS
-            Registration = Set_Registration(credential: credential,
-                        administrationDate: new DateTime(2020, 11, 02),
-                        seatDate: new DateTime(2020, 11, 04),
-                        examResult: ExamResultType.Pass,
-                        examType: ExamType.Kci);
-
-            Set_CurrentLookBackDatesInfo();
-
-            //****** settingh expected results ++++++++++++++++++++++
-            ExpectedTestResult = new ExpectedTestResult()
-            {
-                AssessmentMet = true,
-                ExamDueDate = new DateTime(Registration.AdministrationYear + 4, 12, 31),
-                KCIExamDueDate = new DateTime(Registration.AdministrationYear + 4, 12, 31),
-                DisplayExamDueDate = new DateTime(Registration.AdministrationYear + 4, 12, 31),
-                Pathway = PathwayType.KCI
-            };
-
-        }
-
-        public async Task WhenICallRunProcessesOnExamResultEvent()
-        {
-            try
-            {
-                await ProgramRulesService.RunProcessesOnExamResultEvent(It.IsAny<Guid>(), ProcessingDate, ExamRegistrationType.Registration);
-            }
-            catch (Exception ex)
-            {
-                ExceptionCaught = ex;
-            }
-        }
-
-        public void ThenNoExceptionShouldHaveBeenThrown()
-        {
-            ExceptionCaught.Should().BeNull();
-        }
-
-        public void AndThenUpdateCredentialOnExamResultCommandWithExpectedValuesShouldBeCalledOnce()
-        {
-            My<ICredentialService>().Verify(p => p.Handle(
-                It.Is<UpdateCredentialOnExamResultCommand>(y => y.ExamDueDate == ExpectedTestResult.ExamDueDate.Value
-                                                         && y.AssessmentMet == ExpectedTestResult.AssessmentMet
-                                                         && y.Pathway == ExpectedTestResult.Pathway
-                                                         && y.KCIExamDueDate == ExpectedTestResult.KCIExamDueDate
-                                                         && y.DisplayExamDueDate == ExpectedTestResult.DisplayExamDueDate)), Times.Once());
-        }
-
-    }
-
-    /// <summary>
     /// The Pass KCI ExamMeet Assessment
     /// </summary>
     public class Fail1ndKCIExamMeetAssessment_InGracePeriod_DontAdvancedDueDatesSpec : UpdateCredentialOnLoadingKCIExamResultOnlySpecScenario
@@ -1289,116 +1036,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         public void AndThenUpdateTLPCCredentialShouldBeCalledOnce()
         {
             My<ICredentialService>().Verify(p => p.Handle(It.IsAny<ExpireAndReissueCommand>()), Times.Never());
-        }
-    }
-
-
-    /// <summary>
-    /// The Pass KCI ExamMeet Assessment
-    /// </summary>
-    public class Pass2ndKCIExamMeetAssessment_NotInGracePeriod_AdvancedDueDatesSpec : UpdateCredentialOnLoadingKCIExamResultOnlySpecScenario
-    {
-        /// <summary>
-        /// PreSetup
-        /// </summary>
-        protected override void PreSetup()
-        {
-            //-----------------------
-            Initialize();
-            InitializeBuilders();
-            InitializeDataProperties();
-
-            // set Main data >>>>>
-            EventDate = new DateTime(2019, 03, 01);
-            ProcessingDate = new DateTime(2019, 03, 10);
-            FirstIssuanceDate = new DateTime(2008, 11, 01);
-            TriggeringEvent = TriggeringEvent.ExamResultMocKci;
-            int GracePeriodYear = 2019;
-
-            Set_ActivitiesWithPoints(ActivityCompletedDate: new DateTime(2018, 12, 01),
-                                    TotalMOCPoints: 100);
-
-            var credential = Set_SuT_Credential(category: CredentialCategoryType.TimeLimited,
-                                                issuanceDate: FirstIssuanceDate,
-                                                certificationCode: ProgramResourceConstants.CertificationCode.InternalMedicine,
-                                                issuanceStatus: IssuanceStatusType.Expired, // !!!!!!
-                                                occurrenceType: OccurrenceType.Initial,
-                                                maintenanceStatus: MaintenanceStatusType.Maintained,
-                                                expirationDate: new DateTime(2018, 10, 10),
-                                                assessmentMet: false,
-                                                assessmentMetDate: FirstIssuanceDate,
-                                                actions: new List<Action<Credential>>() {
-                                                    (a => a.LookbackDate = new DateTime(ProcessingDate.Year - 1, 12, 31)),
-                                                    (d => d.Pathway=PathwayType.KCI)});
-
-            // initial cert exam
-            Set_Registration(credential: credential,
-                                administrationDate: FirstIssuanceDate,
-                                seatDate: FirstIssuanceDate,
-                                examResult: ExamResultType.Pass,
-                                examType: ExamType.Cert);
-
-            // 1 st KCI pass in Grace period
-            Set_Registration(credential: credential,
-                        administrationDate: new DateTime(GracePeriodYear, 03, 01),
-                        seatDate: new DateTime(GracePeriodYear, 03, 01),
-                        examResult: ExamResultType.Pass,
-                        examType: ExamType.Kci);
-
-            // 2 st KCI pass in Grace period
-            Registration = Set_Registration(credential: credential,
-                        administrationDate: new DateTime(GracePeriodYear, 11, 01),
-                        seatDate: new DateTime(GracePeriodYear, 11, 01),
-                        examResult: ExamResultType.Pass,
-                        examType: ExamType.Kci);
-
-            Set_CurrentLookBackDatesInfo();
-
-            //****** settingh expected results ++++++++++++++++++++++
-            ExpectedTestResult = new ExpectedTestResult()
-            {
-                AssessmentMet = true,
-                ExamDueDate = new DateTime(GracePeriodYear + 4, 12, 31),
-                DisplayExamDueDate = new DateTime(GracePeriodYear + 4, 12, 31),
-                GracePeriodStartDate = null,
-                GracePeriodEndDate = null,
-                Pathway = PathwayType.KCI
-            };
-
-        }
-
-        public async Task WhenICallRunProcessesOnExamResultEvent()
-        {
-            try
-            {
-                await ProgramRulesService.RunProcessesOnExamResultEvent(It.IsAny<Guid>(), ProcessingDate, ExamRegistrationType.Registration);
-            }
-            catch (Exception ex)
-            {
-                ExceptionCaught = ex;
-            }
-        }
-
-        public void ThenNoExceptionShouldHaveBeenThrown()
-        {
-            ExceptionCaught.Should().BeNull();
-        }
-
-        public void AndThenUpdateCredentialOnExamResultCommandWithExpectedValuesShouldBeCalledOnce()
-        {
-            My<ICredentialService>().Verify(p => p.Handle(
-                It.Is<UpdateCredentialOnExamResultCommand>(y => y.ExamDueDate == ExpectedTestResult.ExamDueDate.Value
-                                                         && y.AssessmentMet == ExpectedTestResult.AssessmentMet
-                                                         && y.GracePeriodStartDate == ExpectedTestResult.GracePeriodStartDate
-                                                         && y.GracePeriodEndDate == ExpectedTestResult.GracePeriodEndDate
-                                                         && y.Pathway == ExpectedTestResult.Pathway
-                                                         && y.DisplayExamDueDate == ExpectedTestResult.DisplayExamDueDate
-                                                         )), Times.Once());
-        }
-
-        public void AndThenUpdateTLPCCredentialShouldBeCalledOnce()
-        {
-            My<ICredentialService>().Verify(p => p.Handle(It.IsAny<ExpireAndReissueCommand>()), Times.Once());
         }
     }
 

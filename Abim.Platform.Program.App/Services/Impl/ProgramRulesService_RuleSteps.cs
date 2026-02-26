@@ -6,7 +6,6 @@ using Abim.Platform.Program.App.Extensions.Registration;
 using Abim.Platform.Program.App.Util;
 using Abim.Platform.Program.Interservice.Shared;
 using Abim.Platform.Program.Resources;
-using Abim.Platform.Program.WebApi.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +30,18 @@ namespace Abim.Platform.Program.App.Services.Impl
                                          Boolean runAsStepRequirement = false)
         {
             var step = new MaintenanceStatusStep();
+
+            step.MeetStepRule = step.MeetMaintenanceStatus = true;
+
+            return step;
+
+            /*
+            // Pbi 296003 : (Proj 1530) Update Program Rule 28 – Participation Status Evaluation Due Date
+            // Pbi 296004 : (Proj 1530) Retire Program Rule 31 – 2-Year Lookback Start and End Dates
+            // Pbi 296005 : (Proj 1530) Retire Program Rule 32 – 2-Year Lookback
+            // Pbi 296006 : (Proj 1530) Update Program Rule 37 – All Certificates Participation Requirements
+
+            //to-do after 1/1/2025 remove MaintenanceStatus function and all references (12 total)
 
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // [P031] 2 years lookback Requirements
@@ -60,7 +71,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 if (!step.MeetMaintenanceStatus && checkTwoYearReciprocityRequirement)
                 {
                     // Pbi 134025 reciprocity requirement (ar@2/16/2019)
-                    step.Reciprocity = step.MeetMaintenanceStatus = UserActivities.IsEnrolledInReprocity(ExecutingProcess, processingDate, step.MaintenanceTwoYearLookBackDates.Item2);
+                    step.Reciprocity = step.MeetMaintenanceStatus = UserActivities.IsEnrolledInReciprocity_2yearLookBack(ExecutingProcess, processingDate, startOfTheWindowDate: step.MaintenanceTwoYearLookBackDates.Item1, endOfTheWindowDate: step.MaintenanceTwoYearLookBackDates.Item2); // pbi 274136 : Update Program Rule 32 - 2-year Lookback Requirement
                 }
 
                 // c) Recently initially certified (2 years window)
@@ -84,6 +95,7 @@ namespace Abim.Platform.Program.App.Services.Impl
             step.MeetStepRule = runAsStepRequirement ? step.MeetMaintenanceStatus : true;
 
             return step;
+            */
         }
 
         #endregion
@@ -150,7 +162,7 @@ namespace Abim.Platform.Program.App.Services.Impl
             if (!step.MeetStepRule)
             {
                 // Pbi 134025 reciprocity requirement (ar@2/16/2019)
-                step.Reciprocity = step.MeetStepRule = UserActivities.IsEnrolledInReprocity(ExecutingProcess, evaluationDate, step.FiveYearLookBackDates.Item2);
+                step.Reciprocity = step.MeetStepRule = UserActivities.IsEnrolledInReciprocity_5yearLookBack(ExecutingProcess, evaluationDate, step.FiveYearLookBackDates.Item2);
             }
 
             // [C028] e) Eearned new Subspecialty initial Certification during window
@@ -211,7 +223,7 @@ namespace Abim.Platform.Program.App.Services.Impl
             if (!step.MeetStepRule)
             {
                 // Pbi 134025 reciprocity requirement (ar@2/16/2019)
-                step.Reciprocity = step.MeetStepRule = UserActivities.IsEnrolledInReprocity(ExecutingProcess, evaluationDate, step.FiveYearLookBackDates.Item2);
+                step.Reciprocity = step.MeetStepRule = UserActivities.IsEnrolledInReciprocity_5yearLookBack(ExecutingProcess, evaluationDate, step.FiveYearLookBackDates.Item2);
             }
 
             // [C028] e) Eearned new Subspecialty initial Certification during window
@@ -231,124 +243,8 @@ namespace Abim.Platform.Program.App.Services.Impl
 
             return step;
         }
-        /// <summary>
-        /// Marking public for unit tests
-        /// </summary>
-        /// <param name="credential"></param>
-        /// <param name="evaluationDate"></param>
-        /// <returns></returns>
-        public IStep FiveYearsLookBackFPHM(Credential credential,
-                       DateTime evaluationDate)
-        {
-            DateTime checkDate = evaluationDate;
 
-            var step = new FiveYearLookBackStep();
-            step.EvaluationDate = evaluationDate;
-
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            // Requirement: 100 Total points within 5 year [OR earned new subspecialty initial certification during window]
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            // 100 total moc points 
-            //  OR in reciprocity 
-            //  or more earned within 5 years of the check date 
-            //  OR earned new subspecialty initial certification during window 
-
-            /* [C005] Sum the total points from the activities that were completed between the starting date and evaluation date where the [C015] starting date is 
-              computed by getting the check date, add 1 to the date, extract the year, subtract 6 from the year to obtain a start year, and use 1/1/starting year
-            */
-
-            DateTime startDate = new DateTime(checkDate.AddDays(1).Year - 5, 1, 1); // changed 6 to 5
-            step.FiveYearLookBackDates = new Tuple<DateTime, DateTime>(startDate, evaluationDate);
-
-            step.TotalMOCPoints = UserActivities.totalMOCpoints(startDate, evaluationDate);
-
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            // Requirement: 20 Medical knowledge within 5 year [OR earned new subspecialty initial certification during window]
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            // 20 part 2 points or more earned in within 5 years of the check date
-            /* [C006] Sum part 2 points with claimed=1, including those that are part of a blended activity that includes part 2 with a activity.completeddate between the 
-             * [C015] starting date and evaluation date where the starting date is computed by getting the check date, add 1 to the date, extract the year, 
-             * subtract 6 from the year to obtain a start year, and use 1/1/starting year
-            */
-            //MK Points removed in project 1380
-            //step.MKPoints = UserActivities.medicalKnowledgePoints(startDate, evaluationDate);
-            //if (step.TotalMOCPoints >= 100 && step.MKPoints >= 20)
-            if (step.TotalMOCPoints >= 100)
-                step.MeetStepRule = true;
-
-            // Reciprocity (5 year window) [P033][C003]
-            if (!step.MeetStepRule)
-            {
-                // Pbi 134025 reciprocity requirement (ar@2/16/2019)
-                step.Reciprocity = step.MeetStepRule = UserActivities.IsEnrolledInReprocity(ExecutingProcess, evaluationDate, step.FiveYearLookBackDates.Item2);
-            }
-
-            if (!step.MeetStepRule)
-            {
-                //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                // OR earned new subspecialty initial certification during window
-                //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                // Determine if a new ABIM subspecialty initial credential was earned in the applicable 5 year window
-
-                // [C028] Determine if any issuance exists that is the first issuance for the credential and the source is ABIM 
-                // and the certificate is not Internal Medicine and the issuance date >= starting date and the issuance date <= evaluation date
-                step.NewSubspecialtyInitialCert = step.MeetStepRule = Credentials.isEarnedNewSubspecialtyInitialCertOk(startDate, checkDate);
-
-            }
-
-            return step;
-        }
-        /// <summary>
-        /// Marking public for unit tests
-        /// </summary>
-        /// <param name="credential"></param>
-        /// <param name="evaluationDate"></param>
-        /// <returns></returns>
-        public IStep FiveYearsLookBackGFPrinting(Credential credential,
-                      DateTime evaluationDate)
-        {
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            // [P034] 5 years lookback Requirements | 
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            /*   100 Total points and 20 Medical knowledge points
-                    OR in reciprocity 
-                    OR earned new subspecialty initial certification during window                   
-            */
-            // Check date – the same as the evaluation date
-            DateTime checkDate = evaluationDate;
-
-            var step = new FiveYearLookBackStep();
-
-            // b) [P033] [C002] (5-Year Lookback Start and End Dates)	
-            step.FiveYearLookBackDates = ProgramRulesHelpers.ComputeLookBackWindow(FirstIssuanceDate,
-                                                                                                    checkDate,
-                                                                                                    WindowsIntervalType.FiveYearLookBack);
-            // ** [C005] 100 MOC points ( 5 year window)
-            step.TotalMOCPoints = UserActivities.totalMOCpoints(step.FiveYearLookBackDates.Item1, evaluationDate);
-
-            // *** [C006] 20 medical Knowledge Points (5 year window)  ==> removed in project 1380
-            //step.MKPoints = UserActivities.medicalKnowledgePoints(step.FiveYearLookBackDates.Item1, evaluationDate);
-            //if (step.TotalMOCPoints >= 100 && step.MKPoints >= 20)
-            if (step.TotalMOCPoints >= 100)
-                step.MeetStepRule = true;
-
-            // -- Reciprocity (5 year window) [P033][C003]
-            if (!step.MeetStepRule)
-            {
-                // Pbi 134025 reciprocity requirement (ar@2/16/2019)
-                step.Reciprocity = step.MeetStepRule = UserActivities.IsEnrolledInReprocity(ExecutingProcess, evaluationDate, step.FiveYearLookBackDates.Item2);
-            }
-
-            // [C028] Eearned new Subspecialty initial Certification during window
-            if (!step.MeetStepRule)
-            {
-                // [C028] Determine if any issuance exists that is the first issuance for the credential and the source is ABIM and 
-                // the certificate is not Internal Medicine and the issuance date >= starting date and the issuance date <= evaluation date
-                step.NewSubspecialtyInitialCert = step.MeetStepRule = Credentials.isEarnedNewSubspecialtyInitialCertOk(step.FiveYearLookBackDates.Item1, evaluationDate);
-            }
-
-            return step;
-        }
+ 
 
         #endregion
 
@@ -406,109 +302,8 @@ namespace Abim.Platform.Program.App.Services.Impl
                 return step;
             }
 
-            //If not found
-            if (!step.MeetStepRule)
-            {
-                //Query registration to determine if there is an administration of type KCI for the exam result 
-                //is fail/ind/inc/utt and no consequences=1. 
-                var badKCINoConsequenceExams = Registrations.Where(x => x.CertificationId == credential.Certification.ExternalId
-                                                                                              && x.IsKci()
-                                                                                              && x.IsFailIndIncUtt()
-                                                                                              && x.NoConsequence).ToList();
-
-                //PBI 148689: If not found, then check for CMP no consequences.  One more step now until they are good.
-                if (badKCINoConsequenceExams == null || !badKCINoConsequenceExams.Any())
-                {
-                    //PBI 148689: Query CMPRegistration to determine if there is an administration of type CMP for the exam result 
-                    //is fail/ind/inc/utt and no consequences=1. 
-                    var badCMPNoConsequenceExams =
-                    CMPRegistrations.Where(x => x.CMPExam != null && x.CMPExam.CertificationId == credential.Certification.ExternalId
-                        && (x.ExamResult.ToEnum() == ExamResultType.Fail || x.ExamResult.ToEnum() == ExamResultType.UnableToTest
-                                || x.ExamResult.ToEnum() == ExamResultType.Indeterminate || x.ExamResult.ToEnum() == ExamResultType.Incomplete)
-                        && x.CMPExam.NoConsequenceYears.Any(y => y == x.TestDate.Year)).ToList();
-
-                    //PBI 148689: If not found, then this subrequirement is good (never took noconcequences). Note the administration date(B)
-                    if (badCMPNoConsequenceExams == null || !badCMPNoConsequenceExams.Any())
-                    {
-                        step.MeetStepRule = true;
-                        Log.Debug($"ExamTL() - no KCI or CMP no-consequences exams with bad result found for credential {credential.Id}, requirement met");
-                    }
-                    else
-                    {
-                        //PBI 148689: If found,
-                        //Query CMPRegistration to determine if there is an administration of any type for the exam result 
-                        //is pass and the administration is after the date of the previous query (B)
-                        var latestBadCMPNoConsequencesTestDate = badCMPNoConsequenceExams
-                                                                                         .OrderByDescending(x => x.TestDate)
-                                                                                         .First()
-                                                                                         .TestDate;
-
-                        var passingCMPWithGoodTestDate = CMPRegistrations.Where(x => x.CMPExam.CertificationId == credential.Certification.ExternalId
-                                                                && x.ExamResult.ToEnum() == ExamResultType.Pass
-                                                                && x.TestDate > latestBadCMPNoConsequencesTestDate);
-
-                        //If found, then this subrequirement is good (passed an exam after noconsequences)
-                        if (passingCMPWithGoodTestDate != null && passingCMPWithGoodTestDate.Any())
-                        {
-                            step.PassCMPExam = true;
-                            step.MeetStepRule = true;
-                            Log.Debug($"ExamTL() - passing CMP exam with good test date found for credential {credential.Id}, requirement met, PassKCIExam = {step.PassKCIExam}, PassMOCExam = {step.PassMOCExam}, PassCMPExam = {step.PassCMPExam}");
-                        }
-
-                        //If not found, then this subrequirement is false and the exam requirement is not met.             
-                        //(step.MeetStepRule is already false)
-                    }
-                }
-                else
-                {
-                    //If found,
-                    //Query registration to determine if there is an administration of any type for the exam result 
-                    //is pass and the ExamTestDate ( was administration date) is > the ExamTestDate ( was administration date) of the previous query (A)
-
-                    var latestBadKCINoConsequencesExamTestDate = badKCINoConsequenceExams
-                                                                                        .OrderByDescending(x => x.ExamTestDate())
-                                                                                        .First()
-                                                                                        .ExamTestDate();
-
-                    var passingRegistrationsAfterBadKCI =
-                                Registrations.Where(x => x.CertificationId == credential.Certification.ExternalId
-                                    && x.IsPassExam()
-                                    && x.ExamTestDate() > latestBadKCINoConsequencesExamTestDate).ToList();
-
-                    //If kci/moc found, then this subrequirement is good (passed an exam after noconcequences)
-                    if (passingRegistrationsAfterBadKCI != null && passingRegistrationsAfterBadKCI.Any())
-                    {
-                        var latest = passingRegistrationsAfterBadKCI.OrderByDescending(x => x.ExamTestDate()).First();
-
-                        if (latest.IsKci())
-                            step.PassKCIExam = true;
-                        else
-                            step.PassMOCExam = true;
-
-                        Log.Debug($"ExamTL() - passing exam with good admin date found for credential {credential.Id}, requirement met, PassKCIExam = {step.PassKCIExam}, PassMOCExam = {step.PassMOCExam}, PassCMPExam = {step.PassCMPExam}");
-                        step.MeetStepRule = true;
-                    }
-                    else // also need to check CMP to see if they have a pass 
-                    {
-                        // pbi 227738 : 2020/2021 CMP Pass and New Issuances Issues
-                        var passingCMPWithGoodTestDate =
-                                CMPRegistrations.Where(x => x.CMPExam.CertificationId == credential.Certification.ExternalId
-                                    && x.ExamResult.ToEnum() == ExamResultType.Pass
-                                    && x.TestDate > latestBadKCINoConsequencesExamTestDate);
-
-                        //If cmp found, then this subrequirement is good (passed an exam after noconsequences)
-                        if (passingCMPWithGoodTestDate != null && passingCMPWithGoodTestDate.Any())
-                        {
-                            step.PassCMPExam = true;
-                            step.MeetStepRule = true;
-                            Log.Debug($"ExamTL() - passing CMP exam with good test date found for credential {credential.Id}, requirement met, PassKCIExam = {step.PassKCIExam}, PassMOCExam = {step.PassMOCExam}, PassCMPExam = {step.PassCMPExam}");
-                        }
-                    }
-
-                    //If not found, then this subreuqirement is false and the exam requirement is not met.             
-                    //(step.MeetStepRule is already false)
-                }
-            }
+            // to retire the program rule for no consequence assessments as ABIM is no longer offering no consequences assessments.
+            // PBI 284269 : 2.53 Retire Program Rule 40 – No Consequence KCI Assessments
 
             // 180679 : (Proj 1492) - Update Program Rule 35 Time Limited Certificate Certification Requirements to Include LNG
             if (!step.MeetStepRule)
@@ -579,115 +374,8 @@ namespace Abim.Platform.Program.App.Services.Impl
             Log.Debug($"ExamRequirements() - returning for credential {credential.Id}, step.MeetStepRule = {step.MeetStepRule}");
             return step;
         }
-
-        private IStep ExamFPHM(Credential credential,
-                                  DateTime evaluationDate)
-        {
-
-            var step = new ExamRequirementStep();
-
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            // The exam assessment was met
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            step.ExamAssessmentMet = step.MeetStepRule = credential.AssessmentMet &&
-                                                        credential.AssessmentMetDate.HasValue &&
-                                                        credential.AssessmentMetDate.Value.Date <= evaluationDate.Date;
-
-            // don't go any further when ExamAssessmentMet is not met
-            if (!step.MeetStepRule)
-                return step;
-
-            //      Pathway is 10 year
-            //      The MOC exam in the discipline was a pass
-            //      The administration date is within 10 years of the evaluation date
-            // Bug 119645: (remove one extra year)
-            DateTime start10YearLookback = new DateTime(evaluationDate.AddDays(1).Year - 10, 1, 1); // changed 11 to 10
-
-            step.PassMOCExam = step.MeetStepRule = Registrations.IfPassExamInRange(start10YearLookback, evaluationDate, ExamType.Moc, FPHMCertificateGuid);
-
-            step.MOCExamTimeRange = new Tuple<DateTime, DateTime>(start10YearLookback, evaluationDate);
-
-            //doesn’t matter if they took a noconcequences since there is a 10 year pass)
-            if (!step.MeetStepRule)
-            {
-
-                // to find noconcequences
-                DateTime start2YearLookback = new DateTime(evaluationDate.AddDays(1).Year - 2, 1, 1); // changed 3 to 2
-
-                step.KCIExamTimeRange = new Tuple<DateTime, DateTime>(start2YearLookback, evaluationDate);
-
-                var NoConsequenceKCIExam = Registrations
-                                .Where(re => re.NoConsequence)
-                                // !!! no filtering for date range (per Don)
-                                .Where(p => p.IsFailIndIncUtt())
-                                .Where(e => e.CertificationId == FPHMCertificateGuid)
-                                .Where(reg => reg.IsKci())
-                                .FirstOrDefault();
-
-                DateTime? NoConcequenceKCIDateFound = NoConsequenceKCIExam == null ? (DateTime?)null : NoConsequenceKCIExam.AdministrationDate;
-
-                step.NoConsequenceKCIExam = step.MeetStepRule = !NoConcequenceKCIDateFound.HasValue;
-
-                if (NoConcequenceKCIDateFound.HasValue)
-                {
-                    //make sure user passed an exam after noconcequences
-                    var examPassAfterNoconcequences = Registrations
-                              .Where(reg => reg.ExamTestDate() > NoConcequenceKCIDateFound.Value.Date)
-                              // !!! no filtering for evalution date (upper limit of date range) (per Don)
-                              .Where(p => p.IsPassExam())
-                              .Where(e => e.CertificationId == FPHMCertificateGuid)
-                              .FirstOrDefault();
-
-                    step.ExamPassAfterNoconcequences = step.MeetStepRule = examPassAfterNoconcequences != null;
-                }
-            }
-            return step;
-        }
-
-        private IStep ExamGFPrinting(Credential credential,
-                                         DateTime evaluationDate)
-        {
-            var step = new ExamRequirementStep();
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------
-            //[P029*][C012] Pathway is 10 year
-            //-------------------------------------------------------------------------------------------------------------------------------------------
-            DateTime start10YearLookback = new DateTime(evaluationDate.AddDays(1).Year - 10, 1, 1); // changed 11 to 10
-
-            step.MOCExamTimeRange = new Tuple<DateTime, DateTime>(start10YearLookback, evaluationDate);
-
-            step.PassMOCExam = step.MeetStepRule = Registrations.IfPassExamInRange(start10YearLookback, evaluationDate, ExamType.Moc, credential.Certification.ExternalId);
-
-            // ______ OR ________
-            if (!step.MeetStepRule)
-            {
-                //-------------------------------------------------------------------------------------------------------------------------------------------
-                //[P030*][C013] Pathway is 2 year
-                //-------------------------------------------------------------------------------------------------------------------------------------------
-                DateTime start2YearLookback = new DateTime(evaluationDate.AddDays(1).Year - 2, 1, 1);
-
-                step.KCIExamTimeRange = new Tuple<DateTime, DateTime>(start2YearLookback, evaluationDate);
-
-                step.PassKCIExam = step.MeetStepRule = Registrations.IfPassExamInRange(start2YearLookback, evaluationDate, ExamType.Kci, credential.Certification.ExternalId);
-            }
-
-            if (!step.MeetStepRule)
-            {
-                //PBI 150925 - CMP
-                DateTime startDate = new DateTime((evaluationDate.AddDays(1).Year - 1), 1, 1);
-                step.CMPExamTimeRange = new Tuple<DateTime, DateTime>(startDate, evaluationDate);
-                step.PassCMPExam = step.MeetStepRule = CMPRegistrations.IfPassExamInRange(startDate, evaluationDate, credential.Certification.ExternalId);
-            }
-
-            // PBI 180686 : Update Program Rule 45 Print Pre-1990 Certs to Include LNG
-            // === met the participation requirement on the longitudinal assessment in their first year on the longitudinal assessment 
-            if (!step.MeetStepRule)
-            {
-                step.MetParticipationInTheFirstYear = step.MeetStepRule = LongitudinalEnrollments.IfMetParticipationInTheFirstYear(credential.Certification.ExternalId);
-            }
-
-            return step;
-        }
+       
+  
 
         #endregion
 
@@ -778,53 +466,25 @@ namespace Abim.Platform.Program.App.Services.Impl
             var step = new AttestationStep();
             step.MeetStepRule = true;
 
-            if (credential.Certification.IsICARD() || credential.Certification.IsFPHM())
+            // pbi 257166 : Proj 1493 - Release 2.0 : Update Program Rule 12
+            // – The FPHM attestation requirement is not past due (Program Rule: Focused Practice in Hospital Medicine Reattestation Due Date)
+            // Release 2 : we would need to remove all reference to FPHM and corresponding attestations since we retire this cert 
+
+            if (credential.Certification.IsICARD())
             {
-                var targetAttestationType = credential.Certification.IsICARD()
-                    ? ProductResourceConstants.ProductCode.ICARDAttestMOC
-                    : ProductResourceConstants.ProductCode.FPHMAttestMOC;
 
                 //[P006*][C010] This can be computed by taking the check date, add 1 to the date, extract the year, subtract 5 from the year to obtain a start year,
                 DateTime attestationStartDate = ProgramRulesHelpers.ComputeReattestationDueDate(checkDate, WindowsIntervalType.FiveYearLookBack);
 
-                //[P007][C011] verify there is an attestation [ICARDAttestMOC/FPHMAttestMOC] activity completed between 1/1/start year and the evaluation date.
+                //[P007][C011] verify there is an attestation [ICARDAttestMOC] activity completed between 1/1/start year and the evaluation date.
                 // OR
                 //[C052] the year of the earliest issuance date is > start year
                 step.Attestation =
-                    step.MeetStepRule = (UserActivities.isAttestationOK(attestationStartDate, evaluationDate, targetAttestationType)
+                    step.MeetStepRule = (UserActivities.isAttestationOK(attestationStartDate, evaluationDate, ProductResourceConstants.ProductCode.ICARDAttestMOC)
                                             || credential.OldestIssuance?.IssuanceDate.Date.Year >= attestationStartDate.Year);
 
                 step.ReattestationDueDate = new DateTime(attestationStartDate.Year + 5, 12, 31);
             }
-
-            return step;
-        }
-
-
-        /// <summary>
-        /// FPHM Initial attestation [C011] [C016] 
-        /// The attestation must be completed within the last 3 years relative to the check date (Check date – the same as the evaluation date)
-        /// [C011] Determine if the FPHMAttestInitial activity was completed between the starting date and evaluation date where the [C016] starting date is computed by getting the check date, add 1 to the date, extract the year, subtract 4 from the year to obtain a start year, and use 1/1/starting year
-        /// Notes about attestations:
-        ///        A new interval begins when an attestation occurs and ends 12/31/3 years later.
-        ///        The rules for determining if a FPHM attestation is acceptable should be baked into the attestation process. If the activity is marked as completed, we presume it was acceptable.
-        /// </summary>
-        /// <param name="credential"></param>
-        /// <param name="evaluationDate"></param>
-        /// <returns></returns>
-        private IStep AttestationFPHMInitial(Credential credential,
-                                   DateTime evaluationDate)
-        {
-
-            var step = new AttestationStep();
-
-            //var step = new StepResult("FPHM Initial attestation [C011] [C016]");
-            // Bug 119645: (remove one extra year)
-            DateTime attestationStartDate = new DateTime(evaluationDate.AddDays(1).Year - 3, 1, 1); // changed 4 to 3
-
-            step.Attestation = step.MeetStepRule = UserActivities.isAttestationOK(attestationStartDate, evaluationDate, ProductResourceConstants.ProductCode.FPHMAttestInitial);
-
-            step.ReattestationDueDate = attestationStartDate;
 
             return step;
         }
@@ -868,10 +528,10 @@ namespace Abim.Platform.Program.App.Services.Impl
 
             try
             {
-
-                // a) exam = "Internal Medicine" or ACHD (Cert exam)
-                //----------------------------------------
-                if (CertificationCode == "IM" || CertificationCode == "ACHD")
+                // a) exam = "Internal Medicine" or ACHD (Cert exam) or HPM (Cert Exam)
+                //------------------------------------------------------------------------------------------
+                // SR548818 : Doctors who passed HPM cert exam not publicly listed as certified
+                if (CertificationCode == "IM" || CertificationCode == "ACHD" || CertificationCode == "HPM")
                     meetMaintainedRequirement = true;
 
                 Tuple<DateTime, DateTime> twoYearLookBackDates = null;
@@ -893,7 +553,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 if (!meetMaintainedRequirement)
                 {
                     // Pbi 134025 reciprocity requirement (ar@2/16/2019)
-                    bool twoYearReciprocityOK = UserActivities.IsEnrolledInReprocity(ExecutingProcess, processingDate, twoYearLookBackDates.Item2);
+                    bool twoYearReciprocityOK = UserActivities.IsEnrolledInReciprocity_2yearLookBack(ExecutingProcess, processingDate, startOfTheWindowDate: twoYearLookBackDates.Item1 , endOfTheWindowDate: twoYearLookBackDates.Item2 ); // pbi 274136 : Update Program Rule 32 - 2-year Lookback Requirement
 
                     if (twoYearReciprocityOK)
                         meetMaintainedRequirement = true;

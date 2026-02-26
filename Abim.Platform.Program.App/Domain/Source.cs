@@ -10,8 +10,7 @@ namespace Abim.Platform.Program.App.Domain
     /// Use to set the source of where the Certification data was derived from
     /// </summary>
     public class Source : 
-        AggregateRoot<Source>,
-        IDomainValidationHandler<Source>
+        AggregateRoot<Source>
     {
         #region Properties
 

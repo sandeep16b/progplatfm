@@ -58,8 +58,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.AppInfo
 
         protected override void PostSetup()
         {
-            Container.Inject<IEnumService>(EnumService.Object);
-            Container.Inject<IBusControl>(BusControl.Object);
+            Container.Inject(EnumService.Object);
+            Container.Inject(BusControl.Object);
             Container.Inject<IConfigurationManager>(new ConfigurationManager());
         }
 
@@ -94,41 +94,57 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.AppInfo
 
         public void AndThenTheResponseShouldHaveASelfLink()
         {
+            // ReSharper disable once AssignNullToNotNullAttribute
+            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             Resource["links"].Any(l => l.ToString().Contains("self"));
         }
 
         public void AndThenTheResponseShouldHaveAMetricsLink()
         {
+            // ReSharper disable once AssignNullToNotNullAttribute
+            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             Resource["links"].Any(l => l.ToString().Contains("Metrics"));
         }
 
         public void AndThenTheResponseShouldHaveAMetricsUILink()
         {
+            // ReSharper disable once AssignNullToNotNullAttribute
+            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             Resource["links"].Any(l => l.ToString().Contains("Metrics UI"));
         }
 
         public void AndThenTheResponseShouldHaveAJobUILink()
         {
+            // ReSharper disable once AssignNullToNotNullAttribute
+            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             Resource["links"].Any(l => l.ToString().Contains("Job UI"));
         }
 
         public void AndThenTheResponseShouldHaveABusInfoLink()
         {
-            Resource["links"].Any(l => l.ToString().Contains("System Bus Info"));
+            // ReSharper disable once AssignNullToNotNullAttribute
+            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+                Resource["links"].Any(l => l.ToString().Contains("System Bus Info"));
         }
 
         public void AndThenTheResponseShouldHaveAVersionInfoLink()
         {
+            // ReSharper disable once AssignNullToNotNullAttribute
+            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             Resource["links"].Any(l => l.ToString().Contains("System Version Info"));
         }
 
         public void AndThenTheResponseShouldHaveAVersionLink()
         {
+            // ReSharper disable once AssignNullToNotNullAttribute
+            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             Resource["links"].Any(l => l.ToString().Contains("Get App Version"));
         }
 
         public void AndThenTheResponseShouldHaveAnUptimeLink()
         {
+            // ReSharper disable once AssignNullToNotNullAttribute
+            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             Resource["links"].Any(l => l.ToString().Contains("Get Uptime"));
         }
     }
@@ -151,8 +167,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.AppInfo
 
         protected override void PostSetup()
         {
-            Container.Inject<IEnumService>(EnumService.Object);
-            Container.Inject<IBusControl>(BusControl.Object);
+            Container.Inject(EnumService.Object);
+            Container.Inject(BusControl.Object);
             Container.Inject<IConfigurationManager>(new ConfigurationManager());
         }
 

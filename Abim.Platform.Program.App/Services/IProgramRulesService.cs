@@ -14,7 +14,7 @@ namespace Abim.Platform.Program.App.Services
     /// <summary>
     /// IProgramRulesService interface.  
     /// </summary>
-    public partial interface IProgramRulesService 
+    public  interface IProgramRulesService 
     {
         /// <summary>
         /// Handles the job.

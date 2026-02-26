@@ -14,6 +14,7 @@ using Abim.Platform.Program.WebApi.Testing.Setup.Builders;
 using FluentValidation;
 using Hangfire;
 using JetBrains.dotMemoryUnit;
+using JetBrains.dotMemoryUnit.Kernel;
 using MassTransit;
 using Moq;
 using NHibernate;
@@ -124,24 +125,40 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.Registration
                 CredentialService.Handle(Command);
             }
 
-            dotMemory.Check(memory =>
-                Assert.That(memory.GetObjects(where => where.Interface.Is<ISession>()).ObjectsCount,
-                    Is.LessThanOrEqualTo(1)));
-            dotMemory.Check(memory =>
-                Assert.That(memory.GetObjects(where => where.Interface.Is<ICertificationService>()).ObjectsCount,
-                    Is.LessThanOrEqualTo(1)));
-            dotMemory.Check(memory =>
-                Assert.That(memory.GetObjects(where => where.Interface.Is<ICredentialService>()).ObjectsCount,
-                    Is.LessThanOrEqualTo(1)));
-            dotMemory.Check(memory =>
-                Assert.That(memory.GetObjects(where => where.Interface.Is<IHelperService>()).ObjectsCount,
-                    Is.LessThanOrEqualTo(1)));
-            dotMemory.Check(memory =>
-                Assert.That(memory.GetObjects(where => where.Interface.Is<IProgramRulesService>()).ObjectsCount,
-                    Is.LessThanOrEqualTo(1)));
-            dotMemory.Check(memory =>
-                Assert.That(memory.GetObjects(where => where.Interface.Is<ISourceService>()).ObjectsCount,
-                    Is.LessThanOrEqualTo(1)));
+            /*
+             ar@3/14/2025: trying to fix the following error;
+                Error Message:
+                DotMemoryUnitException : The test was run without the support for dotMemory Unit. To safely run tests with or without (depending on your needs) the support for dotMemory Unit:
+                - Set 'DotMemoryUnitAttribute.FailIfRunWithoutSupport' to 'False'. In this case, if a test is run without the support for dotMemory Unit, all 'dotMemory.Check' calls will be ignored.
+                - If you use the 'dotMemoryApi' class to work with memory, wrap all dotMemoryApi calls that get data for assertions with the 'dotMemoryApi.IsEnabled' check.
+                   Stack Trace:
+                   at JetBrains.dotMemoryUnit.Client.DotMemoryUnitProxy.AssertWithSupport()
+                   at JetBrains.dotMemoryUnit.dotMemory.Check(Action`1 check)
+
+            */
+
+            if (dotMemoryApi.IsEnabled)
+            {
+                var snapshot = dotMemoryApi.GetSnapshot();
+
+                    Assert.That(snapshot.GetObjects(where => where.Interface.Is<ISession>()).ObjectsCount,
+                        Is.LessThanOrEqualTo(1));
+
+                    Assert.That(snapshot.GetObjects(where => where.Interface.Is<ICertificationService>()).ObjectsCount,
+                        Is.LessThanOrEqualTo(1));
+
+                    Assert.That(snapshot.GetObjects(where => where.Interface.Is<ICredentialService>()).ObjectsCount,
+                        Is.LessThanOrEqualTo(1));
+
+                    Assert.That(snapshot.GetObjects(where => where.Interface.Is<IHelperService>()).ObjectsCount,
+                        Is.LessThanOrEqualTo(1));
+
+                    Assert.That(snapshot.GetObjects(where => where.Interface.Is<IProgramRulesService>()).ObjectsCount,
+                        Is.LessThanOrEqualTo(1));
+
+                    Assert.That(snapshot.GetObjects(where => where.Interface.Is<ISourceService>()).ObjectsCount,
+                        Is.LessThanOrEqualTo(1));
+            }
 
         }
     }

@@ -284,7 +284,8 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 var latestIssuance = Credential.Issuances.OrderByDescending(issuance => issuance.IssuanceDate).First();
                 latestIssuance.DeselectionSubmittedDate.ShouldBeNull();
-                latestIssuance.DeselectionEffectiveDate.ShouldBeNull(); 
+                latestIssuance.DeselectionEffectiveDate.ShouldBeNull();
+                latestIssuance.DeselectionType.ShouldBeNull();
                 latestIssuance.AuditData.Modified.ShouldNotBeNull();
                 latestIssuance.AuditData.ModifiedBy.ShouldBe(Command.UserInfo.Username);
             }

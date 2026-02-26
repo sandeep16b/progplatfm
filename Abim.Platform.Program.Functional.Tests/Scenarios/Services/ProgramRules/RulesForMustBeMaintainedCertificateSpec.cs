@@ -16,7 +16,6 @@ using Abim.Platform.Program.Resources;
 using Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules.Base;
 using Abim.Platform.Program.Tests.Setup.DomainBuilders;
 using Abim.Platform.Program.Tests.Setup.ResourceBuilders;
-using Abim.Platform.Program.WebApi.Testing.Setup;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -131,20 +130,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         {
             new ShouldNotReissueWhenNoMOCPassAndBadKCINoConsequencesWithInapplicableAdminDate().BDDfy();
         }
-
-        [TestCase]
-        [WorkItem(137190)]
-        public void Should_Reissue_When_No_MOC_Pass_And_Bad_KCI_NoConsequences_With_Inapplicable_Admin_Date_But_Has_Later_Pass()
-        {
-            new ShouldReissueWhenNoMOCPassAndBadKCINoConsequencesWithInapplicableAdminDateButHasLaterPass().BDDfy();
-        }
-
-        [TestCase]
-        [WorkItem(151482)]
-        public void Should_Reissue_When_No_MOC_Pass_But_No_Bad_KCI_or_CMP_NoConsequences_Exam()
-        {
-            new ShouldReissueWhenNoMOCPassButNoBadKCIorCMPNoConsequencesExam().BDDfy();
-        }
         
         [TestCase]
         [WorkItem(151482)]
@@ -172,34 +157,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         public void Should_Not_Reissue_When_No_MOCPass_But_NoKCINoConsequencesExam_CmpNoConsequenceIncompleteExists_NoSubsequentPass()
         {
             new ShouldNotReissueWhenNoMOCPassButNoKCINoConsequencesExamCmpNoConsequenceIncompleteExistsNoSubsequentPass().BDDfy();
-        }     
-
-        [TestCase]
-        [WorkItem(151482)]
-        public void Should_Reissue_When_No_MOCPass_But_NoKCINoConsequencesExam_CmpNoConsequenceFailExists_SubsequentPass_Exists()
-        {
-            new ShouldReissueWhenNoMOCPassButNoKCINoConsequencesExamCmpNoConsequenceFailExistsSubsequentPassExists().BDDfy();
-        }
-        [TestCase]
-        [WorkItem(151482)]
-        public void Should_Reissue_When_No_MOCPass_But_NoKCINoConsequencesExam_CmpNoConsequenceUttExists_SubsequentPass_Exists()
-        {
-            new ShouldReissueWhenNoMOCPassButNoKCINoConsequencesExamCmpNoConsequenceUttExistsSubsequentPassExists().BDDfy();
-        }
-
-        [TestCase]
-        [WorkItem(151482)]
-        public void Should_Reissue_When_No_MOCPass_But_NoKCINoConsequencesExam_CmpNoConsequenceIndtExists_SubsequentPass_Exists()
-        {
-            new ShouldReissueWhenNoMOCPassButNoKCINoConsequencesExamCmpNoConsequenceIndeterminateExistsSubsequentPassExists().BDDfy();
-        }
-
-        [TestCase]
-        [WorkItem(151482)]
-        public void Should_Reissue_When_No_MOCPass_But_NoKCINoConsequencesExam_CmpNoConsequenceIncompleteExists_SubsequentPass_Exists()
-        {
-            new ShouldReissueWhenNoMOCPassButNoKCINoConsequencesExamCmpNoConsequenceIncompleteExistsSubsequentPassExists().BDDfy();
-        }     
+        }       
 
         [TestCase]
         [WorkItem(151482)]

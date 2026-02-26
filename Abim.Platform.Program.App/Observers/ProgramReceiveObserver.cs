@@ -89,7 +89,7 @@ namespace Abim.Platform.Program.Consumers.Observers
             try
             {
                 LogEventInfo logMsg = new LogEventInfo();
-                logMsg.Message = $"PostConsume: Message ID {context.MessageId} - {GetMessageBody<T>(context.Message)}";
+                logMsg.Message = $"PostConsume: Message ID {context.MessageId} - {GetMessageBody(context.Message)}";
                 logMsg.Level = LogLevel.Info;
                 logMsg.Properties.Add("MessageId", context.MessageId);
                 
@@ -121,7 +121,7 @@ namespace Abim.Platform.Program.Consumers.Observers
             try
             {                
                 LogEventInfo logMsg = new LogEventInfo();
-                logMsg.Message = $"Consume Fault: Message ID {context.MessageId} - {GetMessageBody<T>(context.Message)}";
+                logMsg.Message = $"Consume Fault: Message ID {context.MessageId} - {GetMessageBody(context.Message)}";
                 logMsg.Level = LogLevel.Warn;
                 logMsg.Properties.Add("MessageId", context.MessageId);
                 

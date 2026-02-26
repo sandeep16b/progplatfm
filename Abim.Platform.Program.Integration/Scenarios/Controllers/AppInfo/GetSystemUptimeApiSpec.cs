@@ -47,8 +47,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.AppInfo
 
         protected override void PostSetup()
         {
-            Container.Inject<IEnumService>(EnumService.Object);
-            Container.Inject<IBusControl>(BusControl.Object);
+            Container.Inject(EnumService.Object);
+            Container.Inject(BusControl.Object);
             Container.Inject<IConfigurationManager>(new ConfigurationManager());
         }
 

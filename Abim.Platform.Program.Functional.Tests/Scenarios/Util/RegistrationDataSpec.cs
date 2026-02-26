@@ -6,7 +6,6 @@ using Abim.Platform.Program.Tests.Setup.ResourceBuilders;
 using NUnit.Framework;
 using Shouldly;
 using System;
-using System.Linq;
 using TestStack.BDDfy;
 
 namespace Abim.Platform.Program.Tests.Scenarios.Util
@@ -30,54 +29,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Util
         public void Should_Allow_NoShow_Result_From_CMPRegistrationResource()
         {
             new Should_Allow_NoShow_Result_From_CMPRegistrationResource_Scenario().BDDfy();
-        }
-
-        [Test]
-        public void Should_Return_Passing_EffectiveExamResult_When_Criteria_Met_And_Actual_Result_Was_Fail()
-        {
-            new Should_Return_Passing_EffectiveExamResult_When_Criteria_Met_And_Actual_Result_Was_Fail_Scenario().BDDfy();
-        }
-
-        [Test]
-        public void Should_Return_Passing_EffectiveExamResult_When_Criteria_Met_And_Actual_Result_Was_Indeterminate()
-        {
-            new Should_Return_Passing_EffectiveExamResult_When_Criteria_Met_And_Actual_Result_Was_Indeterminate_Scenario().BDDfy();
-        }
-
-        [Test]
-        public void Should_Return_Passing_EffectiveExamResult_When_Criteria_Met_And_Actual_Result_Was_Incomplete()
-        {
-            new Should_Return_Passing_EffectiveExamResult_When_Criteria_Met_And_Actual_Result_Was_Incomplete_Scenario().BDDfy();
-        }
-
-        [Test]
-        public void Should_Return_Passing_EffectiveExamResult_When_Criteria_Met_And_Actual_Result_Was_UnableToTest()
-        {
-            new Should_Return_Passing_EffectiveExamResult_When_Criteria_Met_And_Actual_Result_Was_UnableToTest_Scenario().BDDfy();
-        }
-
-        [Test]
-        public void Should_Return_Actual_Exam_Result_When_Not_No_Consequence()
-        {
-            new Should_Return_Actual_Exam_Result_When_Not_No_Consequence_Scenario().BDDfy();
-        }
-
-        [Test]
-        public void Should_Return_Actual_Exam_Result_When_Result_Not_One_Of_The_Allowed_Passing_Types()
-        {
-            new Should_Return_Actual_Exam_Result_When_Result_Not_One_Of_The_Allowed_Passing_Types_Scenario().BDDfy();
-        }
-
-        [Test]
-        public void Should_Return_Actual_Exam_Result_When_AdminYear_Greater_Than_DueDate_Year()
-        {
-            new Should_Return_Actual_Exam_Result_When_AdminYear_Greater_Than_DueDate_Year_Scenario().BDDfy();
-        }
-
-        [Test]
-        public void Should_Return_Actual_Exam_Result_When_ConsecutiveKCIPassRequired()
-        {
-            new Should_Return_Actual_Exam_Result_When_ConsecutiveKCIPassRequired_Scenario().BDDfy();
         }
 
         [Test]
@@ -181,16 +132,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Util
             }
         }
 
-        private abstract class GetEffectiveExamResultScenario : RegistrationDataScenario
-        {
-            protected ExamResultType _effectiveExamResult;
-
-            public virtual void AndWhenICallGetEffectiveExamResult()
-            {
-                _effectiveExamResult = _sut.GetEffectiveExamResult(new DateTime(2018, 1, 1), false);
-            }
-        }
-
         private abstract class GetExamTypeScenario : RegistrationDataScenario
         {
             protected string _examTypeString;
@@ -242,7 +183,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Util
                 Assert.IsTrue(_sut.IsMoc);
                 Assert.AreEqual(_regResource.MemberId, _sut.MemberId);
                 Assert.AreEqual(_regResource.Seats[0].SeatDate, _sut.MinSeatOrDeliveryDate);
-                Assert.AreEqual(_regResource.NoConsequence, _sut.NoConsequence);
                 Assert.AreEqual(_regResource.PhysicianIsAbim, _sut.PhysicianIsAbim);
             }
         }
@@ -275,7 +215,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Util
                 Assert.IsFalse(_sut.IsMoc);
                 Assert.AreEqual(_resource.MemberId, _sut.MemberId);
                 Assert.AreEqual(_resource.TestDate, _sut.MinSeatOrDeliveryDate);
-                Assert.AreEqual(_resource.CMPExam.NoConsequenceYears.Any(x => x == DateTime.Now.Year), _sut.NoConsequence);
                 Assert.AreEqual(_resource.PhysicianIsAbim, _sut.PhysicianIsAbim);
                 Assert.AreEqual(_resource.OnHold, _sut.OnHold);
             }
@@ -302,155 +241,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Util
             }
         }
         
-        private class Should_Return_Passing_EffectiveExamResult_When_Criteria_Met_And_Actual_Result_Was_Fail_Scenario : GetEffectiveExamResultScenario
-        {
-            public void GivenThatIHaveARegistrationResource()
-            {
-                _regResource =
-                    _regBuilder
-                        .WithAdministrationYear(2018)
-                        .WithNoConsequence(true)
-                        .WithExamResult(ExamResultType.Fail)
-                        .Build();
-            }
-
-            public void AndTheResultShouldBePass()
-            {
-                Assert.AreEqual(ExamResultType.Pass, _effectiveExamResult);
-            }
-        }
-
-        private class Should_Return_Passing_EffectiveExamResult_When_Criteria_Met_And_Actual_Result_Was_Indeterminate_Scenario : GetEffectiveExamResultScenario
-        {
-            public void GivenThatIHaveARegistrationResource()
-            {
-                _regResource =
-                    _regBuilder
-                        .WithAdministrationYear(2018)
-                        .WithNoConsequence(true)
-                        .WithExamResult(ExamResultType.Indeterminate)
-                        .Build();
-            }
-
-            public void AndTheResultShouldBePass()
-            {
-                Assert.AreEqual(ExamResultType.Pass, _effectiveExamResult);
-            }
-        }
-
-        private class Should_Return_Passing_EffectiveExamResult_When_Criteria_Met_And_Actual_Result_Was_Incomplete_Scenario : GetEffectiveExamResultScenario
-        {
-            public void GivenThatIHaveARegistrationResource()
-            {
-                _regResource =
-                    _regBuilder
-                        .WithAdministrationYear(2018)
-                        .WithNoConsequence(true)
-                        .WithExamResult(ExamResultType.Incomplete)
-                        .Build();
-            }
-
-            public void AndTheResultShouldBePass()
-            {
-                Assert.AreEqual(ExamResultType.Pass, _effectiveExamResult);
-            }
-        }
-
-        private class Should_Return_Passing_EffectiveExamResult_When_Criteria_Met_And_Actual_Result_Was_UnableToTest_Scenario : GetEffectiveExamResultScenario
-        {
-            public void GivenThatIHaveARegistrationResource()
-            {
-                _regResource =
-                    _regBuilder
-                        .WithAdministrationYear(2018)
-                        .WithNoConsequence(true)
-                        .WithExamResult(ExamResultType.UnableToTest)
-                        .Build();
-            }
-
-            public void AndTheResultShouldBePass()
-            {
-                Assert.AreEqual(ExamResultType.Pass, _effectiveExamResult);
-            }
-        }
-
-        private class Should_Return_Actual_Exam_Result_When_Not_No_Consequence_Scenario : GetEffectiveExamResultScenario
-        {
-            public void GivenThatIHaveARegistrationResource()
-            {
-                _regResource =
-                    _regBuilder
-                        .WithAdministrationYear(2018)
-                        .WithNoConsequence(false)
-                        .WithExamResult(ExamResultType.Incomplete)
-                        .Build();
-            }
-
-            public void AndTheResultShouldBeIncomplete()
-            {
-                Assert.AreEqual(ExamResultType.Incomplete, _effectiveExamResult);
-            }
-        }
-
-        private class Should_Return_Actual_Exam_Result_When_Result_Not_One_Of_The_Allowed_Passing_Types_Scenario : GetEffectiveExamResultScenario
-        {
-            public void GivenThatIHaveARegistrationResource()
-            {
-                _regResource =
-                    _regBuilder
-                        .WithAdministrationYear(2018)
-                        .WithNoConsequence(true)
-                        .WithExamResult(ExamResultType.NotScored)
-                        .Build();
-            }
-
-            public void AndTheResultShouldBeIncomplete()
-            {
-                Assert.AreEqual(ExamResultType.NotScored, _effectiveExamResult);
-            }
-        }
-
-        private class Should_Return_Actual_Exam_Result_When_AdminYear_Greater_Than_DueDate_Year_Scenario : GetEffectiveExamResultScenario
-        {
-            public void GivenThatIHaveARegistrationResource()
-            {
-                _regResource =
-                    _regBuilder
-                        .WithAdministrationYear(2019)
-                        .WithNoConsequence(true)
-                        .WithExamResult(ExamResultType.Incomplete)
-                        .Build();
-            }
-
-            public void AndTheResultShouldBeIncomplete()
-            {
-                Assert.AreEqual(ExamResultType.Incomplete, _effectiveExamResult);
-            }
-        }
-
-        private class Should_Return_Actual_Exam_Result_When_ConsecutiveKCIPassRequired_Scenario : GetEffectiveExamResultScenario
-        {
-            public void GivenThatIHaveARegistrationResource()
-            {
-                _regResource =
-                    _regBuilder
-                        .WithAdministrationYear(2018)
-                        .WithNoConsequence(true)
-                        .WithExamResult(ExamResultType.Incomplete)
-                        .Build();
-            }
-
-            public override void AndWhenICallGetEffectiveExamResult()
-            {
-                _effectiveExamResult = _sut.GetEffectiveExamResult(new DateTime(2018, 1, 1), true); //2nd param is ConsecutiveKCIPassRequired
-            }
-
-            public void AndTheResultShouldBeIncomplete()
-            {
-                Assert.AreEqual(ExamResultType.Incomplete, _effectiveExamResult);
-            }
-        }
-
         private class Should_Return_Correct_Exam_Type_String_For_MOC_Scenario : GetExamTypeScenario
         {
             public void GivenThatIHaveARegistrationResourceForAnMOCExam()

@@ -32,7 +32,7 @@ namespace Abim.Platform.Program.Util.Extensions
         /// <returns></returns>
         public static T Pick<T>(this IEnumerable<T> data)
         {
-            return Selector.Select<T>(data.ToArray());
+            return Selector.Select(data.ToArray());
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Abim.Platform.Program.Util.Extensions
         /// <returns></returns>
         public static List<T> Except<T>(this IEnumerable<T> data, params T[] items)
         {
-            return data.Except<T>(items.ToList()).ToList();
+            return data.Except(items.ToList()).ToList();
         }
 
         /// <summary>

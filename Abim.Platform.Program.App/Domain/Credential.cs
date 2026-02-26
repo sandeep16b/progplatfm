@@ -17,8 +17,7 @@ namespace Abim.Platform.Program.App.Domain
     /// The diplomate's Credential - class
     /// </summary>
     public class Credential :
-        AggregateRoot<Credential>,
-        IDomainValidationHandler<Credential>
+        AggregateRoot<Credential>
     {
         #region Fields
 
@@ -282,15 +281,6 @@ namespace Abim.Platform.Program.App.Domain
         public virtual bool SelectedToMaintain { get; protected internal set; } = true;
 
 
-        /// <summary>
-        /// Gets or sets the Grandfather MOC Print Date . PBI 87085
-        /// </summary>
-        /// <value>
-        /// It would be used by ETL to copy date to Certification database table table GrandFatherMOC 
-        /// </value>
-        public virtual DateTime? GrandfatherMOCPrintDate { get; protected internal set; }
-
-        /// <summary>
         /// Gets or sets the Withdrawn Date . PBI 112730
         /// </summary>
         /// <value>
@@ -314,28 +304,35 @@ namespace Abim.Platform.Program.App.Domain
         /// It is temporary measure until Release 3 (it would be removed and own table would be created as CMPEnrollment)
         /// </value>
         public virtual DateTime? CMPEnrollmentDate { get; protected internal set; }
-  
+
+        /// <summary>
+        /// Gets or sets the CMP Unenrollment Date . 
+        /// </summary>
+        /// <value>
+        /// </value>
+        public virtual DateTime? CMPUnenrollmentDate { get; protected internal set; }
+        
         /// <summary>
         /// Flag if issuance has been changed by current process
         /// </summary>
-        public virtual bool HasChanged { get; protected internal set; } = false;
+        public virtual bool HasChanged { get; protected internal set; } 
 
         /// <summary>
         /// Flag if issuance has been added by current process
         /// </summary>
-        public virtual bool HasAdded { get; protected internal set; } = false;
+        public virtual bool HasAdded { get; protected internal set; } 
 
         /// <summary>
         /// Specifies whether or not passing consecutive KCI exams is required
         /// </summary>
-        public virtual bool ConsecutiveKCIPassRequired { get; protected internal set; } = false;
+        public virtual bool ConsecutiveKCIPassRequired { get; protected internal set; }
 
 
         //pbi 210449 (Proj 1473) Remove unnecessary elements from homepage/menu for Cosponsored physicians
         /// <summary>
         /// IsCosponsored flag
         /// </summary>
-        public virtual bool IsCosponsored { get; protected internal set; } = false;
+        public virtual bool IsCosponsored { get; protected internal set; } 
 
         /// <summary>
         /// OnBehalfBoardCode 
@@ -571,22 +568,22 @@ namespace Abim.Platform.Program.App.Domain
         /// <summary>
         /// Specifies whether or not this credential is Not lapsed
         /// </summary>
-        public virtual bool IsNotLapsedCredential
+        public virtual bool IsNotLapsed
         {
             get
             {
-                return HasIssuances && NewestIssuance.IssuanceStatus == IssuanceStatusType.Active;
+                return (HasIssuances && NewestIssuance.IssuanceStatus == IssuanceStatusType.Active) || IsGrandfather;
             }
         }
 
         /// <summary>
-        /// Specifies whether or not this credential is lapsed
+        /// Specifies whether or not this credential is not lapsed due to assessment (aligned it with Program 063 text)
         /// </summary>
-        public virtual bool IsLapsedCredential
+        public virtual bool IsNotLapsedDueToAssessment
         {
             get
             {
-                return !IsNotLapsedCredential;
+                return IsNotLapsed || AssessmentMet == true; // if AssessmentMet still good  then even it is lapsed but not due to assessment
             }
         }
 
@@ -696,6 +693,17 @@ namespace Abim.Platform.Program.App.Domain
         }
 
         /// <summary>
+        /// Specifies newest issuance Deselection Type
+        /// </summary>
+        public virtual DeselectionType? DeselectionType
+        {
+            get
+            {
+                return NewestIssuance?.DeselectionType;
+            }
+        }
+
+        /// <summary>
         /// Specifies whether or not this credential is the COVID 4 disciplines (Infectious Disease, Hospital Medicine, Critical Care, Pulmonary Disease)
         /// </summary>
         public virtual bool IsCovid4
@@ -708,7 +716,6 @@ namespace Abim.Platform.Program.App.Domain
                         Certification.Code == ProgramResourceConstants.CertificationCode.PulmonaryDisease ;
             }
         }
-
         #endregion DerivedProperties
 
         #endregion Properties
@@ -1343,17 +1350,6 @@ namespace Abim.Platform.Program.App.Domain
                 IsInCMP = false;
         }
 
-        /// <summary>
-        /// updates the GrandfatherMOCPrintDate DateTime field of the <see cref="Credential"/> domain object
-        /// </summary>
-        /// <param name="grandfatherMOCPrintDate"></param>
-        /// <param name="modifiedBy"></param>
-        public virtual void SetGrandfatherMOCPrintDate(DateTime grandfatherMOCPrintDate, string modifiedBy)
-        {
-            GrandfatherMOCPrintDate = grandfatherMOCPrintDate;
-            AuditData.Modified = DateTime.Now;
-            AuditData.ModifiedBy = modifiedBy;
-        }
 
         /// <summary>
         ///  updates the Credential's WithdrawnDate and NewestIssuance status of the <see cref="Credential"/> domain object
@@ -1392,21 +1388,16 @@ namespace Abim.Platform.Program.App.Domain
         }
 
         /// <summary>
-        ///  updates the Credential's WithdrawnDate and NewestIssuance status of the <see cref="Credential"/> domain object
+        ///  Reinstate All issuances that have status Inactive, Revoked, Surrendered, Suspended to proper status 
         /// </summary>
         /// <param name="modifiedBy"></param>
         public virtual void SetReinstate(string modifiedBy)
         {
-
-            NewestIssuance.IssuanceStatus = IssuanceStatusType.Expired;
-            NewestIssuance.AuditData.Modified = DateTime.Now;
-            NewestIssuance.AuditData.ModifiedBy = modifiedBy;
-            NewestIssuance.HasChanged = true;
-
-            // find any other issuances (Revoked,Surrendered,Suspended) and set them to proper status
-            foreach (var iss in Issuances.Where(i => i.IssuanceStatus == IssuanceStatusType.Revoked ||
+            // find All not GF issuances (Inactive,Revoked,Surrendered,Suspended) and set them Expired status
+            foreach (var iss in Issuances.Where(i => (i.IssuanceStatus == IssuanceStatusType.Inactive ||
+                                                    i.IssuanceStatus == IssuanceStatusType.Revoked ||
                                                     i.IssuanceStatus == IssuanceStatusType.Surrendered ||
-                                                    i.IssuanceStatus == IssuanceStatusType.Suspended))
+                                                    i.IssuanceStatus == IssuanceStatusType.Suspended) && i.Duration != DurationType.Lifetime))
             {
                 iss.IssuanceStatus = IssuanceStatusType.Expired;
                 iss.AuditData.Modified = DateTime.Now;
@@ -1414,6 +1405,27 @@ namespace Abim.Platform.Program.App.Domain
                 iss.HasChanged = true;
             }
 
+            // Pbi 306060 : (Project 1463) Valid Indefinites Active Issuance Status
+            // Pbi 335679 : (3.11) Setting status to Active for Pre-1990 Cert
+            // Find most recent Grandfather issuance and set them Active status
+            var NewestGFIssuance = Issuances.Where(i => i.Duration == DurationType.Lifetime &&  
+                                                        (i.IssuanceStatus == IssuanceStatusType.Inactive ||
+                                                         i.IssuanceStatus == IssuanceStatusType.Revoked ||
+                                                         i.IssuanceStatus == IssuanceStatusType.Surrendered ||
+                                                         i.IssuanceStatus == IssuanceStatusType.Suspended))
+                                            .OrderByDescending(a => a.IssuanceDate)
+                                            .FirstOrDefault();
+
+            if (NewestGFIssuance != null)
+            {
+                NewestGFIssuance.IssuanceStatus = IssuanceStatusType.Active; // set GF issuance to Active
+                NewestGFIssuance.ExpirationDate = null; // clear ExpirationDate
+                NewestGFIssuance.ExpiredDate = null; // clear ExpiredDate
+                IsActive = true; // set credential to Active
+                NewestGFIssuance.AuditData.Modified = DateTime.Now;
+                NewestGFIssuance.AuditData.ModifiedBy = modifiedBy;
+                NewestGFIssuance.HasChanged = true;
+            }
         }
 
         /// <summary>
@@ -1454,9 +1466,8 @@ namespace Abim.Platform.Program.App.Domain
         {
             //PBI 151637
             IsInCMP = false;
-            Pathway = priviousPathway; // set pro privious pathway
-            //ar@ 7/15/2019: I assume it is better to keep that Date unchanged .
-            //CMPEnrollmentDate = EnrollmentDate;
+            Pathway = priviousPathway; // set to privious pathway
+            CMPUnenrollmentDate = UnEnrollmentDate;
             AuditData.Modified = DateTime.Now;
             AuditData.ModifiedBy = modifiedBy;
         }
@@ -1486,6 +1497,8 @@ namespace Abim.Platform.Program.App.Domain
             {
                 latestIssuance.DeselectionProcessedDate = DateTime.Now;
             }
+
+            latestIssuance.DeselectionType = Resources.DeselectionType.Self;
 
             latestIssuance.AuditData.ModifiedBy = modifiedBy;
             latestIssuance.AuditData.Modified = DateTime.Now;
@@ -1535,8 +1548,11 @@ namespace Abim.Platform.Program.App.Domain
                 */
                 newIssuance.DeselectionSubmittedDate = latestIssuance.DeselectionSubmittedDate;
                 newIssuance.DeselectionEffectiveDate = latestIssuance.DeselectionEffectiveDate;
+                newIssuance.DeselectionType = latestIssuance.DeselectionType;
+
                 latestIssuance.DeselectionSubmittedDate = null;
                 latestIssuance.DeselectionEffectiveDate = null;
+                latestIssuance.DeselectionType = null;
                 latestIssuance.HasChanged = true;
             }
         }

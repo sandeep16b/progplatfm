@@ -18,7 +18,7 @@ namespace Abim.Platform.Program.App.Services.CommandValidators.Credential
         {
             RuleFor(o => o.CredentialId).NotEqual(Guid.Empty)
                 .WithMessage("CredentialId is required");
-            RuleFor(l => l.WithdrawnStatus).In(IssuanceStatusType.Revoked, IssuanceStatusType.Surrendered, IssuanceStatusType.Suspended);
+            RuleFor(l => l.WithdrawnStatus).In(IssuanceStatusType.Inactive, IssuanceStatusType.Revoked, IssuanceStatusType.Surrendered, IssuanceStatusType.Suspended);
             RuleFor(x => x.UserInfo).NotNull()
                 .WithMessage("UserInfo must not be null");
             RuleFor(x => x.UserInfo.Username).NotEmpty().When(x => x.UserInfo != null)

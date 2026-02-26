@@ -1,5 +1,4 @@
-﻿using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
-using Abim.Enterprise.Core.Profile.Resource;
+﻿using Abim.Platform.Program.MembershipClient;
 using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.Core.Identity;
 using Abim.Platform.Program.Integration.Scenarios.Controllers.PhysicianCertification.Base;
@@ -18,10 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using TestStack.BDDfy;
-using NameResource = Abim.Enterprise.Core.Profile.Resource.NameResource;
-using ProfileShortCollectionResource = Abim.Enterprise.Core.Profile.Resource.ProfileShortCollectionResource;
-using ProfileSummaryShortResource = Abim.Enterprise.Core.Profile.Resource.ProfileSummaryShortResource;
+using TestStack.BDDfy; 
 
 namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 {
@@ -35,6 +31,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
     {
         [TestCase]
         [WorkItem(140373)]
+        [WorkItem(296934)]
         public void SearchProfilesByNameAndDob_MultipleRecords_ReturnsOK()
         {
             new SearchProfilesByNameAndDob_MultipleRecords_ReturnsOK().BDDfy();
@@ -78,9 +75,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         protected override List<Type> AdditionalDependencies()
         {
             var list = base.AdditionalDependencies();
-            list.Add(typeof(IEnumService));
-            list.Add(typeof(ICredentialService));
-            list.Add(typeof(IProfileInterservice));
+            list.Add(typeof(IEnumService)); 
             list.Add(typeof(IAccessTokenService));
             list.Add(typeof(ILogger));
             return list;
@@ -95,7 +90,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
                 createdBy: RandomString.Build());
             var credential = App.Domain.Credential.Create(certification, Guid.NewGuid(), EnumAttributes.RandomEntry<CredentialType>(),
                 EnumAttributes.RandomEntry<PathwayType>(), null, null, RandomString.Build());
-
+             
             credential.IsCosponsored = isCosponsored;
 
             foreach (var i in Enumerable.Range(0, numberOfIssuances))
@@ -124,52 +119,71 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PostSetup()
         {
-            var profileShortCollection = new ProfileShortCollectionResource()
-            {
-                CurrentPage = 1,
-                PageSize = 2,
-                TotalCount = 2,
-                TotalPages = 1,
-                Data = new List<ProfileSummaryShortResource>() {
-                    new ProfileSummaryShortResource() { AbimId="123", Id=new Guid(),
-                        Name = new NameResource() { FirstName="Sam", LastName="Reznit"} },
-                    new ProfileSummaryShortResource() { AbimId="124", Id=new Guid(),
-                        Name = new NameResource() { FirstName="Sam", LastName="Smith"} }
-                }
-            };
-
-            My<IProfileInterservice>()
-                .Setup(o => o.SearchProfilesByNameAndDob(It.IsAny<string>(),
-                            It.IsAny<string>(),
-                            It.IsAny<string>(),
-                            It.IsAny<string>(), //lastname
-                            It.IsAny<DateTime?>(),
-                            It.IsAny<bool>(),
-                            It.IsAny<int>(),
-                            It.IsAny<int>()))
-                .Returns(Task.FromResult(profileShortCollection));
+            var profileShortCollection = new List<VocProfileResource>() {
+                new VocProfileResource() {
+                   PublicId =Guid.NewGuid(),
+                   Id    = (new Random()).Next(1, int.MaxValue),
+                   AbimId =  (new Random()).Next(1, int.MaxValue).ToString(),
+                   NpiNumber =  (new Random()).Next(1, int.MaxValue).ToString(),
+                   Credential  =  true,
+                   Deceased   =  false,
+                   FirstName    =  RandomString.BuildWithLength(255),
+                   LastName     =  RandomString.BuildWithLength(255),
+                   MiddleName   =  RandomString.BuildWithLength(255),
+                   Suffix  =  VocProfileResourceSuffix.DC,
+                   FirstNameSoundex = RandomString.BuildWithLength(10),
+                   LastNameSoundex  = RandomString.BuildWithLength(10),
+                   AliasId   = (new Random()).Next(1, int.MaxValue),
+                   AliasFirstName   =  RandomString.BuildWithLength(255),
+                   AliasMiddleName    =  RandomString.BuildWithLength(255),
+                   AliasLastName     =  RandomString.BuildWithLength(255),
+                   AliasSuffix      =   VocProfileResourceAliasSuffix.DC,
+                   AliasFirstNameSoundex     = RandomString.BuildWithLength(10),
+                   AliasLastNameSoundex      = RandomString.BuildWithLength(10),
+                   ImageHref= RandomString.BuildWithLength(255)
+                },
+                new VocProfileResource() {
+                   PublicId = Guid.NewGuid(),
+                   Id    = (new Random()).Next(1, int.MaxValue),
+                   AbimId =  (new Random()).Next(1, int.MaxValue).ToString(),
+                   NpiNumber =  (new Random()).Next(1, int.MaxValue).ToString(),
+                   Credential  =  true,
+                   Deceased   =  false,
+                   FirstName    =  RandomString.BuildWithLength(255),
+                   LastName     =  RandomString.BuildWithLength(255),
+                   MiddleName   =  RandomString.BuildWithLength(255),
+                   Suffix  =  VocProfileResourceSuffix.Jr,
+                   FirstNameSoundex = RandomString.BuildWithLength(10),
+                   LastNameSoundex  = RandomString.BuildWithLength(10),
+                   AliasId   = (new Random()).Next(1, int.MaxValue),
+                   AliasFirstName   =  RandomString.BuildWithLength(255),
+                   AliasMiddleName    =  RandomString.BuildWithLength(255),
+                   AliasLastName     =  RandomString.BuildWithLength(255),
+                   AliasSuffix      =   VocProfileResourceAliasSuffix.Jr,
+                   AliasFirstNameSoundex     = RandomString.BuildWithLength(10),
+                   AliasLastNameSoundex      = RandomString.BuildWithLength(10),
+                   ImageHref= null
+                }};  
 
             CredentialDomainObjects = new List<App.Domain.Credential>() { ConstructDomainObject() };
-
-            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
-            {
-                AbimId = "123",
-                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
-                NameAliases = new List<ProfileNameAliasSummaryResource>()
-            };
-
-            My<IProfileInterservice>()
-                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Task.FromResult(profileSummaryShortResource));
-
+         
             My<ICredentialService>()
-                .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .Returns(Task.FromResult(CredentialDomainObjects));
+                  .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
+                  .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
                .Setup(o => o.GetAccessToken())
                .Returns("--token--");
+
+            My<IMembershipClientService>()
+                .Setup(o => o.GetNameAllAsync(
+                           It.IsAny<string>(),
+                            It.IsAny<string>(),
+                            It.IsAny<DateTime?>(),
+                            It.IsAny<bool>(),
+                            It.IsAny<int>(),
+                            It.IsAny<int>())).ReturnsAsync(profileShortCollection); 
 
         }
 
@@ -199,6 +213,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         public void AndThenMyResourceLastNameShouldNotBeNull()
         {
             Resource.Data[0].LastName.Should().NotBeNull();
+            Resource.Data[0].ImageHref.Should().NotBeNull();
+            Resource.Data[1].ImageHref.Should().BeNull();
         }
     }
 
@@ -218,66 +234,69 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PostSetup()
         {
-            var profileShortCollection = new ProfileShortCollectionResource()
-            {
-                CurrentPage = 1,
-                PageSize = 2,
-                TotalCount = 2,
-                TotalPages = 1,
-                Data = new List<ProfileSummaryShortResource>() {
-                    new ProfileSummaryShortResource() { AbimId="123", Id=new Guid(),
-                        Name = new NameResource() { FirstName="Sam", LastName="Reznit"} ,
-                        NameAliases = new List<ProfileNameAliasSummaryResource> () { new ProfileNameAliasSummaryResource()
-                        {
-                            Name = (new NameResource() { FirstName = "SamAliase1", LastName = "ReznitAliase1", MiddleName="middle" }), UserAccountsId=12345, UserAccountsNameAliasId = 789654
-                        },
-                        new ProfileNameAliasSummaryResource()
-                        {
-                            Name = (new NameResource() { FirstName = "SamAliase", LastName = "ReznitAliase", MiddleName="middle" }), UserAccountsId=12345, UserAccountsNameAliasId = 789654 }
-                        } },
-                    new ProfileSummaryShortResource() { AbimId="124", Id=new Guid(),
-                        Name = new NameResource() { FirstName="Sam", LastName="Smith"},
-                        NameAliases = new List<ProfileNameAliasSummaryResource> () { new ProfileNameAliasSummaryResource()
-                        {
-                            Name = (new NameResource() { FirstName = "SamAliase", LastName = "ReznitAliase", MiddleName="middle" }), UserAccountsId=12345, UserAccountsNameAliasId = 789654
-                        }
-                    }
-                    }
-                }
-            };
-
-            My<IProfileInterservice>()
-                .Setup(o => o.SearchProfilesByNameAndDob(It.IsAny<string>(),
-                            It.IsAny<string>(),
-                            It.IsAny<string>(),
-                            It.IsAny<string>(), //lastname
-                            It.IsAny<DateTime?>(),
-                            It.IsAny<bool>(),
-                            It.IsAny<int>(),
-                            It.IsAny<int>()))
-                .Returns(Task.FromResult(profileShortCollection));
+            var profileShortCollection = new List<VocProfileResource>() {
+                new VocProfileResource() {
+                   PublicId =Guid.NewGuid(),
+                   Id    = (new Random()).Next(1, int.MaxValue),
+                   AbimId =   "123",
+                   NpiNumber =   "1234",
+                   Credential  =  true,
+                   Deceased   =  false,
+                   FirstName    =  RandomString.BuildWithLength(255),
+                   LastName     =  RandomString.BuildWithLength(255),
+                   MiddleName   =  RandomString.BuildWithLength(255),
+                   Suffix  =  VocProfileResourceSuffix.DC,
+                   FirstNameSoundex = RandomString.BuildWithLength(10),
+                   LastNameSoundex  = RandomString.BuildWithLength(10),
+                   AliasId   = (new Random()).Next(1, int.MaxValue),
+                   AliasFirstName   = "SamAliase1",
+                   AliasMiddleName    =  RandomString.BuildWithLength(255),
+                   AliasLastName     =  "ReznitAliase1",
+                   AliasSuffix      =   VocProfileResourceAliasSuffix.DC,
+                   AliasFirstNameSoundex     = RandomString.BuildWithLength(10),
+                   AliasLastNameSoundex      = RandomString.BuildWithLength(10),
+                },
+                new VocProfileResource() {
+                   PublicId = Guid.NewGuid(),
+                   Id    = (new Random()).Next(1, int.MaxValue),
+                   AbimId =  "124",
+                   NpiNumber =   "1245",
+                   Credential  =  true,
+                   Deceased   =  false,
+                   FirstName    =  RandomString.BuildWithLength(255),
+                   LastName     =  RandomString.BuildWithLength(255),
+                   MiddleName   =  RandomString.BuildWithLength(255),
+                   Suffix  =  VocProfileResourceSuffix.Jr,
+                   FirstNameSoundex = RandomString.BuildWithLength(10),
+                   LastNameSoundex  = RandomString.BuildWithLength(10),
+                   AliasId   = (new Random()).Next(1, int.MaxValue),
+                   AliasFirstName   = "SamAliase2",
+                   AliasMiddleName    =  RandomString.BuildWithLength(255),
+                   AliasLastName     =  "ReznitAliase2",
+                   AliasSuffix      =   VocProfileResourceAliasSuffix.Jr,
+                   AliasFirstNameSoundex     = RandomString.BuildWithLength(10),
+                   AliasLastNameSoundex      = RandomString.BuildWithLength(10),
+             }}; 
+ 
 
             CredentialDomainObjects = new List<App.Domain.Credential>() { ConstructDomainObject() };
 
-            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
-            {
-                AbimId = "123",
-                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
-                NameAliases = new List<ProfileNameAliasSummaryResource>()
-            };
-
-            My<IProfileInterservice>()
-                .Setup(o => o.SearchProfilesByNPI(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Task.FromResult(profileSummaryShortResource));
+            My<IAccessTokenService>()
+              .Setup(o => o.GetAccessToken())
+              .Returns("--token--");
 
             My<ICredentialService>()
-                .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .Returns(Task.FromResult(CredentialDomainObjects));
+               .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
+               .Returns(Task.FromResult(CredentialDomainObjects));
 
-            // ***  AccessTokenServiceMock ---
-            My<IAccessTokenService>()
-               .Setup(o => o.GetAccessToken())
-               .Returns("--token--");
+            My<IMembershipClientService>()
+                  .Setup(o => o.GetNameAllAsync(
+                           It.IsAny<string>(),
+                            It.IsAny<string>(),
+                            It.IsAny<DateTime?>(),
+                            It.IsAny<bool>(),
+                            It.IsAny<int>(),
+                            It.IsAny<int>())).ReturnsAsync(profileShortCollection);
 
         }
 
@@ -338,41 +357,48 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PostSetup()
         {
-            var profileShortCollection = new ProfileShortCollectionResource()
-            {
-                CurrentPage = 1,
-                PageSize = 1,
-                TotalCount = 1,
-                TotalPages = 1,
-                Data = new List<ProfileSummaryShortResource>() {
-                    new ProfileSummaryShortResource() { AbimId="123", Id=new Guid(),
-                        Name = new NameResource() { FirstName="Sam", LastName="Reznit"} }
-                }
-            };
+            var profileShortCollection = new List<VocProfileResource>() {
+                new VocProfileResource() {
+                   PublicId = Guid.NewGuid(),
+                   Id    = (new Random()).Next(1, int.MaxValue),
+                   AbimId =   "123",
+                   NpiNumber =  "1234",
+                   Credential  =  true,
+                   Deceased   =  false,
+                   FirstName    =  RandomString.BuildWithLength(255),
+                   LastName     =  RandomString.BuildWithLength(255),
+                   MiddleName   =  RandomString.BuildWithLength(255),
+                   Suffix  =  VocProfileResourceSuffix.DC,
+                   FirstNameSoundex = RandomString.BuildWithLength(10),
+                   LastNameSoundex  = RandomString.BuildWithLength(10),
+                   AliasId   = (new Random()).Next(1, int.MaxValue),
+                   AliasFirstName   = "SamAliase1",
+                   AliasMiddleName    =  RandomString.BuildWithLength(255),
+                   AliasLastName     =  "ReznitAliase1",
+                   AliasSuffix      =   VocProfileResourceAliasSuffix.DC,
+                   AliasFirstNameSoundex     = RandomString.BuildWithLength(10),
+                   AliasLastNameSoundex      = RandomString.BuildWithLength(10),
+             }};
 
-            My<IProfileInterservice>()
-                .Setup(o => o.SearchProfilesByNameAndDob(It.IsAny<string>(),
-                            It.IsAny<string>(),
-                            It.IsAny<string>(),
-                            It.IsAny<string>(), //lastname
-                            It.IsAny<DateTime?>(),
-                            It.IsAny<bool>(),
-                            It.IsAny<int>(),
-                            It.IsAny<int>()))
-                .Returns(Task.FromResult(profileShortCollection));
+            var region = new List<RegionResource> { new RegionResource() {
+                    Id = 1,
+                    Code = "AL",
+                    Name = "Alabama"
+                } };
 
             CredentialDomainObjects = new List<App.Domain.Credential>() { ConstructDomainObject() };
 
-            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
-            {
+            var profileResources = new List<VocProfileResource>() { 
+                new VocProfileResource() {
                 AbimId = "123",
-                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
-                NameAliases = new List<ProfileNameAliasSummaryResource>()
-            };
+                Id = 1256,
+                FirstName = "Alex",
+                LastName = "Reznit"
+            }}; 
 
-            My<IProfileInterservice>()
-                .Setup(o => o.SearchProfilesByAbimId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Task.FromResult(profileSummaryShortResource));
+            My<ICredentialService>()
+                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
+                 .Returns(Task.FromResult(CredentialDomainObjects));
 
             My<ICredentialService>()
                 .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
@@ -382,6 +408,22 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
             My<IAccessTokenService>()
                .Setup(o => o.GetAccessToken())
                .Returns("--token--");
+             
+            My<IMembershipClientService>()
+                .Setup(o => o.GetVocByAbimIdAsync(It.IsAny<string>()))
+                .ReturnsAsync(profileResources);
+
+            My<IMembershipClientService>()
+             .Setup(o => o.GetNameAllAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<DateTime?>(),
+                It.IsAny<bool>(),
+                It.IsAny<int>(),
+                It.IsAny<int>())).ReturnsAsync(profileShortCollection);
+
+            My<IMembershipClientService>().Setup(_ => _.GetCountryRegionsAsync(It.IsAny<string>()))
+                   .ReturnsAsync(region);
         }
 
         public void GivenIPassTheCorrectUrl()
@@ -429,31 +471,31 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PostSetup()
         {
-            CredentialDomainObjects = new List<App.Domain.Credential>() { };
+            CredentialDomainObjects = new List<App.Domain.Credential>();
 
-            Enterprise.Core.Profile.Interservice.Util.Extensions.UnsuccessfulStatusException ex = new Enterprise.Core.Profile.Interservice.Util.Extensions.UnsuccessfulStatusException();
-            ex.StatusCode = HttpStatusCode.NotFound;
-
-            My<IProfileInterservice>()
-                .Setup(o => o.SearchProfilesByNameAndDob(It.IsAny<string>(),
-                            It.IsAny<string>(),
-                            It.IsAny<string>(),
-                            It.IsAny<string>(), //lastname
-                            It.IsAny<DateTime?>(),
-                            It.IsAny<bool>(),
-                            It.IsAny<int>(),
-                            It.IsAny<int>()))
-                .Throws(ex);
+            var ex = new ApiException("Not Found", 404, "", null, null); 
 
             My<ICredentialService>()
-                .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .Returns(Task.FromResult(CredentialDomainObjects));
+               .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
+               .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
                .Setup(o => o.GetAccessToken())
                .Returns("--token--");
 
+            My<IMembershipClientService>()
+                .Setup(o => o.GetProfileByMemberIdAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(new ProfileResource() { Id = Guid.NewGuid(), AbimId = "123" });
+
+            My<IMembershipClientService>()
+              .Setup(o => o.GetNameAllAsync(
+                           It.IsAny<string>(),
+                            It.IsAny<string>(),
+                            It.IsAny<DateTime?>(),  
+                            It.IsAny<bool>(),
+                            It.IsAny<int>(),
+                            It.IsAny<int>())).Throws(ex);
         }
 
         public void GivenIPassTheCorrectUrl()
@@ -476,8 +518,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         public void AndThenMyResponseContentShouldContainText()
         {
             ResponseContent.Should().Contain("No users exist with Last Name:");
-        }
-
+        } 
     }
 
     public class SearchProfilesByNameAndDob_NotFoundForCoSponsoredDiplomate : SearchProfilesByNameAndDobScenario
@@ -486,6 +527,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         IEnumerable<App.Domain.Credential> CredentialDomainObjects { get; set; }
 
+        string AbimId = RandomString.BuildWithLength(10);
+
         protected override void PreSetup()
         {
             Log = new Mock<ILogger>();
@@ -493,53 +536,54 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         protected override void PostSetup()
         {
-            var profileShortCollection = new ProfileShortCollectionResource()
-            {
-                CurrentPage = 1,
-                PageSize = 1,
-                TotalCount = 1,
-                TotalPages = 1,
-                Data = new List<ProfileSummaryShortResource>() {
-                    new ProfileSummaryShortResource() { AbimId="123", Id=new Guid(),
-                        Name = new NameResource() { FirstName="Sam", LastName="Reznit"} }
-                }
-            };
+            var profileShortCollection = new List<VocProfileResource>() {
+                new VocProfileResource() {
+                   PublicId = Guid.NewGuid(),
+                   Id    = (new Random()).Next(1, int.MaxValue),
+                   AbimId =   AbimId,
+                   NpiNumber =  "1234",
+                   Credential  =  true,
+                   Deceased   =  false,
+                   FirstName    =  "Alex",
+                   LastName     =  "Reznit",
+                   MiddleName   =  RandomString.BuildWithLength(255),
+                   Suffix  =  VocProfileResourceSuffix.DC,
+                   FirstNameSoundex = RandomString.BuildWithLength(10),
+                   LastNameSoundex  = RandomString.BuildWithLength(10),
+                   AliasId   = (new Random()).Next(1, int.MaxValue),
+                   AliasFirstName   = "SamAliase1",
+                   AliasMiddleName    =  RandomString.BuildWithLength(255),
+                   AliasLastName     =  "ReznitAliase1",
+                   AliasSuffix      =   VocProfileResourceAliasSuffix.DC,
+                   AliasFirstNameSoundex     = RandomString.BuildWithLength(10),
+                   AliasLastNameSoundex      = RandomString.BuildWithLength(10),
+             }};
 
-            My<IProfileInterservice>()
-                .Setup(o => o.SearchProfilesByNameAndDob(It.IsAny<string>(),
-                            It.IsAny<string>(),
-                            It.IsAny<string>(),
-                            It.IsAny<string>(), //lastname
-                            It.IsAny<DateTime?>(),
-                            It.IsAny<bool>(),
-                            It.IsAny<int>(),
-                            It.IsAny<int>()))
-                .Returns(Task.FromResult(profileShortCollection));
 
-            //CredentialDomainObjects = new List<App.Domain.Credential>() { ConstructDomainObject() };
-            CredentialDomainObjects = new List<App.Domain.Credential>() {   ConstructDomainObject(SourceCode: "ABIM", numberOfIssuances: 1, isCosponsored:true),
-                                                                            ConstructDomainObject(SourceCode: "ABIM", numberOfIssuances: 0, isCosponsored:true),
-                                                                            ConstructDomainObject(RandomString.Build(), numberOfIssuances: 1, isCosponsored:true) };
 
-            ProfileSummaryShortResource profileSummaryShortResource = new ProfileSummaryShortResource()
-            {
-                AbimId = "123",
-                Name = new NameResource() { FirstName = "Alex", LastName = "Reznit" },
-                NameAliases = new List<ProfileNameAliasSummaryResource>()
-            };
-
-            My<IProfileInterservice>()
-                .Setup(o => o.SearchProfilesByAbimId(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Task.FromResult(profileSummaryShortResource));
+            var profileResources = new List<VocProfileResource>();
 
             My<ICredentialService>()
-                .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
-                .Returns(Task.FromResult(CredentialDomainObjects));
+               .Setup(o => o.SearchByMemberIdAsync(It.IsAny<Guid>()))
+               .Returns(Task.FromResult(CredentialDomainObjects));
 
             // ***  AccessTokenServiceMock ---
             My<IAccessTokenService>()
                .Setup(o => o.GetAccessToken())
                .Returns("--token--");
+
+            My<IMembershipClientService>()
+            .Setup(o => o.GetVocByAbimIdAsync(It.IsAny<string>()))
+            .ReturnsAsync(profileResources);
+
+            My<IMembershipClientService>()
+              .Setup(o => o.GetNameAllAsync(
+                           It.IsAny<string>(),
+                            It.IsAny<string>(),
+                            It.IsAny<DateTime?>(),
+                            It.IsAny<bool>(),
+                            It.IsAny<int>(),
+                            It.IsAny<int>())).ReturnsAsync(profileShortCollection);
         }
 
         public void GivenIPassTheCorrectUrl()
@@ -556,7 +600,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
 
         public void ThenIGetResultContentShouldBeNoUserExists()
         {
-            ResponseContent.Should().Contain("No user exists with AbimId:'123'.");
+            ResponseContent.Should().Contain($"No user exists with AbimId:'{AbimId}'.");
         }
     }
     #endregion

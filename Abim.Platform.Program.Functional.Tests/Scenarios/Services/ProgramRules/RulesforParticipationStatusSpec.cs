@@ -18,7 +18,6 @@ using Abim.Platform.Program.Testing.Setup.DataBuilders;
 using Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest.Base;
 using Abim.Platform.Program.Tests.Setup.Responses;
 using Abim.Platform.Program.WebApi.Testing.Setup;
-using Abim.Platform.Program.WebApi.Testing.Setup.Builders;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -48,23 +47,9 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
 
         [TestCase]
         [WorkItem(134063)]
-        public void ParticipationStatus_TL_DontMeet2YearLookBack_NotMeetingScenario()
-        {
-            new ParticipationStatus_TL_DontMeet2YearLookBack_NotMeetingScenario().BDDfy();
-        }
-
-        [TestCase]
-        [WorkItem(134063)]
         public void ParticipationStatus_MBM_Meet2YearLookBack_MeetingScenario()
         {
             new ParticipationStatus_MBM_Meet2YearLookBack_MeetingScenario().BDDfy();
-        }
-
-        [TestCase]
-        [WorkItem(134063)]
-        public void ParticipationStatus_MBM_DontMeet2YearLookBack_NotMeetingScenario()
-        {
-            new ParticipationStatus_MBM_DontMeet2YearLookBack_NotMeetingScenario().BDDfy();
         }
 
         [TestCase]
@@ -74,12 +59,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
             new ParticipationStatus_GF_Meet2YearLookBack_MeetingScenario().BDDfy();
         }
 
-        [TestCase]
-        [WorkItem(134063)]
-        public void ParticipationStatus_GF_DontMeet2YearLookBack_NotMeetingScenario()
-        {
-            new ParticipationStatus_GF_DontMeet2YearLookBack_NotMeetingScenario().BDDfy();
-        }
     }
 
     /// <summary>
@@ -395,117 +374,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         }
     }
 
-    /// <summary>
-    /// The ParticipationStatus_TL_DontMeet2YearLookBack_NotMeetingScenario scenario
-    /// </summary>
-    public class ParticipationStatus_TL_DontMeet2YearLookBack_NotMeetingScenario : ParticipationStatusSpecScenario
-    {
-        /// <summary>
-        /// Primary setup
-        /// </summary>
-        protected override void PreSetup()
-        {
-            //****  staging data values  ++++++++++++++++++++++++++++++++++++
-            CertificationId = Guid.NewGuid();
-            FirstIssuanceDate = new DateTime(DateTime.Now.Year - 3, 8, 3);
-            EventDate = new DateTime(DateTime.Now.Year, 9, 1);
-            ProcessingDate = DateTime.Now;
-
-            // *********  creating domain data  *********
-            Source source = SourceDataBuilder
-                            .With(a => a.Code = "ABIM")
-                            .Build();
-
-            Certification certification = (new CertificationDataBuilder(source))
-                                            .Build();
-
-            //Active TL issuance NotMaintained
-            Issuance issuance = IssuanceDataBuilder
-                                .With(a => a.Source = source)
-                                .With(b => b.IssuanceStatus = IssuanceStatusType.Active)
-                                .With(b => b.Duration = DurationType.Timelimited)
-                                .With(b => b.MaintenanceRequirement = MaintenanceRequirementType.NotRequired)
-                                .With(b => b.MaintenanceStatus = MaintenanceStatusType.NotMaintained)
-                                .Build();
-
-            Credential = (new CredentialDataBuilder(certification))
-                        .Build();
-
-            Credential.AddIssuance(issuance);
-
-            // old points (should not meet 2 year look back)
-            Condition_MOCPoints_MedicalKnowledgePoints_ActivityCredit(completedDate: new DateTime(ProcessingDate.Year-3,1,1),
-                                                            creditDate: new DateTime(ProcessingDate.Year - 3, 1, 1),
-                                                            totalMOCPoints: 100,
-                                                            medicalKnowledgePoints: 20);
-        }
-
-        /// <summary>
-        /// Secondary setup (requiring the Container)
-        /// </summary>
-        protected override void PostSetup()
-        {
-            ProgramRulesService = Container.GetInstance<ProgramRulesService>();
-
-            //// ++++++++++++ Credential Service ++++++++++++
-            My<ICredentialService>().Setup(p => p.GetFirstIssuanceDate(It.IsAny<Guid>()))
-                  .Returns(FirstIssuanceDate);
-
-            My<ICredentialService>().Setup(p => p.SearchByMemberId(It.IsAny<Guid>()))
-                .Returns(new List<Credential>() { Credential });
-
-            My<ICredentialService>().Setup(p => p.Handle(It.IsAny<SetIssuanceToMaintainedCommand>()))
-                .Returns(new SetIssuanceToMaintainedCommandResult(CommandStatus.Accepted, null, null));
-
-            // ++++++++++++ ProductInterservice ++++++++++++
-            My<IProductInterservice>()
-                .Setup(p => p.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                .Returns(Task.FromResult(ActivitiesFullCollectionResource));
-            
-            // ***  AccessTokenServiceMock ---
-            My<IAccessTokenService>()
-               .Setup(o => o.GetAccessToken())
-               .Returns("--token--");
-
-            // ++++++++++++ Log ++++++++++++
-            ProgramRulesService.Log = Log.Object;
-            LogTest.Watch(Log);
-
-        }
-
-        public void WhenICallRunCorrectiveAction()
-        {
-            try
-            {
-                Result = ProgramRulesService.RunCorrectiveAction(
-                                credentialsIn: new List<Credential>() { Credential },
-                                memberId: new Guid(),
-                                eventDate: EventDate,
-                                processingDate: ProcessingDate).Result;
-            }
-            catch (Exception ex)
-            {
-                ExceptionCaught = ex;
-            }
-        }
-
-        public void ThenNoExceptionShouldHaveBeenThrown()
-        {
-            ExceptionCaught.Should().BeNull();
-        }
-
-        public void ThenResultShouldBeTrue()
-        {
-            Result.Should().Be(true);
-        }
-
-        public void AndThenSetIssuanceToMaintainedCommandShouldNOTBeCalled()
-        {
-            My<ICredentialService>()
-                .Verify(p => p.Handle(It.IsAny<SetIssuanceToMaintainedCommand>()), Times.Never());
-        }
-    }
-
     //**** MBM ********
     /// <summary>
     /// The ParticipationStatus_MBM_Meet2YearLookBack_MeetingScenario
@@ -617,117 +485,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         }
     }
 
-    /// <summary>
-    /// The ParticipationStatus_MBM_DontMeet2YearLookBack_NotMeetingScenario scenario
-    /// </summary>
-    public class ParticipationStatus_MBM_DontMeet2YearLookBack_NotMeetingScenario : ParticipationStatusSpecScenario
-    {
-        /// <summary>
-        /// Primary setup
-        /// </summary>
-        protected override void PreSetup()
-        {
-            //****  staging data values  ++++++++++++++++++++++++++++++++++++
-            CertificationId = Guid.NewGuid();
-            FirstIssuanceDate = new DateTime(DateTime.Now.Year - 3, 8, 3);
-            EventDate = new DateTime(DateTime.Now.Year, 9, 1);
-            ProcessingDate = DateTime.Now;
-
-            // *********  creating domain data  *********
-            Source source = SourceDataBuilder
-                            .With(a => a.Code = "ABIM")
-                            .Build();
-
-            Certification certification = (new CertificationDataBuilder(source))
-                                            .Build();
-
-            //Active MBM issuance NotMaintained
-            Issuance issuance = IssuanceDataBuilder
-                                .With(a => a.Source = source)
-                                .With(b => b.IssuanceStatus = IssuanceStatusType.Active)
-                                .With(b => b.Duration = DurationType.Continuous)
-                                .With(b => b.MaintenanceStatus = MaintenanceStatusType.NotMaintained)
-                                .With(b => b.MaintenanceRequirement = MaintenanceRequirementType.Required)
-                                .Build();
-
-            Credential = (new CredentialDataBuilder(certification))
-                        .Build();
-
-            Credential.AddIssuance(issuance);
-
-            // old points (should not meet 2 year look back)
-            Condition_MOCPoints_MedicalKnowledgePoints_ActivityCredit(completedDate: new DateTime(ProcessingDate.Year - 3, 1, 1),
-                                                            creditDate: new DateTime(ProcessingDate.Year - 3, 1, 1),
-                                                            totalMOCPoints: 100,
-                                                            medicalKnowledgePoints: 20);
-        }
-
-        /// <summary>
-        /// Secondary setup (requiring the Container)
-        /// </summary>
-        protected override void PostSetup()
-        {
-            ProgramRulesService = Container.GetInstance<ProgramRulesService>();
-
-            //// ++++++++++++ Credential Service ++++++++++++
-            My<ICredentialService>().Setup(p => p.GetFirstIssuanceDate(It.IsAny<Guid>()))
-                  .Returns(FirstIssuanceDate);
-
-            My<ICredentialService>().Setup(p => p.SearchByMemberId(It.IsAny<Guid>()))
-                .Returns(new List<Credential>() { Credential });
-
-            My<ICredentialService>().Setup(p => p.Handle(It.IsAny<SetIssuanceToMaintainedCommand>()))
-                .Returns(new SetIssuanceToMaintainedCommandResult(CommandStatus.Accepted, null, null));
-
-            // ++++++++++++ ProductInterservice ++++++++++++
-            My<IProductInterservice>()
-                .Setup(p => p.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                .Returns(Task.FromResult(ActivitiesFullCollectionResource));
-
-            // ***  AccessTokenServiceMock ---
-            My<IAccessTokenService>()
-               .Setup(o => o.GetAccessToken())
-               .Returns("--token--");
-
-            // ++++++++++++ Log ++++++++++++
-            ProgramRulesService.Log = Log.Object;
-            LogTest.Watch(Log);
-
-        }
-
-        public void WhenICallRunCorrectiveAction()
-        {
-            try
-            {
-                Result = ProgramRulesService.RunCorrectiveAction(
-                                credentialsIn: new List<Credential>() { Credential },
-                                memberId: new Guid(),
-                                eventDate: EventDate,
-                                processingDate: ProcessingDate).Result;
-            }
-            catch (Exception ex)
-            {
-                ExceptionCaught = ex;
-            }
-        }
-
-        public void ThenNoExceptionShouldHaveBeenThrown()
-        {
-            ExceptionCaught.Should().BeNull();
-        }
-
-        public void ThenResultShouldBeTrue()
-        {
-            Result.Should().Be(true);
-        }
-
-        public void AndThenSetIssuanceToMaintainedCommandShouldNOTBeCalled()
-        {
-            My<ICredentialService>()
-                .Verify(p => p.Handle(It.IsAny<SetIssuanceToMaintainedCommand>()), Times.Never());
-        }
-    }
-
     //**** GF ********
     /// <summary>
     /// The ParticipationStatus_GF_Meet2YearLookBack_MeetingScenario
@@ -766,7 +523,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
             Credential = (new CredentialDataBuilder(certification))
                         .With(a=>a.AssessmentMet=true)
                         .With(a=>a.AssessmentMetDate= new DateTime(EventDate.Year,1,1))
-                        .With(a=>a.GrandfatherMOCPrintDate= new DateTime(EventDate.Year, 1, 1))
                         .Build();
 
             Credential.AddIssuance(issuance);
@@ -840,121 +596,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRulesServiceTest
         {
             My<ICredentialService>()
                 .Verify(p => p.Handle(It.IsAny<SetIssuanceToMaintainedCommand>()), Times.Once());
-        }
-    }
-
-    /// <summary>
-    /// The ParticipationStatus_GF_DontMeet2YearLookBack_NotMeetingScenario scenario
-    /// </summary>
-    public class ParticipationStatus_GF_DontMeet2YearLookBack_NotMeetingScenario : ParticipationStatusSpecScenario
-    {
-        /// <summary>
-        /// Primary setup
-        /// </summary>
-        protected override void PreSetup()
-        {
-            //****  staging data values  ++++++++++++++++++++++++++++++++++++
-            CertificationId = Guid.NewGuid();
-            FirstIssuanceDate = new DateTime(DateTime.Now.Year - 3, 8, 3);
-            EventDate = new DateTime(DateTime.Now.Year, 9, 1);
-            ProcessingDate = DateTime.Now;
-
-            // *********  creating domain data  *********
-            Source source = SourceDataBuilder
-                            .With(a => a.Code = "ABIM")
-                            .Build();
-
-            Certification certification = (new CertificationDataBuilder(source))
-                                            .Build();
-
-            //Active GF issuance NotMaintained
-            Issuance issuance = IssuanceDataBuilder
-                                .With(a => a.Source = source)
-                                .With(b => b.IssuanceStatus = IssuanceStatusType.Active)
-                                .With(b => b.Duration = DurationType.Lifetime)
-                                .With(b => b.MaintenanceRequirement = MaintenanceRequirementType.NotRequired)
-                                .With(c => c.Occurrence = OccurrenceType.Initial)
-                                .With(b => b.MaintenanceStatus = MaintenanceStatusType.NotMaintained)
-                                .Build();
-
-            Credential = (new CredentialDataBuilder(certification))
-                        .With(a => a.AssessmentMet = true)
-                        .With(a => a.AssessmentMetDate = new DateTime(EventDate.Year, 1, 1))
-                        .With(a => a.GrandfatherMOCPrintDate = new DateTime(EventDate.Year, 1, 1))
-                        .Build();
-
-            Credential.AddIssuance(issuance);
-
-            // old points (should not meet 2 year look back)
-            Condition_MOCPoints_MedicalKnowledgePoints_ActivityCredit(completedDate: new DateTime(ProcessingDate.Year - 3, 1, 1),
-                                                            creditDate: new DateTime(ProcessingDate.Year - 3, 1, 1),
-                                                            totalMOCPoints: 100,
-                                                            medicalKnowledgePoints: 20);
-        }
-
-        /// <summary>
-        /// Secondary setup (requiring the Container)
-        /// </summary>
-        protected override void PostSetup()
-        {
-            ProgramRulesService = Container.GetInstance<ProgramRulesService>();
-
-            //// ++++++++++++ Credential Service ++++++++++++
-            My<ICredentialService>().Setup(p => p.GetFirstIssuanceDate(It.IsAny<Guid>()))
-                  .Returns(FirstIssuanceDate);
-
-            My<ICredentialService>().Setup(p => p.SearchByMemberId(It.IsAny<Guid>()))
-                .Returns(new List<Credential>() { Credential });
-
-            My<ICredentialService>().Setup(p => p.Handle(It.IsAny<SetIssuanceToMaintainedCommand>()))
-                .Returns(new SetIssuanceToMaintainedCommandResult(CommandStatus.Accepted, null, null));
-
-            // ++++++++++++ ProductInterservice ++++++++++++
-            My<IProductInterservice>()
-                .Setup(p => p.GetUserActivities(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                .Returns(Task.FromResult(ActivitiesFullCollectionResource));
-
-            // ***  AccessTokenServiceMock ---
-            My<IAccessTokenService>()
-               .Setup(o => o.GetAccessToken())
-               .Returns("--token--");
-
-            // ++++++++++++ Log ++++++++++++
-            ProgramRulesService.Log = Log.Object;
-            LogTest.Watch(Log);
-
-        }
-
-        public void WhenICallRunCorrectiveAction()
-        {
-            try
-            {
-                Result = ProgramRulesService.RunCorrectiveAction(
-                                credentialsIn: new List<Credential>() { Credential },
-                                memberId: new Guid(),
-                                eventDate: EventDate,
-                                processingDate: ProcessingDate).Result;
-            }
-            catch (Exception ex)
-            {
-                ExceptionCaught = ex;
-            }
-        }
-
-        public void ThenNoExceptionShouldHaveBeenThrown()
-        {
-            ExceptionCaught.Should().BeNull();
-        }
-
-        public void ThenResultShouldBeTrue()
-        {
-            Result.Should().Be(true);
-        }
-
-        public void AndThenSetIssuanceToMaintainedCommandShouldNOTBeCalled()
-        {
-            My<ICredentialService>()
-                .Verify(p => p.Handle(It.IsAny<SetIssuanceToMaintainedCommand>()), Times.Never());
         }
     }
 

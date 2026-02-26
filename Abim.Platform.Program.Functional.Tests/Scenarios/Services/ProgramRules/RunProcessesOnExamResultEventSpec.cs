@@ -70,18 +70,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         }
 
         [Test]
-        public void Should_Set_Due_Dates_For_Passed_KCI_Exam_Where_Consecutive_KCI_Pass_Not_Required_Due_Date_Is_ExamDueDate()
-        {
-            new ShouldSetDueDatesForPassedKCIExamWhereConsecutiveKCIPassNotRequiredDueDateIsExamDueDate().BDDfy();
-        }
-
-        [Test]
-        public void Should_Set_Due_Dates_For_Passed_KCI_Exam_Where_Consecutive_KCI_Pass_Not_Required_Due_Date_Is_End_Of_AdminYear_Plus_4()
-        {
-            new ShouldSetDueDatesForPassedKCIExamWhereConsecutiveKCIPassNotRequiredDueDateIsEndOfAdminYearPlus4().BDDfy();
-        }
-
-        [Test]
         public void Should_Set_Due_Dates_For_Failed_KCI_Exam_Where_Consecutive_KCI_Pass_Required()
         {
             new ShouldSetDueDatesForFailedKCIExamWhereConsecutiveKCIPassRequired().BDDfy();
@@ -182,12 +170,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         }
 
         [Test]
-        public void Should_Treat_Bad_Result_As_Passing_When_No_Consequence_And_AdminYear_Less_Than_Or_Equal_ExamDueDate_Year_And_ConsecutiveKCIPass_Not_Reqd()
-        {
-            new ShouldTreatBadResultAsPassingWhenNoConsequenceAndAdminYearLessThanOrEqualExamDueDateYearAndConsecutiveKCIPassNotReqd().BDDfy();
-        }
-
-        [Test]
         public void Should_Not_Treat_Bad_Result_As_Passing_When_No_Consequence_And_AdminYear_Greater_Than_ExamDueDate_Year_And_ConsecutiveKCIPass_Not_Reqd()
         {
             new ShouldNotTreatBadResultAsPassingWhenNoConsequenceAndAdminYearGreaterThanExamDueDateYearAndConsecutiveKCIPassNotReqd().BDDfy();
@@ -269,26 +251,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             new ShouldUpdateCredentialPathwayTo1YearWhenApplicableScenario().BDDfy();
         }
 
-        [Test]
-        [WorkItem(178847)]
-        public void Should_Set_DisplayExamDueDate_For_Pass_NoConsequnce_KCI_Exam_Where_Consecutive_KCI_Pass_Not_Required_ToDisplayExamDueDateWhenGreaterThanAdminYearPlusFour()
-        {
-            new ShouldSetDisplayExamDueDateForPassNoConsequnceKCIExamWhereConsecutiveKCIPassNotRequiredToDisplayExamDueDateWhenGreaterThanAdminYearPlusFour().BDDfy();
-        }
-
-        [Test]
-        [WorkItem(178847)]
-        public void Should_Set_DisplayExamDueDate_For_Pass_Consequnce_KCI_Exam_Where_Consecutive_KCI_Pass_Not_Required_ToDisplayExamDueDateWhenGreaterThanAdminYearPlusFour()
-        {
-            new ShouldSetDisplayExamDueDateForPassConsequnceKCIExamWhereConsecutiveKCIPassNotRequiredToDisplayExamDueDateWhenGreaterThanAdminYearPlusFour().BDDfy();
-        }
-
-        [Test]
-        [WorkItem(178847)]
-        public void Should_Set_DisplayExamDueDate_For_Fail_NoConsequnce_KCI_Exam_Where_Consecutive_KCI_Pass_Not_Required_ToDisplayExamDueDateWhenGreaterThanAdminYearPlusTwo()
-        {
-            new ShouldSetDisplayExamDueDateForFailNoConsequnceKCIExamWhereConsecutiveKCIPassNotRequiredToDisplayExamDueDateWhenGreaterThanAdminYearPlusTwo().BDDfy();
-        }
         #region Scenarios
 
         #region Base
@@ -306,7 +268,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             //    base.SetupAccessTokenServiceMock();
             //    _accessTokenSvcMock.Setup(x => x.GetAccessToken()).Returns(Task.FromResult("someToken"));
             //}
-            protected Credential SetupSharedCredential(Program.Resources.PathwayType pathwayType)
+            protected Credential SetupSharedCredential(Resources.PathwayType pathwayType)
             {
                 var source = (new SourceDataBuilder()).With(a => a.Code = "ABIM").Build();
 
@@ -423,7 +385,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             //    base.SetupAccessTokenServiceMock();
             //    _accessTokenSvcMock.Setup(x => x.GetAccessToken()).Returns(Task.FromResult("someToken"));
             //}
-            protected Credential SetupSharedCredential(Program.Resources.PathwayType pathwayType)
+            protected Credential SetupSharedCredential(Resources.PathwayType pathwayType)
             {
                 var source = (new SourceDataBuilder()).With(a => a.Code = "ABIM").Build();
 
@@ -599,9 +561,9 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
                 _cred.Pathway.Should().Be(Resources.PathwayType.MOC);
             }
 
-            private void AndTheCredentialPathwayShouldBeOneYear()
+            private void AndTheCredentialPathwayShouldRemainMOC()
             {
-                _cred.Pathway.Should().Be(Resources.PathwayType.OneYear);
+                _cred.Pathway.Should().Be(Resources.PathwayType.MOC);
             }
 
         }
@@ -738,94 +700,11 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         }
         #endregion ShouldSetDueDatesForPassedKCIExamWhereConsecutiveKCIPassRequiredNotFirstPass
 
-        #region ShouldSetDueDatesForPassedKCIExamWhereConsecutiveKCIPassNotRequiredDueDateIsExamDueDate
-        private class ShouldSetDueDatesForPassedKCIExamWhereConsecutiveKCIPassNotRequiredDueDateIsExamDueDate : RunProcessesOnExamResultEventScenario
-        {
-            protected override void SetupRegistration()
-            {
-                var builder = new RegistrationResourceBuilder();
-                _reg = builder
-                    .WithExamResult(ExamResultType.Pass)
-                    .WithExamType(ExamType.Kci)
-                    .WithCertificationId(_cred.Certification.ExternalId)
-                    .WithSeat(DateTime.Now)
-                    .WithAdministrationYear(DateTime.Now.Year + 1)
-                    .WithAdministrationDate(new DateTime())
-                    .Build();
-            }
-
-            protected override void SetupCredential()
-            {
-                _cred = SetupSharedCredential(Resources.PathwayType.KCI);
-                _cred.ExamDueDate = DateTime.Now.AddYears(7);
-            }
-
-            private void AndTheDueDateValuesShouldBeAsExpected()
-            {
-                _cred.KCIExamDueDate.Should().Be(new DateTime(DateTime.Now.Year + 5, 12, 31));
-                //PBI 150794
-                //Revised per Bug 161596 to use ExamDueDate instead of MOCExamDueDate
-                //Revised later to use DisplayExamDueDate instead
-                _cred.DisplayExamDueDate.Should().Be(new List<DateTime?> { new DateTime(_reg.AdministrationYear + 2, 12, 31), _cred.DisplayExamDueDate }.Max());
-            }
-
-            private void AndAssessmentPropertiesShouldBeSetCorrectly()
-            {
-                _cred.ConsecutiveKCIPassRequired.Should().BeFalse();
-                _cred.AssessmentMet.Should().BeTrue();
-                _cred.AssessmentMetDate.Should().Be(_reg.Seats[0].SeatDate.Date);
-                _cred.GracePeriodStartDate.ShouldBeNull();
-                _cred.GracePeriodEndDate.ShouldBeNull();
-            }
-        }
-        #endregion ShouldSetDueDatesForPassedKCIExamWhereConsecutiveKCIPassNotRequiredDueDateIsExamDueDate
-
-        #region ShouldSetDueDatesForPassedKCIExamWhereConsecutiveKCIPassNotRequiredDueDateIsEndOfAdminYearPlus4
-        private class ShouldSetDueDatesForPassedKCIExamWhereConsecutiveKCIPassNotRequiredDueDateIsEndOfAdminYearPlus4 : RunProcessesOnExamResultEventScenario
-        {
-            protected override void SetupRegistration()
-            {
-                var builder = new RegistrationResourceBuilder();
-                _reg = builder
-                    .WithExamResult(ExamResultType.Pass)
-                    .WithExamType(ExamType.Kci)
-                    .WithCertificationId(_cred.Certification.ExternalId)
-                    .WithSeat(DateTime.Now)
-                    .WithAdministrationYear(DateTime.Now.Year + 1)
-                    .WithAdministrationDate(new DateTime())
-                    .Build();
-            }
-
-            protected override void SetupCredential()
-            {
-                _cred = SetupSharedCredential(Resources.PathwayType.KCI);
-                _cred.MOCExamDueDate = DateTime.Now.AddYears(2);
-                _cred.ExamDueDate = _cred.MOCExamDueDate;
-            }
-
-            private void AndTheDueDateValuesShouldBeAsExpected()
-            {
-                var expectedDate = new DateTime(_reg.AdministrationYear + 4, 12, 31);
-                _cred.ExamDueDate.Should().Be(expectedDate);
-                _cred.KCIExamDueDate.Should().Be(expectedDate);
-                _cred.DisplayExamDueDate.Should().Be(expectedDate);
-            }
-
-            private void AndAssessmentPropertiesShouldBeSetCorrectly()
-            {
-                _cred.ConsecutiveKCIPassRequired.Should().BeFalse();
-                _cred.AssessmentMet.Should().BeTrue();
-                _cred.AssessmentMetDate.Should().Be(_reg.Seats[0].SeatDate.Date);
-                _cred.GracePeriodStartDate.ShouldBeNull();
-                _cred.GracePeriodEndDate.ShouldBeNull();
-            }
-        }
-        #endregion ShouldSetDueDatesForPassedKCIExamWhereConsecutiveKCIPassNotRequiredDueDateIsEndOfAdminYearPlus4
 
         #region ShouldSetDisplayDueDateForPassedKCIExamToExamDueDateIfGreaterThanAdministrationYearPlusTwo
         private class ShouldSetDisplayDueDateForPassedKCIExamToExamDueDateIfGreaterThanAdministrationYearPlusTwo : RunProcessesOnExamResultEventScenario
         {
-            private DateTime _examDueDate = DateTime.Now.AddYears(7);
+            private readonly DateTime _examDueDate = DateTime.Now.AddYears(7);
 
             protected override void SetupRegistration()
             {
@@ -899,8 +778,8 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         #region ShouldSetDueDatesForFailedKCIExamWhereConsecutiveKCIPassNotRequired
         private class ShouldNotChangeDisplayExamDueDateForFailedKCIExamWhereConsecutiveKCIPassNotRequired : RunProcessesOnExamResultEventScenario
         {
-            private DateTime _examDueDate = DateTime.Now.AddYears(7);
-            private DateTime _adminDate = DateTime.Now;
+            private readonly DateTime _examDueDate = DateTime.Now.AddYears(7);
+            private readonly DateTime _adminDate = DateTime.Now;
 
             protected override void SetupRegistration()
             {
@@ -935,8 +814,8 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         #region ShouldNotChangeExamDueDateForKCIPassWithEarlyTakerNoConsecutiveKCIPassRequired
         private class ShouldNotChangeExamDueDateForKCIPassWithEarlyTakerNoConsecutiveKCIPassRequired : RunProcessesOnExamResultEventScenario
         {
-            private DateTime _examDueDate = DateTime.Now.AddYears(10);
-            private DateTime _adminDate = DateTime.Now;
+            private readonly DateTime _examDueDate = DateTime.Now.AddYears(10);
+            private readonly DateTime _adminDate = DateTime.Now;
 
             protected override void SetupRegistration()
             {
@@ -972,8 +851,8 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         #region ShouldNotChangeExamDueDateForKCIPassWithEarlyTakerConsecutiveKCIPassRequired
         private class ShouldNotChangeExamDueDateForKCIPassWithEarlyTakerConsecutiveKCIPassRequired : RunProcessesOnExamResultEventScenario
         {
-            private DateTime _examDueDate = DateTime.Now.AddYears(10);
-            private DateTime _adminDate = DateTime.Now;
+            private readonly DateTime _examDueDate = DateTime.Now.AddYears(10);
+            private readonly DateTime _adminDate = DateTime.Now;
 
             protected override void SetupRegistration()
             {
@@ -1082,8 +961,8 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         #region ShouldSetDueDatesForIndeterminateKCIExamWhereConsecutiveKCIPassNotRequired
         private class ShouldSetDisplayExamDueDateForIndeterminateKCIExamWhereConsecutiveKCIPassNotRequiredToExamDueDateWhenGreaterThanAdminYearPlusTwo : RunProcessesOnExamResultEventScenario
         {
-            private DateTime _examDueDate = DateTime.Now.AddYears(7);
-            private DateTime _displayExamDueDate = new DateTime(2025, 12, 31);
+            private readonly DateTime _examDueDate = DateTime.Now.AddYears(7);
+            private readonly DateTime _displayExamDueDate = new DateTime(2025, 12, 31);
 
             protected override void SetupRegistration()
             {
@@ -1154,10 +1033,10 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         #region ShouldSetDueDatesForIndeterminateKCIExamWhereConsecutiveKCIPassNotRequired
         private class ShouldSetDisplayExamDueDateForIncompleteKCIExamWhereConsecutiveKCIPassNotRequiredToDisplayExamDueDateWhenGreaterThanAdminYearPlusTwo : RunProcessesOnExamResultEventScenario
         {
-            private DateTime? _startingExamDueDate;
-            private DateTime? _startingMOCExamDueDate;
-            private DateTime _examDueDate = DateTime.Now.AddYears(7);
-            private DateTime _displayExamDueDate = new DateTime(2025, 12, 31);
+            private  DateTime? _startingExamDueDate;
+            private  DateTime? _startingMOCExamDueDate;
+            private readonly DateTime _examDueDate = DateTime.Now.AddYears(7);
+            private readonly DateTime _displayExamDueDate = new DateTime(2025, 12, 31);
 
             protected override void SetupRegistration()
             {
@@ -1307,8 +1186,8 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
         #region ShouldSetDueDatesForIndeterminateKCIExamWhereConsecutiveKCIPassNotRequired
         private class ShouldSetDisplayExamDueDateForUnableToTestKCIExamWhereConsecutiveKCIPassNotRequiredToExamDueDateWhenGreaterThanAdminYearPlusTwo : RunProcessesOnExamResultEventScenario
         {
-            private DateTime _examDueDate = DateTime.Now.AddYears(7);
-            private DateTime _displayExamDueDate = new DateTime(2025, 12, 31);
+            private readonly DateTime _examDueDate = DateTime.Now.AddYears(7);
+            private readonly DateTime _displayExamDueDate = new DateTime(2025, 12, 31);
 
             protected override void SetupRegistration()
             {
@@ -1350,37 +1229,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             }
         }
         #endregion ShouldUpdateCredentialWhenChanged
-
-        private class ShouldTreatBadResultAsPassingWhenNoConsequenceAndAdminYearLessThanOrEqualExamDueDateYearAndConsecutiveKCIPassNotReqd : RunProcessesOnExamResultEventScenario
-        {
-            protected override void SetupRegistration()
-            {
-                var builder = new RegistrationResourceBuilder();
-                _reg = builder
-                    .WithExamResult(ExamResultType.Fail)
-                    .WithExamType(ExamType.Kci)
-                    .WithCertificationId(_cred.Certification.ExternalId)
-                    .WithSeat(DateTime.Now)
-                    .WithAdministrationYear(DateTime.Now.Year)
-                    .WithAdministrationDate(new DateTime())
-                    .WithNoConsequence(true)
-                    .Build();
-            }
-
-            protected override void SetupCredential()
-            {
-                _cred = SetupSharedCredential(Resources.PathwayType.MOC);
-                _cred.ConsecutiveKCIPassRequired = false;
-                _cred.ExamDueDate = DateTime.Now;
-                _cred.AssessmentMet = false;
-                _cred.ExamDueDate = DateTime.Now;
-            }
-
-            protected void AndTheCredentialShouldBeMarkedAsHavingTheAssessmentMet()
-            {
-                _cred.AssessmentMet.Should().BeTrue();
-            }
-        }
 
         private class ShouldNotTreatBadResultAsPassingWhenNoConsequenceAndAdminYearGreaterThanExamDueDateYearAndConsecutiveKCIPassNotReqd : RunProcessesOnExamResultEventScenario
         {
@@ -1915,130 +1763,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.ProgramRules
             }
         }
 
-        private class ShouldSetDisplayExamDueDateForPassNoConsequnceKCIExamWhereConsecutiveKCIPassNotRequiredToDisplayExamDueDateWhenGreaterThanAdminYearPlusFour : RunProcessesOnExamResultEventScenario
-        {
-            private DateTime _startingExamDueDate = new DateTime(2022, 12, 31);
-
-            private DateTime _examPassDate = new DateTime(2020, 11, 03);
-
-            protected override void SetupRegistration()
-            {
-                var builder = new RegistrationResourceBuilder();
-                _reg = builder
-                    .WithExamResult(ExamResultType.Pass)
-                    .WithExamType(ExamType.Kci)
-                    .WithCertificationId(_cred.Certification.ExternalId)
-                    .WithSeat(_examPassDate)
-                    .WithAdministrationYear(_examPassDate.Year)
-                    .WithAdministrationDate(_examPassDate.AddDays(-2))
-                    .WithNoConsequence(false)
-                    .Build();
-            }
-
-            protected override void SetupCredential()
-            {
-                _cred = SetupSharedCredential(Resources.PathwayType.KCI);
-                _cred.ConsecutiveKCIPassRequired = false;
-                _cred.ExamDueDate = _startingExamDueDate;
-                _cred.DisplayExamDueDate = _startingExamDueDate;
-                _cred.KCIExamDueDate = _startingExamDueDate;
-                _cred.DisplayExamDueDate = _startingExamDueDate;
-            }
-
-            private void AndTheDueDateValuesShouldBeAsExpected()
-            {
-                var expectedDueDate = new DateTime(_examPassDate.Year + 4, 12, 31);
-
-                _cred.ExamDueDate.ShouldBeEquivalentTo(expectedDueDate);
-                _cred.DisplayExamDueDate.ShouldBeEquivalentTo(expectedDueDate);
-                _cred.KCIExamDueDate.ShouldBeEquivalentTo(expectedDueDate);
-                _cred.MOCExamDueDate.ShouldBeEquivalentTo(expectedDueDate);
-
-            }
-        }
-
-        private class ShouldSetDisplayExamDueDateForPassConsequnceKCIExamWhereConsecutiveKCIPassNotRequiredToDisplayExamDueDateWhenGreaterThanAdminYearPlusFour : RunProcessesOnExamResultEventScenario
-        {
-            private DateTime _startingExamDueDate = new DateTime(2022, 12, 31);
-
-            private DateTime _examPassDate = new DateTime(2020, 11, 03);
-
-            protected override void SetupRegistration()
-            {
-                var builder = new RegistrationResourceBuilder();
-                _reg = builder
-                    .WithExamResult(ExamResultType.Pass)
-                    .WithExamType(ExamType.Kci)
-                    .WithCertificationId(_cred.Certification.ExternalId)
-                    .WithSeat(_examPassDate)
-                    .WithAdministrationYear(_examPassDate.Year)
-                    .WithAdministrationDate(_examPassDate.AddDays(-2))
-                    .WithNoConsequence(true) // !!!!
-                    .Build();
-            }
-
-            protected override void SetupCredential()
-            {
-                _cred = SetupSharedCredential(Resources.PathwayType.KCI);
-                _cred.ConsecutiveKCIPassRequired = false;
-                _cred.ExamDueDate = _startingExamDueDate;
-                _cred.DisplayExamDueDate = _startingExamDueDate;
-                _cred.KCIExamDueDate = _startingExamDueDate;
-                _cred.DisplayExamDueDate = _startingExamDueDate;
-            }
-
-            private void AndTheDueDateValuesShouldBeAsExpected()
-            {
-                var expectedDueDate = new DateTime(_examPassDate.Year + 4, 12, 31);
-
-                _cred.ExamDueDate.ShouldBeEquivalentTo(expectedDueDate);
-                _cred.DisplayExamDueDate.ShouldBeEquivalentTo(expectedDueDate);
-                _cred.KCIExamDueDate.ShouldBeEquivalentTo(expectedDueDate);
-                _cred.MOCExamDueDate.ShouldBeEquivalentTo(expectedDueDate);
-
-            }
-        }
-
-        private class ShouldSetDisplayExamDueDateForFailNoConsequnceKCIExamWhereConsecutiveKCIPassNotRequiredToDisplayExamDueDateWhenGreaterThanAdminYearPlusTwo : RunProcessesOnExamResultEventScenario
-        {
-            private DateTime _startingExamDueDate = new DateTime(2022, 12, 31);
-            private DateTime _examPassDate = new DateTime(2020, 11, 03);
-
-            protected override void SetupRegistration()
-            {
-                var builder = new RegistrationResourceBuilder();
-                _reg = builder
-                    .WithExamResult(ExamResultType.Fail)
-                    .WithExamType(ExamType.Kci)
-                    .WithCertificationId(_cred.Certification.ExternalId)
-                    .WithSeat(_examPassDate)
-                    .WithAdministrationYear(_examPassDate.Year)
-                    .WithAdministrationDate(_examPassDate.AddDays(-2))
-                    .WithNoConsequence(true) // !!!!
-                    .Build();
-            }
-
-            protected override void SetupCredential()
-            {
-                _cred = SetupSharedCredential(Resources.PathwayType.KCI);
-                _cred.ConsecutiveKCIPassRequired = false;
-                _cred.ExamDueDate = _startingExamDueDate;
-                _cred.DisplayExamDueDate = _startingExamDueDate;
-                _cred.KCIExamDueDate = _startingExamDueDate;
-                _cred.DisplayExamDueDate = _startingExamDueDate;
-            }
-
-            private void AndTheDueDateValuesShouldBeAsExpected()
-            {
-                var expectedDueDate = new DateTime(_examPassDate.Year + 2, 12, 31);
-
-                _cred.ExamDueDate.ShouldBeEquivalentTo(expectedDueDate);
-                _cred.DisplayExamDueDate.ShouldBeEquivalentTo(expectedDueDate);
-                _cred.KCIExamDueDate.ShouldBeEquivalentTo(expectedDueDate);
-                _cred.MOCExamDueDate.ShouldBeEquivalentTo(expectedDueDate);
-
-            }
-        }
         #endregion Scenarios
     }
 }

@@ -1,6 +1,4 @@
-﻿extern alias SharedOldServiceBus;
-using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
-using Abim.Enterprise.Core.Profile.Resource;
+﻿extern alias SharedOldServiceBus;  
 using Abim.Platform.Program.App.DTOs;
 using Abim.Platform.Program.App.HangFireJobs;
 using Abim.Platform.Program.App.Services;
@@ -20,6 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TestStack.BDDfy;
 using static Abim.Platform.Program.App.Util.Constants;
+using Abim.Platform.Program.MembershipClient;
 
 namespace Abim.Platform.Program.Tests.Scenarios.HangfireJobs
 {
@@ -67,30 +66,32 @@ namespace Abim.Platform.Program.Tests.Scenarios.HangfireJobs
         {
             protected Mock<ICredentialService> _credentialServiceMock;
             protected Mock<IBusControl> _busControlMock;
-            protected Mock<IProfileInterservice> _profileInterserviceMock;
+            protected Mock<IMembershipClientService> _membershipClientServiceMock; 
             protected Mock<IAccessTokenService> _accessTokenSingletonWraper;
             protected string _profileHostUrl = "https://myFakeProfileUrl/api/";
+            protected string _enviroment = "Dev";
             protected Exception _caughtException;
             protected DeselectCertificateChildJob _sut;
             protected readonly Guid IM_GUID = Guid.Parse("1771AD17-9920-E711-8101-005056AB0204");
             protected readonly Guid CARD_GUID = Guid.Parse("0571AD17-9920-E711-8101-005056AB0198");
             protected readonly Guid ICARD_GUID = Guid.Parse("1871AD17-9920-E711-8101-005056AB0204");
-            protected ProfileNestedResource _profile;
+            protected ProfileResource _profile;
             protected Guid _memberId = Guid.NewGuid();
 
             protected virtual void Setup()
             {
                 SetupCredentialServiceMock();
                 SetupBusControlMock();
-                SetupProfileInterserviceMock();
+                SetupProfileMembershipMock();
                 SetupAccessTokenServiceMock();
 
                 _sut =
                     new DeselectCertificateChildJob(
                         _credentialServiceMock.Object,
                         _busControlMock.Object,
-                        _profileInterserviceMock.Object,
+                        _membershipClientServiceMock.Object,
                         _profileHostUrl,
+                        _enviroment,
                         _accessTokenSingletonWraper.Object);
             }
 
@@ -110,17 +111,18 @@ namespace Abim.Platform.Program.Tests.Scenarios.HangfireJobs
                     .Returns(Task.FromResult(false));
             }
 
-            protected virtual void SetupProfileInterserviceMock()
+            protected virtual void SetupProfileMembershipMock()
             {
-                _profile = new ProfileNestedResource();
+                _profile = new ProfileResource();
                 _profile.AbimId = "123456";
-                _profile.Name = new NameResource { LastName = "Shatner" };
-                _profile.EmailAddress = new EmailAddressSummaryResource { EmailAddress = "billshatner@fakemail.com" };
-                
-                _profileInterserviceMock = new Mock<IProfileInterservice>(MockBehavior.Strict);
-                _profileInterserviceMock
-                    .Setup(mock => mock.GetProfileById(It.IsAny<string>(), _profileHostUrl, _memberId))
+                _profile.Name = new ProfileNameResource { LastName = "Shatner" };
+                _profile.EmailAddress = "billshatner@fakemail.com";
+
+                _membershipClientServiceMock = new Mock<IMembershipClientService>(MockBehavior.Strict);
+                _membershipClientServiceMock
+                    .Setup(mock => mock.GetProfileByMemberIdAsync(_memberId))
                     .Returns(Task.FromResult(_profile));
+
             }
 
             protected virtual void SetupAccessTokenServiceMock()
@@ -142,7 +144,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.HangfireJobs
                             new CredentialInfoDTO { ExternalId = IM_GUID, CertificateName = "Internal Medicine", IsActive = false }, 
                             new CredentialInfoDTO { ExternalId = CARD_GUID, CertificateName = "Cardiovascular Disease", IsActive = false } 
                         }, 
-                        new DateTime(DateTime.Now.Year, 2, 1), 
+                        new DateTime(DateTime.Now.Year, 4, 1), 
                         null, 
                         null);
                 }
@@ -192,7 +194,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.HangfireJobs
                             new CredentialInfoDTO { ExternalId = IM_GUID, CertificateName = "Internal Medicine" },
                             new CredentialInfoDTO { ExternalId = CARD_GUID, CertificateName = "Cardiovascular Disease" }
                         },
-                        new DateTime(DateTime.Now.Year, 2, 1), 
+                        new DateTime(DateTime.Now.Year, 4, 1), 
                         null, 
                         _cancellationToken.Object);
                 }
@@ -230,7 +232,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.HangfireJobs
                             new CredentialInfoDTO { ExternalId = ICARD_GUID, CertificateName = "Interventional Cardiology", IsActive = false }, 
                             new CredentialInfoDTO { ExternalId = CARD_GUID, CertificateName = "Cardiovascular Disease", IsActive = true }
                         },
-                        new DateTime(DateTime.Now.Year, 2, 1),
+                        new DateTime(DateTime.Now.Year, 4, 1),
                         null,
                         null);
                 }
@@ -244,13 +246,14 @@ namespace Abim.Platform.Program.Tests.Scenarios.HangfireJobs
             {
                 _busControlMock.Verify(mock => 
                     mock.Publish(It.Is<NotificationEvent>(evt => 
-                        evt.EmailAddress == _profile.EmailAddress.EmailAddress
+                        evt.EmailAddress == _profile.EmailAddress
                         && evt.TemplateExternalKey == TriggeredCommunicationTemplateExternalKey.DeactivateCertification
                         && evt.Parameters["LastName"] == _profile.Name.LastName
                         && evt.Parameters["CertificationNames"] == "Internal Medicine<br />Cardiovascular Disease<br />"
                         && evt.Parameters["CertificationNames_TV"] == "Internal Medicine, Cardiovascular Disease"
-                        && evt.Parameters["SubscriberKey"] == _profile.EmailAddress.EmailAddress
-                        && evt.Parameters["IID"] == _profile.AbimId), It.IsAny<CancellationToken>()), Times.Once);
+                        && evt.Parameters["SubscriberKey"] == _profile.EmailAddress
+                        && evt.Parameters["IID"] == _profile.AbimId
+                        && evt.Parameters["Env"] == _enviroment), It.IsAny<CancellationToken>()), Times.Once);
             }
         }
 
@@ -272,7 +275,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.HangfireJobs
                             new CredentialInfoDTO { ExternalId = ICARD_GUID, CertificateName = "Interventional Cardiology", IsActive = false },
                             new CredentialInfoDTO { ExternalId = CARD_GUID, CertificateName = "Cardiovascular Disease", IsActive = false }
                         },
-                        new DateTime(DateTime.Now.Year, 2, 1),
+                        new DateTime(DateTime.Now.Year, 4, 1),
                         null,
                         null);
                 }

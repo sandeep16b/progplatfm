@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 
 namespace Abim.Platform.Program.App.ServiceBus
 {
+    /// <summary>
+    /// RegistrationCreatedEventConsumer
+    /// </summary>
     public class RegistrationCreatedEventConsumer : IConsumer<IRegistrationCreatedEvent>
     {
         #region Properties
@@ -69,7 +72,10 @@ namespace Abim.Platform.Program.App.ServiceBus
             AccessTokenService = accessTokenSingleton;
             RegistrationInterservice = registrationInterservice;
         }
-
+        /// <summary>
+        /// Consume
+        /// </summary>
+        /// <param name="context"></param> 
         public async Task Consume(ConsumeContext<IRegistrationCreatedEvent> context)
         {
             try
@@ -99,7 +105,10 @@ namespace Abim.Platform.Program.App.ServiceBus
                 Log.Error(ex);
             }
         }
-
+        /// <summary>
+        /// GetCertificationIdFromRegistration
+        /// </summary>
+        /// <param name="registrationId"></param> 
         private async Task<Guid> GetCertificationIdFromRegistration(Guid registrationId)
         {
 
@@ -111,12 +120,16 @@ namespace Abim.Platform.Program.App.ServiceBus
             }
             return Guid.Empty;
         }
-
+        /// <summary>
+        /// GetCredentialIdForCertification
+        /// </summary>
+        /// <param name="memberId"></param> 
+        /// <param name="certificationId"></param> 
         private Guid GetCredentialIdForCertification(Guid memberId, Guid certificationId)
         {
             var issuances = CredentialService.GetIssuancesForMemberId(memberId).ToList();
 
-            if (issuances != null && issuances.Any())
+            if (issuances.Any())
             {
                 var issuance = issuances
                                     .OrderByDescending(x => x.IssuanceDate)
@@ -129,7 +142,11 @@ namespace Abim.Platform.Program.App.ServiceBus
             }
             return Guid.Empty;
         }
-
+        /// <summary>
+        /// GetMarkCertificatesForSelectOrDeselectCommand
+        /// </summary>
+        /// <param name="memberId"></param> 
+        /// <param name="credentialId"></param> 
         private MarkCertificatesForSelectOrDeselectCommand GetMarkCertificatesForSelectOrDeselectCommand(Guid memberId, Guid credentialId)
         {
             var command = new MarkCertificatesForSelectOrDeselectCommand()

@@ -60,7 +60,7 @@ namespace Abim.Platform.Program.WebApi.Util.Infrastructure.ServiceBus
                 {
                     transaction.SetResult(@event);
                 }
-                catch(Exception ex)
+                catch(Exception)
                 {
                     //doesn't matter
                 }
@@ -130,7 +130,7 @@ namespace Abim.Platform.Program.WebApi.Util.Infrastructure.ServiceBus
         /// <returns></returns>
         internal async Task SetTimeout<TResultEvent>(int seconds)
         {
-            SetTimeout(seconds, default(TResultEvent));
+           SetTimeout(seconds, default(TResultEvent));
         }
 
         /// <summary>

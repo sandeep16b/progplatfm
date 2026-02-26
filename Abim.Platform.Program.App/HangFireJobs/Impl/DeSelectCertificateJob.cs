@@ -43,7 +43,7 @@ namespace Abim.Platform.Program.App.HangFireJobs
                 if (cancellationToken != null)
                     cancellationToken.ThrowIfCancellationRequested();
 
-                DateTime deselectionEffectiveDate = new DateTime(DateTime.Now.Year, 2, 1);
+                DateTime deselectionEffectiveDate = new DateTime(DateTime.Now.Year, 4, 1);
                 
                 Log.Info($"Executing DeSelectCertificateJob for deselection effective date {deselectionEffectiveDate}.");
 

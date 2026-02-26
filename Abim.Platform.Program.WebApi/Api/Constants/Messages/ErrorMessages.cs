@@ -47,7 +47,7 @@ namespace Abim.Platform.Program.WebApi
         /// <returns></returns>
         public static string NotFound(string typeName, Object id)
         {
-            return string.Format(_notFound, typeName, id.ToString());
+            return string.Format(_notFound, typeName, id);
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Abim.Platform.Program.WebApi
         /// <returns></returns>
         public static string NotFound(Type entityType, Object id)
         {
-            return string.Format(_notFound, entityType.Name, id.ToString());
+            return string.Format(_notFound, entityType.Name, id);
         }
 
         /// <summary>

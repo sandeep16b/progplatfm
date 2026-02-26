@@ -151,8 +151,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Source
         protected override void PreSetup()
         {
             MockList = new List<App.Domain.Source>();
-            EmailBuilder = new EmailBuilder();
-            OverrideAndInjectUnacceptableScope();
+            EmailBuilder = new EmailBuilder(); 
         }
 
         protected override void PostSetup()
@@ -209,7 +208,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Source
         {
             MockList = new List<App.Domain.Source>();
             EmailBuilder = new EmailBuilder();
-            OverrideScope();
+            OverrideAndInjectUnacceptableScope();
         }
 
         protected override void PostSetup()
@@ -266,9 +265,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Source
                 var domainObject = CreateSource();
                 domainObject.Name = (startNumber + i).ToString().PadLeft(5, '0');
                 MockList.Add(domainObject);
-            }
-
-            OverrideAndInjectUnacceptableScope();
+            } 
         }
 
         protected override void PostSetup()
@@ -351,21 +348,19 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Source
         int pageSize;
         int pageIndex;
         int startNumber;
-        
+
         protected override void PreSetup()
         {
             totalNumber = new Random().Next(100, 1000);
             startNumber = new Random().Next(1000, 2000);
             MockList = new List<App.Domain.Source>();
             EmailBuilder = new EmailBuilder();
-            for(var i = 0; i < totalNumber; i++)
+            for (var i = 0; i < totalNumber; i++)
             {
                 var domainObject = CreateSource();
                 domainObject.Name = (startNumber + i).ToString().PadLeft(5, '0');
                 MockList.Add(domainObject);
             }
-
-            OverrideAndInjectUnacceptableScope();
         }
 
         protected override void PostSetup()
@@ -445,6 +440,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Source
                     sorted = false;
                     break;
                 }
+                previousItem = item;
             }
             sorted.Should().Be(true);
         }
@@ -476,9 +472,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Source
                 var domainObject = CreateSource();
                 domainObject.Name = (startNumber + i).ToString().PadLeft(5, '0');
                 MockList.Add(domainObject);
-            }
-
-            OverrideAndInjectUnacceptableScope();
+            } 
+           
         }
 
         protected override void PostSetup()
@@ -588,7 +583,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Source
                 domainObject.Name = (startNumber + i).ToString().PadLeft(5, '0');
                 MockList.Add(domainObject);
             }
-            OverrideAndInjectUnacceptableScope();
+           // OverrideScope();
         }
 
         protected override void PostSetup()
@@ -643,13 +638,12 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Source
             startNumber = new Random().Next(1000, 2000);
             MockList = new List<App.Domain.Source>();
             EmailBuilder = new EmailBuilder();
-            for(var i = 0; i < totalNumber; i++)
+            for (var i = 0; i < totalNumber; i++)
             {
                 var domainObject = CreateSource();
                 domainObject.Name = (startNumber + i).ToString().PadLeft(5, '0');
                 MockList.Add(domainObject);
             }
-            OverrideAndInjectUnacceptableScope();
         }
 
         protected override void PostSetup()
@@ -710,8 +704,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Source
                 var domainObject = CreateSource();
                 domainObject.Name = (startNumber + i).ToString().PadLeft(5, '0');
                 MockList.Add(domainObject);
-            }
-            OverrideAndInjectUnacceptableScope();
+            } 
         }
 
         protected override void PostSetup()
@@ -777,8 +770,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Source
                 var domainObject = CreateSource();
                 domainObject.Name = (startNumber + i).ToString().PadLeft(5, '0');
                 MockList.Add(domainObject);
-            }
-            OverrideAndInjectUnacceptableScope();
+            } 
         }
 
         protected override void PostSetup()

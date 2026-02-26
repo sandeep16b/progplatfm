@@ -12,6 +12,7 @@ using MassTransit;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -70,8 +71,19 @@ namespace Abim.Platform.Program.Host.Api.Controllers
 
         #endregion
 
-        #region Endpoints
+        #region Disposal
 
+        /// <summary>
+        /// Disposes the services.
+        /// </summary>
+        protected void DisposeServices(HttpRequestMessage message)
+        {
+            message.RegisterForDispose(CredentialService);
+        }
+
+        #endregion
+
+        #region Endpoints 
 
         /// <summary>
         /// Times the limited credentials.
@@ -110,7 +122,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
 
             var memberId = MemberId;
 
-            DateTime startDate = new DateTime();
+            DateTime startDate ;
 
             //check if any value is pass to use, otherwise used current date
             DateTime processingDate = ProcessingDate.HasValue ? ProcessingDate.Value : DateTime.Now;
@@ -192,6 +204,10 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                 Logger.Error(ex);
                 return Content(HttpStatusCode.InternalServerError, string.Format("An error has occurred while testing corrective action: '{0}'", ex.Message));
             }
+            finally
+            {
+                DisposeServices(Request);
+            }
         }
 
         /// <summary>
@@ -227,6 +243,10 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                 Logger.Error(ex);
                 return Content(HttpStatusCode.InternalServerError, string.Format("An error has occurred while testing corrective action: '{0}'", ex.Message));
             }
+            finally
+            {
+                DisposeServices(Request);
+            }
         }
 
         /// <summary>
@@ -260,6 +280,10 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             {
                 Logger.Error(ex);
                 return Content(HttpStatusCode.InternalServerError, string.Format("An error has occurred while testing TriggeredCommunication action: '{0}'", ex.Message));
+            }
+            finally
+            {
+                DisposeServices(Request);
             }
         }
 
@@ -301,6 +325,10 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                 Logger.Error(ex);
                 return Content(HttpStatusCode.InternalServerError, string.Format("An error has occurred while testing corrective action: '{0}'", ex.Message));
             }
+            finally
+            {
+                DisposeServices(Request);
+            }
         }
 
         #endregion
@@ -311,6 +339,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         /// OnExamResultEvent
         /// </summary>
         /// <param name="registrationGuid"></param>
+        /// <param name="examRegistration"></param>
         /// <param name="processingDate"></param>
         /// <returns></returns>
         [HttpGet]
@@ -338,6 +367,10 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                 Logger.Error(ex);
                 return Content(HttpStatusCode.InternalServerError, $"An error has occurred while testing '{ex.Message}'");
             }
+            finally
+            {
+                DisposeServices(Request);
+            }
         }
 
         #endregion
@@ -363,8 +396,6 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         {
             try
             {
-
-                lookBackDate = lookBackDate ?? new DateTime(2018, 12, 31);
                 processingDate = processingDate ?? DateTime.Now;
 
                 await ProgramRulesService.HandleEarlyYearEndLookbackChildJob(memberId,
@@ -377,6 +408,10 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             {
                 Logger.Error(ex);
                 return Content(HttpStatusCode.InternalServerError, string.Format("An error has occurred while testing corrective action: '{0}'", ex.Message));
+            }
+            finally
+            {
+                DisposeServices(Request);
             }
         }
 
@@ -418,6 +453,10 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             {
                 Logger.Error(ex);
                 return Content(HttpStatusCode.InternalServerError, string.Format("An error has occurred while testing lock out period : '{0}'", ex.Message));
+            }
+            finally
+            {
+                DisposeServices(Request);
             }
         }
 

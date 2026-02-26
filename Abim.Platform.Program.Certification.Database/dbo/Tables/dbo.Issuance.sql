@@ -10,7 +10,8 @@ CREATE TABLE [dbo].[Issuance] (
 	--All other fields (sorted alphabetically)
     [DeselectionEffectiveDate]       DATETIME                    NULL, 
     [DeSelectionProcessedDate]        DATETIME                    NULL, 
-    [DeselectionSubmittedDate]       DATETIME                    NULL, 
+    [DeselectionSubmittedDate]       DATETIME                    NULL,
+    [DeselectionType]                NVARCHAR (50)               NULL,
     [Duration]						 NVARCHAR (50)               NOT NULL,
 	[ExpirationDate]				 DATETIME                    NULL,
 	[ExpiredDate]					 DATETIME					 NULL, 
@@ -34,7 +35,8 @@ CREATE TABLE [dbo].[Issuance] (
     CONSTRAINT [FK_Issuance_IssuanceStatusType]				 FOREIGN KEY ([IssuanceStatus])				REFERENCES [dbo].[IssuanceStatusType] ([Value]),
     CONSTRAINT [FK_Issuance_MaintenanceRequirementType]		 FOREIGN KEY ([MaintenanceRequirement])	    REFERENCES [dbo].[MaintenanceRequirementType] ([Value]),
     CONSTRAINT [FK_Issuance_MaintenanceStatusType]			 FOREIGN KEY ([MaintenanceStatus])		    REFERENCES [dbo].[MaintenanceStatusType] ([Value]),
-    CONSTRAINT [FK_Issuance_OccurrenceType]					 FOREIGN KEY ([Occurrence])				    REFERENCES [dbo].[OccurrenceType] ([Value]), 
+    CONSTRAINT [FK_Issuance_OccurrenceType]					 FOREIGN KEY ([Occurrence])				    REFERENCES [dbo].[OccurrenceType] ([Value]),
+    CONSTRAINT [FK_Issuance_DeselectionType]				 FOREIGN KEY ([DeselectionType])			REFERENCES [dbo].[DeselectionType] ([Value]),
     CONSTRAINT [NK_Issuance] UNIQUE ([CredentialId],[IssuanceDate],[EffectiveDate])    
 );
 
@@ -59,6 +61,9 @@ GO
 CREATE NONCLUSTERED INDEX [IK_Issuance_DeselectionEffectiveDate] ON [dbo].[Issuance] ([DeselectionEffectiveDate])
 GO
 CREATE NONCLUSTERED INDEX [IK_Issuance_DeselectionProcessedDate] ON [dbo].[Issuance] ([DeSelectionProcessedDate])
+GO
+CREATE NONCLUSTERED INDEX [NK_Issuance2] ON [dbo].[Issuance] ([Duration],[IssuanceStatus],[SourceId],[ExpirationDate])
+INCLUDE ([CredentialId])
 GO
 
   EXEC Sp_addextendedproperty 
@@ -113,6 +118,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'Issuance',
     @level2type = N'COLUMN',
     @level2name = N'DeselectionSubmittedDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Deselection type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'Issuance',
+    @level2type = N'COLUMN',
+    @level2name = N'DeselectionType'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Date of issuance',

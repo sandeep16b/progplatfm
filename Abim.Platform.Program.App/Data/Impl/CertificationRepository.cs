@@ -48,7 +48,7 @@ namespace Abim.Platform.Program.App.Data.Impl
         {
             return Session.QueryOver<Certification>()
                        .Where(c => c.Code == code)
-                        .JoinQueryOver<Source>(p => p.Source)
+                        .JoinQueryOver(p => p.Source)
                       .Where(s => s.ExternalId == sourceId)
                       .SingleOrDefault();
         }

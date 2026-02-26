@@ -1,7 +1,4 @@
-﻿using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
-using Abim.Enterprise.Core.Profile.Resource;
-using Abim.Enterprise.Core.Profile.Resource.Constants;
-using Abim.Platform.Program.App.Classes;
+﻿using Abim.Platform.Program.MembershipClient;
 using Abim.Platform.Program.App.Domain;
 using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.Core.Identity;
@@ -17,12 +14,16 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.Http.Routing;
-using Abim.Enterprise.Core.Profile.Interservice.Util.Extensions;
+using System.Web.Http.Routing; 
 using static Abim.Platform.Program.Resources.ProgramResourceConstants;
+using Abim.Platform.Product.Utils.Exceptions; 
+using Swashbuckle.Swagger.Annotations;
 
 namespace Abim.Platform.Program.Host.Api.Controllers
 {
+    /// <summary>
+    /// PhysicianCredentialsController
+    /// </summary> 
     [RoutePrefix(Routes.Prefix.PhysicianCertification)]
     public class PhysicianCredentialsController : ControllerBase
     {
@@ -41,10 +42,10 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         protected ICredentialService CredentialService { get; set; }
 
         /// <summary>
-        /// Profile Inter service
+        /// Membership Client Service   
         /// </summary>
-        protected IProfileInterservice ProfileInterService { get; set; }
-
+        protected IMembershipClientService MembershipClientService { get; set; }
+         
         /// <summary>
         /// static Logger
         /// </summary>
@@ -69,14 +70,14 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         /// </summary>
         /// <param name="credentialService"></param>
         /// <param name="accessTokenSingletonWraper"></param>
-        /// <param name="profileInterService"></param>
+        /// <param name="membershipClientService"></param>
         public PhysicianCredentialsController(      ICredentialService credentialService,
                                                     IAccessTokenService accessTokenSingletonWraper,
-                                                    IProfileInterservice profileInterService)
+                                                    IMembershipClientService membershipClientService)
         {
             CredentialService = credentialService;
             AccessTokenService = accessTokenSingletonWraper;
-            ProfileInterService = profileInterService;
+            MembershipClientService = membershipClientService;
         }
 
         #endregion
@@ -101,6 +102,9 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         /// <param name="abimId"></param>
         /// <returns></returns> 169418
         [HttpGet, AllowAnonymous]
+        [SwaggerResponse(HttpStatusCode.OK, "GetPhysicianCredentialsByAbimId", typeof(PhysicianCertificationsPublicResource))]
+        [SwaggerResponse(HttpStatusCode.BadRequest)]
+        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(Routes.PhysicianCredentials.GetPhysicianCredentialsByAbimId, Name = Routes.PhysicianCredentials.GetPhysicianCredentialsByAbimId)]
         public async Task<IHttpActionResult> GetPhysicianCredentialsByAbimId(string abimId)
         {
@@ -110,23 +114,33 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             try
             {
                 //get user's profile
-                var profile = await RetryHelper.RetryTask(() => ProfileInterService.SearchProfilesByAbimId(AccessToken, ProfileHostUrl, abimId), () => AccessTokenService.GetAccessToken()).ConfigureAwait(false);
+                var vocprofiles = await MembershipClientService.GetVocByAbimIdAsync(abimId).ConfigureAwait(false);
 
-                var allCredentials = await CredentialService.SearchByMemberIdAsync(profile.Id)
-                                        .ConfigureAwait(false);
-
-                // filter only ABIM certificates (not ABIM issued cert (Issuance.SourceId=1)
-                // Bug 164024 : VOC pages should only display ABIM certificates
-                var ABIMcredentials = allCredentials.Where(c => c.Certification.Source.Code == "ABIM" && c.IsCosponsored == false).ToList();
-
-                // Bug 222785 : Cosponsored certs appearing on VOC page
-                // PBi 210151 : Remove cosponsored "credentials" from the VoC page
-                // The condition below only for co-sponsored diplomates. If regular diplomate does not have any creds then it should work as before
-                if (!ABIMcredentials.Any() && allCredentials.Any())
+                if (vocprofiles == null || vocprofiles.Count == 0 )
                     return Content(HttpStatusCode.NotFound, $"No user exists with AbimId:'{abimId}'.");
 
-                return Ok(PhysicianCertificationsMapping(profile, ABIMcredentials, Url));
+                var vocprofilesFirst = vocprofiles.FirstOrDefault();
 
+                var allCredentials = await CredentialService.SearchByMemberIdAsync(vocprofilesFirst.PublicId)
+                                         .ConfigureAwait(false); 
+           
+                var ABIMcredentials = allCredentials.Where(c => c.Certification.Source.Code == "ABIM" && c.IsCosponsored == false).ToList();
+ 
+                if (!ABIMcredentials.Any() && allCredentials.Any())
+                    return Content(HttpStatusCode.NotFound, $"No user exists with AbimId:'{abimId}'.");
+            
+                return Ok(PhysicianCertificationsMappingForVocProfileResource(vocprofilesFirst, ABIMcredentials, Url));
+
+            }
+            catch (ApiException ex)
+            {
+                if (ex.StatusCode == 404)
+                    return Content(HttpStatusCode.NotFound, $"No user exists with AbimId:'{abimId}'.");
+                else
+                {
+                    HandleExceptionLogging(ex, $"abimId: '{abimId}'");
+                    return BadRequest(ex.InnerException?.Message);
+                }
             }
             catch (UnsuccessfulStatusException ex)
             {
@@ -143,26 +157,105 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                 HandleExceptionLogging(ex, $"abimId: '{abimId}'");
                 return BadRequest(ex.Message);
             }
+            finally
+            {
+                DisposeServices(Request);
+            }
         }
 
-        /// <summary>
-        /// GetCredentialsByNPI
+
+        // *** below endpoint is not used by VOC page, in case it is used by Someone we leave it here ****
+        /// <summary> 
+        /// GetCredentialsByGuid
         /// </summary>
-        /// <param name="npi"></param>
-        /// <returns></returns>
+        /// <param name="id"></param>
+        /// <returns></returns>  
         [HttpGet, AllowAnonymous]
-        [Route(Routes.PhysicianCredentials.GetPhysicianCredentialsByNPI, Name = RouteNames.PhysicianCredentials.GetPhysicianCredentialsByNPI)]
-        public async Task<IHttpActionResult> GetPhysicianCredentialsByNPI(string npi)
+        [SwaggerResponse(HttpStatusCode.OK, "GetPhysicianCredentialsById", typeof(PhysicianCertificationsPublicResource))]
+        [SwaggerResponse(HttpStatusCode.BadRequest)]
+        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        [Route(Routes.PhysicianCredentials.GetPhysicianCredentialsById, Name = Routes.PhysicianCredentials.GetPhysicianCredentialsById)]
+        public async Task<IHttpActionResult> GetPhysicianCredentialsById(Guid id)
         {
-            if (string.IsNullOrEmpty(npi))
-                return BadRequest("AbimId cannot be null or empty");
+            if (id == Guid.Empty)
+                return BadRequest("Id cannot be null or empty");
 
             try
             {
                 //get user's profile
-                var profile = await RetryHelper.RetryTask(() => ProfileInterService.SearchProfilesByNPI(AccessToken, ProfileHostUrl, npi), () => AccessTokenService.GetAccessToken()).ConfigureAwait(false);
+                var profile = await  MembershipClientService.GetProfileByMemberIdAsync(id).ConfigureAwait(false);
+
+                if (profile == null) throw new Exception($"profile is not found for Guid id {id}");
 
                 var allCredentials = await CredentialService.SearchByMemberIdAsync(profile.Id)
+                                        .ConfigureAwait(false);
+                var ABIMcredentials = allCredentials.Where(c => c.Certification.Source.Code == "ABIM" && c.IsCosponsored == false).ToList();
+
+                if (!ABIMcredentials.Any() && allCredentials.Any())
+                    return Content(HttpStatusCode.NotFound, $"No user exists with Id:'{id}'.");
+
+                return Ok(PhysicianCertificationsMappingForProfileResource(profile, ABIMcredentials, Url));
+
+            }
+            catch (ApiException ex)
+            {
+                if (ex.StatusCode == 404)
+                    return Content(HttpStatusCode.NotFound, $"No user exists with Guid:'{id}'.");
+                else
+                {
+                    HandleExceptionLogging(ex, $"Guid: '{id}'");
+                    return BadRequest(ex.InnerException?.Message);
+                }
+            }
+            catch (UnsuccessfulStatusException ex)
+            {
+                if (ex.StatusCode == HttpStatusCode.NotFound)
+                    return Content(HttpStatusCode.NotFound, $"No user exists with Guid:'{id}'.");
+                else
+                {
+                    HandleExceptionLogging(ex, $"Guid: '{id}'");
+                    return BadRequest(ex.InnerException?.Message);
+                }
+            }
+            catch (Exception ex)
+            {
+                HandleExceptionLogging(ex, $"Guid: '{id}'");
+                return BadRequest(ex.Message);
+            }
+            finally
+            {
+                DisposeServices(Request);
+            }
+        }
+
+
+        /// <summary>
+        /// GetPhysicianCredentialsByNPI
+        /// </summary>
+        /// <param name="npi"></param>
+        /// <returns></returns> 
+        [HttpGet, AllowAnonymous]
+        [SwaggerResponse(HttpStatusCode.OK, "GetPhysicianCredentialsByNPI", typeof(PhysicianCertificationsPublicResource))]
+        [SwaggerResponse(HttpStatusCode.BadRequest)]
+        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        [Route(Routes.PhysicianCredentials.GetPhysicianCredentialsByNPI, Name = RouteNames.PhysicianCredentials.GetPhysicianCredentialsByNPI)]
+        public async Task<IHttpActionResult> GetPhysicianCredentialsByNPI(string npi)
+        {
+            if (string.IsNullOrEmpty(npi))
+                return BadRequest("npi cannot be null or empty"); 
+
+            try
+            {
+                //get user's profile
+                var vocprofile = await MembershipClientService.SearchProfilesByNPI(npi).ConfigureAwait(false);
+
+                var profilefirst = vocprofile.FirstOrDefault();
+
+                if (profilefirst == null)
+                    return Content(HttpStatusCode.NotFound, $"No user exists with npi:'{npi}'.");
+
+
+                var allCredentials = await CredentialService.SearchByMemberIdAsync(profilefirst.PublicId)
                                         .ConfigureAwait(false);
                 // filter only ABIM certificates (not ABIM issued cert (Issuance.SourceId=1)
                 // Bug 164024 : VOC pages should only display ABIM certificates
@@ -174,7 +267,17 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                 if (!ABIMcredentials.Any() && allCredentials.Any())
                     return Content(HttpStatusCode.NotFound, $"No user exists with npi:'{npi}'.");
 
-                return Ok(PhysicianCertificationsMapping(profile, ABIMcredentials, Url));
+                return Ok(PhysicianCertificationsMappingForVocProfileResource(profilefirst, ABIMcredentials, Url));
+            }
+            catch (ApiException ex)
+            {
+                if (ex.StatusCode == 404)
+                    return Content(HttpStatusCode.NotFound, $"No user exists with npi:'{npi}'.");
+                else
+                {
+                    HandleExceptionLogging(ex, $"npi: '{npi}'");
+                    return BadRequest(ex.InnerException?.Message);
+                }
             }
             catch (UnsuccessfulStatusException ex)
             {
@@ -191,6 +294,10 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                 HandleExceptionLogging(ex, $"npi: '{npi}'");
                 return BadRequest(ex.Message);
             }
+            finally
+            {
+                DisposeServices(Request);
+            }
         }
 
         /// <summary>
@@ -204,8 +311,11 @@ namespace Abim.Platform.Program.Host.Api.Controllers
         /// <param name="pageIndex"></param>
         /// <returns></returns>
         [HttpGet, AllowAnonymous]
+        [SwaggerResponse(HttpStatusCode.OK, "SearchProfilesByNameAndDob", typeof(object))]
+        [SwaggerResponse(HttpStatusCode.BadRequest)]
+        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         [Route(Routes.PhysicianCredentials.SearchProfilesByNameAndDob, Name = Routes.PhysicianCredentials.SearchProfilesByNameAndDob)]
-        public async Task<IHttpActionResult> SearchProfilesByNameAndDob(string lastName, string firstName = null, DateTime? dob = null, bool soundEx = false, int pageSize = 0, int pageIndex = 0)
+        public async Task<IHttpActionResult> SearchProfilesByNameAndDob(string lastName, string firstName = null, DateTime? dob = null, bool soundEx = false, int pageSize = 50, int pageIndex = 1)
         {
             if (string.IsNullOrEmpty(lastName))
                 return BadRequest("LastName cannot be null or empty.");
@@ -213,19 +323,43 @@ namespace Abim.Platform.Program.Host.Api.Controllers
             try
             {
                 //search user profiles
-                var result = await RetryHelper.RetryTask(() => ProfileInterService.SearchProfilesByNameAndDob(AccessToken, ProfileHostUrl, lastName, firstName, dob, soundEx, pageSize, pageIndex), () => AccessTokenService.GetAccessToken()).ConfigureAwait(false);
+                var result = await MembershipClientService.GetNameAllAsync(lastName, firstName, dob, soundEx, pageSize, pageIndex).ConfigureAwait(false);
 
-                if (result.TotalCount == 1)
-                    return await GetPhysicianCredentialsByAbimId(result.Data[0].AbimId).ConfigureAwait(false);
+                if (result?.Count == 1)
+                {
+                    return await GetPhysicianCredentialsByAbimId(result.FirstOrDefault().AbimId).ConfigureAwait(false);
+                }
                 else
                 {
                     //  we are getting Profile resource file but we need to change SELF link
-                    var resource = Mapper.Map<ProfileShortCollectionResource, ProfileShortCollectionResourcePublic>(result,
+                    var resource = Mapper.Map<IEnumerable<VocProfileResource>, ProfileShortCollectionResourcePublic>(result,
                                    o => { o.Items["UrlHelper"] = Url; });
-
+                    resource.PageSize = pageSize;
+                    resource.CurrentPage = pageIndex;
+                    resource.TotalCount = result.Count;
+                    resource.TotalPages = resource.PageSize != 0 ? (int)(Math.Ceiling((float)resource.TotalCount / resource.PageSize)) : 1;
                     return Ok(resource);
                 }
 
+            }
+            catch (ApiException ex)
+            {
+                if (ex.StatusCode == 404)
+                {
+                    var resMessage = $"No users exist with Last Name:'{lastName}'";
+                    if (!string.IsNullOrEmpty(firstName))
+                        resMessage += $" and FirsName:'{firstName}'";
+                    if (dob != null)
+                        resMessage += $" and DOB:'{dob.Value.ToShortDateString()}'";
+                    resMessage += ".";
+                    return Content(HttpStatusCode.NotFound, resMessage);
+                }
+                else
+                {
+                    var dobValue = dob.HasValue ? dob.Value.ToString() : "";
+                    HandleExceptionLogging(ex, $"lastName: '{lastName}', firstName: '{firstName}', dob: '{dobValue}', soundEx : '{soundEx}', pageSize: '{pageSize}', pageIndex: '{pageIndex}'");
+                    return BadRequest(ex.InnerException?.Message);
+                }
             }
             catch (UnsuccessfulStatusException ex)
             {
@@ -235,7 +369,7 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                     if (!string.IsNullOrEmpty(firstName))
                         resMessage += $" and FirsName:'{firstName}'";
                     if (dob != null)
-                        resMessage += $" and DOB:'{dob?.ToShortDateString()}'";
+                        resMessage += $" and DOB:'{dob.Value.ToShortDateString()}'";
                     resMessage += ".";
                     return Content(HttpStatusCode.NotFound, resMessage);
                 }
@@ -252,22 +386,25 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                 HandleExceptionLogging(ex, $"lastName: '{lastName}', firstName: '{firstName}', dob: '{dobValue}', soundEx : '{soundEx}', pageSize: '{pageSize}', pageIndex: '{pageIndex}'");
                 return BadRequest(ex.Message);
             }
+            finally
+            {
+                DisposeServices(Request);
+            }
         }
 
         #endregion
 
         /// <summary>
-        /// PhysicianCertificationsMapping
+        /// PhysicianCertificationsMappingForProfileResource
         /// </summary>
         /// <param name="profile"></param>
         /// <param name="credentials"></param>
         /// <param name="Url"></param>
         /// <returns></returns>
-        public static PhysicianCertificationsPublicResource PhysicianCertificationsMapping(ProfileSummaryShortResource profile,
+        public static PhysicianCertificationsPublicResource PhysicianCertificationsMappingForProfileResource(ProfileResource profile,
                                                                             IEnumerable<Credential> credentials,
                                                                             UrlHelper Url)
-        {
-            
+        { 
             // for some reason profile return Link type under Abim.Platform.Identity.NugetCore (base is ResourceBase)
             // so we better off return Abim.Platform.Program.WebApi.Link
             List<Link> links = new List<Link>() {
@@ -277,14 +414,14 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                             new Dictionary<string, object> { { "abimId", profile.AbimId } }))
             };
 
-            var image = profile.Links.Where(a => a.Name == ProfileResourceConstants.RouteNames.GetUserImage).FirstOrDefault();
-
-            if (image != null)
-            {
-                links.Add(new Link("image",
-                            HttpVerbs.Get,
-                            image.Href));
-            }
+            //According to Kevin, Image is no longer needed.  
+            //var image = profile.Links.Where(a => a.Name == ProfileResourceConstants.RouteNames.GetUserImage).FirstOrDefault(); 
+            // if (image != null)
+            // {
+            //     links.Add(new Link("image",
+            //                 HttpVerbs.Get,
+            //                 image.Href));
+            // }
 
             return new PhysicianCertificationsPublicResource
             {
@@ -292,18 +429,18 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                 LastName = profile.Name.LastName,
                 FirstName = profile.Name.FirstName,
                 MiddleName = profile.Name.MiddleName ?? "",
-                MaidenName = profile.Name.MaidenName,
-                Suffix = profile.Name.Suffix,
-                Salutation = profile.Name.Salutation,
+                MaidenName = profile.Name.MaidenName ?? "",
+                Suffix = profile.Name.Suffix.ToString(),
+                Salutation = profile.Name.Salutation.ToString(),
 
-                NameAliases = profile.NameAliases.Select(nm => new NameAliasPublicResource
+                NameAliases = profile.Aliases.Select(nm => new NameAliasPublicResource
                 {
-                    LastName = nm.Name.LastName,
-                    FirstName = nm.Name.FirstName,
-                    MiddleName = nm.Name.MiddleName,
-                    MaidenName = nm.Name.MaidenName,
-                    Salutation = nm.Name.Salutation,
-                    Suffix = nm.Name.Suffix
+                    LastName = nm.LastName,
+                    FirstName = nm.FirstName,
+                    MiddleName = nm.MiddleName ?? "",
+                    MaidenName = nm.MaidenName ?? "",
+                    Salutation = nm.Salutation.ToString(),
+                    Suffix = nm.Suffix.ToString()
                 }).ToList(),
 
                 IsActive = profile.IsActive,
@@ -315,6 +452,78 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                 IsFocusPractice = credentials
                                     .Where(a => a.HasIssuances && 
                                                 a.Certification.Code == CertificationCode.FocusedPracticeHospitalMedicine && 
+                                                a.NewestIssuance.IssuanceStatus == IssuanceStatusType.Active &&
+                                                a.SelectedToMaintain)
+                                    .Any(),
+
+                // the same logic in HelperService.GetVocLetterContent (unit tests in GetVocLetterContentCommandSpec )
+                  Certifications = credentials
+                                        .Where(a => a.HasIssuances)
+                                        .Select(
+                                            cred => new CertificationPublicResource
+                                            {
+                                                Name = cred.Certification.Code != CertificationCode.FocusedPracticeHospitalMedicine ? cred.Certification.Name : CertificationName.IMwithFPHM,
+                                                InitialIssuanceDate = cred.OldestIssuance.IssuanceDate,
+                                                Status = cred.ProperIssuance.IssuanceStatus,
+                                                MaintenanceStatus = cred.ProperIssuance.MaintenanceStatus,
+                                            }).OrderBy(a => a.InitialIssuanceDate).ToList(),
+                Links = links
+            };
+        }
+
+
+        /// <summary>
+        /// PhysicianCertificationsMappingForVocProfileResource
+        /// </summary>
+        /// <param name="profile"></param>
+        /// <param name="credentials"></param>
+        /// <param name="Url"></param>
+        /// <returns></returns>
+        public static PhysicianCertificationsPublicResource PhysicianCertificationsMappingForVocProfileResource(VocProfileResource profile,
+                                                                            IEnumerable<Credential> credentials,
+                                                                            UrlHelper Url)
+        {
+
+            // for some reason profile return Link type under Abim.Platform.Identity.NugetCore (base is ResourceBase)
+            // so we better off return Abim.Platform.Program.WebApi.Link
+            List<Link> links = new List<Link>() {
+                new Link("self",
+                            HttpVerbs.Get,
+                            Url.Link(Routes.PhysicianCredentials.GetPhysicianCredentialsByAbimId,
+                            new Dictionary<string, object> { { "abimId", profile.AbimId } }))
+            };
+
+            return new PhysicianCertificationsPublicResource
+            {
+                AbimId = profile.AbimId,
+                LastName = profile.LastName,
+                FirstName = profile.FirstName,
+                MiddleName = profile.MiddleName ?? "",
+                MaidenName = "", //  No Maiden Name in the VocProfile View
+                Suffix = profile.Suffix.ToString(),
+                Salutation = "",  //  No Maiden Name in the VocProfile View
+
+                NameAliases = new List<NameAliasPublicResource>() { new NameAliasPublicResource()
+                {
+                    LastName = profile.LastName,
+                    FirstName = profile.FirstName,
+                    MiddleName = profile.MiddleName ?? "",
+                    MaidenName = "", //   No Maiden Name in the VocProfile View
+                    Salutation = "", //   No Maiden Name in the VocProfile View
+                    Suffix = profile.Suffix.ToString()
+                } },
+
+                ImageHref = profile.ImageHref, // Task 295167 : Code Fix to Program Platform to update VocProfileResource class
+
+                IsActive = profile.IsActive,  //   profile.profile is missing from New Profile API,
+
+                ParticipatingInMOC = credentials
+                                        .Where(a => a.HasIssuances && a.NewestIssuance.MaintenanceStatus == MaintenanceStatusType.Maintained)
+                                        .Count() > 1,
+                // if FPHM exist and it is selected to be maintained
+                IsFocusPractice = credentials
+                                    .Where(a => a.HasIssuances &&
+                                                a.Certification.Code == CertificationCode.FocusedPracticeHospitalMedicine &&
                                                 a.NewestIssuance.IssuanceStatus == IssuanceStatusType.Active &&
                                                 a.SelectedToMaintain)
                                     .Any(),
@@ -332,7 +541,8 @@ namespace Abim.Platform.Program.Host.Api.Controllers
                                             }).OrderBy(a => a.InitialIssuanceDate).ToList(),
                 Links = links
             };
-        }
+        }  
+    } 
 
-    }
 }
+

@@ -22,7 +22,7 @@ namespace Abim.Platform.Program.WebApi.Util.General.Json
             {
                 return JsonConvert.DeserializeObject(json, type);
             }
-            catch(Exception ex)
+            catch(Exception)
             {
                 if(ignoreParseErrors)
                 {

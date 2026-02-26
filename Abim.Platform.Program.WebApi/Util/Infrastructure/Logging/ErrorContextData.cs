@@ -33,7 +33,7 @@ namespace Abim.Platform.Program.WebApi.Objects.Logging
         {
             return GetErrorDescription(null, exception, exception != null ? exception.GetType().ToString() : null, GlobalExceptionHandler.AppName,
                 GlobalExceptionHandler.AppVersion, null, null, UserInfo.Create(request), request, null,
-                request.GetRequestBody(), null);
+                request.GetRequestBody());
         }
         
         /// <summary>

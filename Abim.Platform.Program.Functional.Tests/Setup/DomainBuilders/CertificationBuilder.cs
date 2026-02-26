@@ -49,12 +49,12 @@ namespace Abim.Platform.Program.Tests.Setup.DomainBuilders
         /// <returns></returns>
         public static Certification Build(string code="IM",
                                           string name= null,
-                                          CertificationType certType = CertificationType.Subspecialty,
                                           Source source = null)
         {
             string[] SubspecialtyArray = { "ACHD", "ADOL", "AHFTC", "CARD", "CCEP", "CRIT", "ENDO", "GAST", "GERI", "HEMA", "HPM", "ICARD", "ID", "NEPH", "ONCO", "PTHEP", "PULM", "RHEUM", "SLEEP", "SPORT", "THEP", "CLI", "DLI" };
             string[] OtherBoardArray = { "ALLG", "CLI", "DLI" };
             string[] JointAgreementArray = { "ALLG" };
+            CertificationType certType;
 
             source = source ?? (!OtherBoardArray.Contains(code) ? SourceBuilder.BuildAbim() : SourceBuilder.BuildOtherBoard());
 

@@ -210,8 +210,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Certification
         protected override void PreSetup()
         {
             MockList = new List<App.Domain.Certification>();
-            EmailBuilder = new EmailBuilder();            
-            OverrideScope();
+            EmailBuilder = new EmailBuilder();
+            OverrideAndInjectUnacceptableScope();
         }
 
         protected override void PostSetup()

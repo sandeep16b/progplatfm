@@ -52,6 +52,29 @@ namespace Abim.Platform.Program.Resources
         public virtual DateTime? DeselectionEffectiveDate { get; set; }
         [DataMember(Order = 19)] 
         public virtual DateTime? DeSelectionProcessedDate { get; set; }
+        [DataMember(Order = 20)]
+        public virtual string IssuanceStatusWithModifier
+        {
+            get
+            {
+                switch (IssuanceStatus.Value)
+                {
+                    case nameof(IssuanceStatusType.Active):
+                        return "Certified";
+                    case nameof(IssuanceStatusType.Suspended):
+                        return "Not Certified, Suspended";
+                    case nameof(IssuanceStatusType.Inactive):
+                    case nameof(IssuanceStatusType.Surrendered):
+                        return "Not Certified";
+                    case nameof(IssuanceStatusType.Expired):
+                        return "Not Certified, Lapsed";
+                    case nameof(IssuanceStatusType.Revoked):
+                        return "Not Certified, Revoked";
+                    default:
+                        return "Not Certified";
+                }
+            }
+        }
     }
 
     /// <summary>

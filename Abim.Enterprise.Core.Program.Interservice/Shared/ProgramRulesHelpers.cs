@@ -157,8 +157,8 @@ namespace Abim.Platform.Program.Interservice.Shared
                 throw new ApplicationException("UIComputeLookbackWindow() currently only supports 2 and 5 year lookbacks.");
 
             int timePeriod = 1;
-            DateTime startDate = new DateTime();
-            DateTime endDate = new DateTime();
+            DateTime startDate;
+            DateTime endDate;
 
             var firstWindow = GetFirstLookbackWindow(earliestCertDate, windowsInterval);
 
@@ -278,8 +278,8 @@ namespace Abim.Platform.Program.Interservice.Shared
             if (windowsInterval == WindowsIntervalType.TenYearLookBack || windowsInterval == WindowsIntervalType.ThreeYearLookBack)
                 throw new ApplicationException("GetFirstLookbackWindow() currently only supports 2 and 5 year lookbacks.");
 
-            DateTime startDate = new DateTime();
-            DateTime endDate = new DateTime();
+            DateTime startDate;
+            DateTime endDate;
 
             if (earliestCertDate.Year < 2014)
                 startDate = new DateTime(2014, 1, 1);

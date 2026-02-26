@@ -143,8 +143,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         protected override void PreSetup()
         {
             MockList = new List<App.Domain.Credential>();
-            EmailBuilder = new EmailBuilder();
-            OverrideAndInjectUnacceptableScope();
+            EmailBuilder = new EmailBuilder(); 
         }
 
         protected override void PostSetup()
@@ -202,7 +201,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
         {
             MockList = new List<App.Domain.Credential>();
             EmailBuilder = new EmailBuilder();
-            OverrideScope();
+            OverrideAndInjectUnacceptableScope();
         }
 
         protected override void PostSetup()
@@ -259,9 +258,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
                 var domainObject = CreateCredential();
                 domainObject.Certification.Name = (startNumber + i).ToString().PadLeft(5, '0');
                 MockList.Add(domainObject);
-            }
-
-            OverrideAndInjectUnacceptableScope();
+            } 
         }
 
         protected override void PostSetup()
@@ -359,9 +356,8 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
                 var domainObject = CreateCredential();
                 domainObject.Certification.Name = (startNumber + i).ToString().PadLeft(5, '0');
                 MockList.Add(domainObject);
-            }
-
-            OverrideAndInjectUnacceptableScope();
+            } 
+        
         }
 
         protected override void PostSetup()
@@ -444,6 +440,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
                     sorted = false;
                     break;
                 }
+                previousItem = item;
             }
             sorted.Should().Be(true);
         }
@@ -475,8 +472,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
                 var domainObject = CreateCredential();
                 domainObject.Certification.Name = (startNumber + i).ToString().PadLeft(5, '0');
                 MockList.Add(domainObject);
-            }
-            OverrideAndInjectUnacceptableScope();
+            } 
         }
 
         protected override void PostSetup()
@@ -588,8 +584,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
                 var domainObject = CreateCredential();
                 domainObject.Certification.Name = (startNumber + i).ToString().PadLeft(5, '0');
                 MockList.Add(domainObject);
-            }
-            OverrideAndInjectUnacceptableScope();
+            } 
         }
 
         protected override void PostSetup()
@@ -652,8 +647,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
                 var domainObject = CreateCredential();
                 domainObject.Certification.Name = (startNumber + i).ToString().PadLeft(5, '0');
                 MockList.Add(domainObject);
-            }
-            OverrideAndInjectUnacceptableScope();
+            } 
         }
 
         protected override void PostSetup()
@@ -717,8 +711,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
                 var domainObject = CreateCredential();
                 domainObject.Certification.Name = (startNumber + i).ToString().PadLeft(5, '0');
                 MockList.Add(domainObject);
-            }
-            OverrideAndInjectUnacceptableScope();
+            } 
         }
 
         protected override void PostSetup()
@@ -788,7 +781,6 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Credential
                 domainObject.Certification.Name = (startNumber + i).ToString().PadLeft(5, '0');
                 MockList.Add(domainObject);
             }
-            OverrideAndInjectUnacceptableScope();
         }
 
         protected override void PostSetup()

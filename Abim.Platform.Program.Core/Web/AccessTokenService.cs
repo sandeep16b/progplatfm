@@ -1,5 +1,4 @@
-﻿using IdentityModel.Client;
-using NLog;
+﻿using NLog;
 using System;
 
 namespace Abim.Platform.Program.Core.Identity
@@ -8,13 +7,15 @@ namespace Abim.Platform.Program.Core.Identity
     {
         private static string _accessToken { get; set; } = "";
 
-        private static DateTime expirationTokenTime { get; set; } = DateTime.Now;
+        private static DateTime expirationTokenTime { get; set; } = DateTime.UtcNow; // UtcNow is NOT adjusted for seasonal changes like DST and it is faster ...
 
         private ITokenClientWraper _tokenClientWraper;
 
         private int timeInSecondsBeforeExpirationToGetNewToken = 60;
 
-        private static string scope = "webapi program_read-write product_read-write registration_read-write profile_read-write";
+        ///private static string scope = "webapi program_read-write product_read-write registration_read-write profile_read-write";
+
+        private static string scope = "a.r a.w ata.r ata.w b.r b.w c.r c.w f.r f.w n.r n.w pd.r pd.w pf.r pf.w r.r r.w s.r s.w t.r t.w u.r u.w";
 
         private static ILogger Log = LogManager.GetCurrentClassLogger();
 
@@ -27,13 +28,13 @@ namespace Abim.Platform.Program.Core.Identity
         public string GetAccessToken()
         {
             //If _accessToken is null, or getNew is true, lock _locker and get a new token
-            if ((string.IsNullOrEmpty(_accessToken) || (!string.IsNullOrEmpty(_accessToken) && DateTime.Now >= expirationTokenTime)))
+            if ((string.IsNullOrEmpty(_accessToken) || (!string.IsNullOrEmpty(_accessToken) && DateTime.UtcNow >= expirationTokenTime))) // UtcNow is NOT adjusted for seasonal changes like DST and it is faster ...
             {
                 lock (_accessToken)
                 {
                     //RACE CONDITION HANDLING (by Alan from email on 7/12/2022 8:39 AM)
                     //Make sure we didn�t already just get one from a different request. If we did, just return what we already have
-                    if (!string.IsNullOrEmpty(_accessToken) && DateTime.Now < expirationTokenTime)
+                    if (!string.IsNullOrEmpty(_accessToken) && DateTime.UtcNow < expirationTokenTime)
                     {
                         //If we�re here, it means we were blocked waiting for a lock to release, and another request already got us a new token. Just return THAT.
                         return _accessToken;
@@ -52,7 +53,7 @@ namespace Abim.Platform.Program.Core.Identity
         {
             var taskResponse = _tokenClientWraper.RequestClientCredentialsAsync(scope).Result;
 
-            expirationTokenTime = DateTime.Now.AddSeconds(taskResponse.ExpiresIn - timeInSecondsBeforeExpirationToGetNewToken); // default ExpiresIn 3600 seconds (60 minutes)
+            expirationTokenTime = DateTime.UtcNow.AddSeconds(taskResponse.ExpiresIn - timeInSecondsBeforeExpirationToGetNewToken); // default ExpiresIn 3600 seconds (60 minutes)
 
             if (taskResponse.IsError) // possible error if we ask for scope that is not assigned to the client <IdentityTestApi> (taskResponse.Error == "invalid_scope")
             {

@@ -1,9 +1,7 @@
-﻿extern alias SharedOldServiceBus;
-using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
-using Abim.Enterprise.Core.Profile.Resource;
+﻿extern alias SharedOldServiceBus; 
 using Abim.Enterprise.Core.Registration.Enums;
 using Abim.Enterprise.Core.Registration.Interservice;
-using Abim.Platform.Program.App.Classes;
+using Abim.Platform.Program.MembershipClient;
 using Abim.Platform.Program.App.Domain;
 using Abim.Platform.Program.App.Extensions.Registration;
 using Abim.Platform.Program.Core.Identity;
@@ -23,7 +21,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static Abim.Platform.Program.App.Util.Constants;
-using static Abim.Platform.Program.Resources.ProgramResourceConstants;
+using static Abim.Platform.Program.Resources.ProgramResourceConstants; 
 
 namespace Abim.Platform.Program.App.Services.Impl
 {
@@ -43,6 +41,11 @@ namespace Abim.Platform.Program.App.Services.Impl
         /// 
         /// </summary>
         protected static string PrintLetterQueue = System.Configuration.ConfigurationManager.AppSettings["ExactTarget:PrintLetterQueue"] ?? "Not found";
+
+        /// <summary>
+        /// Enviroment
+        /// </summary>
+        protected static string Enviroment = System.Configuration.ConfigurationManager.AppSettings["Abim.Common.Env"] ?? "Not found";
 
         /// <summary>
         /// static Logger
@@ -65,7 +68,7 @@ namespace Abim.Platform.Program.App.Services.Impl
         /// <summary>
         /// Profile Inter service
         /// </summary>
-        protected IProfileInterservice ProfileInterService { get; set; }
+        protected IMembershipClientService MembershipClientService { get; set; }
 
         /// <summary>
         /// Registration Interservice
@@ -76,20 +79,20 @@ namespace Abim.Platform.Program.App.Services.Impl
         #endregion
 
         /// <summary>
-        /// 
+        /// HelperService
         /// </summary>
         /// <param name="bus"></param>
         /// <param name="accessTokenService"></param>
-        /// <param name="profileInterService"></param>
+        /// <param name="membershipClientService"></param>
         /// <param name="registrationInterservice"></param>
         public HelperService(IBusControl bus,
                              IAccessTokenService accessTokenService,
-                             IProfileInterservice profileInterService,
+                             IMembershipClientService membershipClientService,
                              IRegistrationInterservice registrationInterservice)
         {
             Bus = bus;
             AccessTokenService = accessTokenService;
-            ProfileInterService = profileInterService;
+            MembershipClientService = membershipClientService;
             RegistrationInterservice = registrationInterservice;
         }
 
@@ -107,7 +110,7 @@ namespace Abim.Platform.Program.App.Services.Impl
         {
             if (Util.Constants.TriggeredCommunication.EarnedMBMCertLetter.ToString().Equals(communicationType))
             {
-                var totalCount = 0;
+                int totalCount;
                 var pageDefinition = new PageDefinition
                 {
                     PageIndex = 1,
@@ -138,19 +141,21 @@ namespace Abim.Platform.Program.App.Services.Impl
         public async Task TriggeredCommunication_Reactivate_Certifications(IList<string> certNames, Guid memberId)
         {
             //get user's profile
-            var profile = await RetryHelper.RetryTask(() => ProfileInterService.GetProfileById(AccessToken, ProfileHostUrl, memberId), () => AccessTokenService.GetAccessToken()).ConfigureAwait(false);
+            var profile = await RetryHelper.RetryTask(() => MembershipClientService.GetProfileByMemberIdAsync(memberId), () => MembershipClientService.GetAccessToken()).ConfigureAwait(false);
 
             await Bus.Publish(new NotificationEvent()
             {
                 TemplateExternalKey = TriggeredCommunicationTemplateExternalKey.Reactivate_Certification, // 43168
-                EmailAddress = profile.EmailAddress.EmailAddress,
+                EmailAddress = profile.EmailAddress,
                 Parameters = new Dictionary<string, string> {
                     { "LastName", profile.Name.LastName},
                     { "CertificationNames", GetDelimitedCertNames(certNames, "<br />", true) },
                     { "CertificationNames_TV", GetDelimitedCertNames(certNames, ", ", false) },
-                    { "EmailAddress", profile.EmailAddress.EmailAddress},
+                    { "EmailAddress", profile.EmailAddress},
                     { "SubscriberKey", profile.AbimId},
-                    { "IID", profile.AbimId}
+                    { "IID", profile.AbimId},
+                    // Enviroment --
+                    { "Env", Enviroment } 
                 }
             });
 
@@ -167,23 +172,26 @@ namespace Abim.Platform.Program.App.Services.Impl
             try
             {
                 //get user's profile
-                var profile = await RetryHelper.RetryTask(() => ProfileInterService.GetProfileById(AccessToken, ProfileHostUrl, memberId), () => AccessTokenService.GetAccessToken()).ConfigureAwait(false);
+                var profile = await RetryHelper.RetryTask(() => MembershipClientService.GetProfileByMemberIdAsync(memberId), () => MembershipClientService.GetAccessToken()).ConfigureAwait(false);
 
-                var address = profile.Addresses.Find(a => a.IsPrimary);
+                var address = profile.Addresses.FirstOrDefault(a => a.IsPrimary);
 
                 if (address == null)
                     Log.Warn($"No primary address record is found for MemberId:'{credential.MemberId}', Notification wouldn't be send to Triggered Comunication");
 
                 string state = "";
-                string country = "";
-                if (address.Country.Code == "US")
+                string country; 
+
+                if (address.CountryId?.ToUpper() == "US" || address.CountryId?.ToUpper() == "CA")
                 {
-                    state = address.Region.Code;
+                    //New API does not return the Region object as part of Address Objects and requering to get the Region
+                    RegionResource matchingRegionByRegionId = await GetMatchingRegionByRegionId(address).ConfigureAwait(false);
+                    state = matchingRegionByRegionId != null ? matchingRegionByRegionId.Code : "";
                 }
-                else
-                {
-                    country = address.Country.Name;
-                }
+             
+                //New API does not return the Country object as part of Address Objects and requering to get the Country
+                CountryResource matchingCountry = await GetCountryByCountryId(address).ConfigureAwait(false);
+                country = matchingCountry != null ? matchingCountry.Name : ""; 
 
                 Tuple<DateTime, DateTime> dates = CalculateIssueReturnDates(credential.NewestIssuance.IssuanceDate.Date);
 
@@ -199,9 +207,9 @@ namespace Abim.Platform.Program.App.Services.Impl
                         { "LastName", profile.Name.LastName },
                         { "FirstName", profile.Name.FirstName},
                         { "MiddleName", profile.Name.MiddleName??""},
-                        { "AddressLine1", address.StreetAddress1},
-                        { "AddressLine2", address.StreetAddress2??""},
-                        { "AddressLine3", address.StreetAddress3??""},
+                        { "AddressLine1", address.Address1},
+                        { "AddressLine2", address.Address2??""},
+                        { "AddressLine3", address.Address3??""},
                         { "City", address.City},
                         { "Zip", address.PostalCode},
                         { "IID", profile.AbimId},
@@ -223,6 +231,30 @@ namespace Abim.Platform.Program.App.Services.Impl
                 Log.Error(ex.InnerException.Message);
             }
             return Task.FromResult<object>(null);
+        }
+
+        /// <summary>
+        /// GetCountryByCountryId
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        public async Task<CountryResource> GetCountryByCountryId(ProfileAddressResource address)
+        {
+            var countries = await RetryHelper.RetryTask(() => MembershipClientService.GetCountriesAsync(), () => MembershipClientService.GetAccessToken()).ConfigureAwait(false);
+            var matchingCountry = countries?.FirstOrDefault(r => r.Code?.ToUpper() == address?.CountryId?.ToUpper());
+            return matchingCountry;
+        }
+
+        /// <summary>
+        /// GetMatchingRegionByRegionId
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        public async Task<RegionResource> GetMatchingRegionByRegionId(ProfileAddressResource address)
+        {
+            var regions = await RetryHelper.RetryTask(() => MembershipClientService.GetCountryRegionsAsync(address.CountryId), () => MembershipClientService.GetAccessToken()).ConfigureAwait(false);
+            var matchingRegionByRegionId = regions?.FirstOrDefault(r => r.Id == address?.RegionId);
+            return matchingRegionByRegionId;
         }
 
         /// <summary>
@@ -272,43 +304,7 @@ namespace Abim.Platform.Program.App.Services.Impl
 
         #endregion
 
-        #region Getting Profile data
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="memberId"></param>
-        /// <returns></returns>
-        public async Task<ProfileNestedResource> GetProfileById(Guid memberId)
-        {
-            try
-            {
-                return await RetryHelper.RetryTask(() => ProfileInterService.GetProfileById(AccessToken, ProfileHostUrl, memberId), () => AccessTokenService.GetAccessToken()).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.InnerException?.Message);
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// GetProfileByAbimId
-        /// </summary>
-        /// <param name="abimId"></param>
-        /// <returns></returns>
-        public async Task<ProfileNestedResource> GetProfileByABIMId(string abimId)
-        {
-            try
-            {
-                return await RetryHelper.RetryTask(() => ProfileInterService.GetProfileByABIMId(AccessToken, ProfileHostUrl, abimId), () => AccessTokenService.GetAccessToken()).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.InnerException.Message);
-                return null;
-            }
-        }
+        #region Getting Profile data 
 
         /// <summary>
         /// GetMemberIdByAbimId
@@ -318,9 +314,9 @@ namespace Abim.Platform.Program.App.Services.Impl
         public async Task<Guid> GetMemberIdByAbimId(string abimId)
         {
             try
-            {
-                var profile = await RetryHelper.RetryTask(() => ProfileInterService.GetProfileByABIMId(AccessToken, ProfileHostUrl, abimId), () => AccessTokenService.GetAccessToken()).ConfigureAwait(false);
-
+            { 
+                var profile = await RetryHelper.RetryTask(() => MembershipClientService.GetProfileByAbimIdAsync(abimId),() => MembershipClientService.GetAccessToken()).ConfigureAwait(false);
+                
                 if (profile != null)
                     return profile.Id;
                 else
@@ -368,7 +364,7 @@ namespace Abim.Platform.Program.App.Services.Impl
         /// <param name="profile"></param>
         /// <param name="credentials"></param>
         /// <returns>Data needed to write into the PDF as an object</returns>
-        public VocPdfData GetVocLetterContent(ProfileNestedResource profile, IEnumerable<Credential> credentials)
+        public async Task<VocPdfData> GetVocLetterContent(ProfileResource profile, IEnumerable<Credential> credentials)
         {
             VocPdfData pdfData = new VocPdfData();
             string text = String.Empty;
@@ -378,7 +374,7 @@ namespace Abim.Platform.Program.App.Services.Impl
             StringBuilder address = new StringBuilder();
             string cityStateZip = String.Empty;
             string isMaintainingMOC = "No";
-            bool isCertified = true;
+            bool isAllCertsCertified = false;
             bool isActive = true;
             bool? isFocusPractice;
 
@@ -395,23 +391,37 @@ namespace Abim.Platform.Program.App.Services.Impl
                     //Skip if Address Count is 0
                     if (profile.Addresses.Count() > 0)
                     {
-                        if (!String.IsNullOrEmpty(profile.Addresses[0].StreetAddress1))
+                        var profileaddress = profile.Addresses.FirstOrDefault(r => r.IsPrimary);
+                        if (profileaddress != null)
                         {
-                            address.AppendLine($"{name}");
-                            address.AppendLine($"{profile.Addresses[0].StreetAddress1}");
+                            if (!String.IsNullOrEmpty(profileaddress.Address1))
+                            {
+                                address.AppendLine($"{name}");
+                                address.AppendLine($"{profileaddress.Address1}");
+                            }
+                            if (!String.IsNullOrEmpty(profileaddress.Address2) && !(String.IsNullOrEmpty(address.ToString())))
+                                address.AppendLine($"{profileaddress.Address2}");
+                            if (!String.IsNullOrEmpty(profileaddress.Address3) && !(String.IsNullOrEmpty(address.ToString())))
+                                address.AppendLine($"{profileaddress.Address3}");
+                            if (!String.IsNullOrEmpty(profileaddress.City) && !(String.IsNullOrEmpty(address.ToString())))
+                            {
+                                cityStateZip = $"{profileaddress.City}";
+                            }
+
+                            string state = ""; 
+
+                            if (profileaddress.CountryId?.ToUpper() == "US" || profileaddress.CountryId?.ToUpper() == "CA")
+                            {
+                                //New API does not return the Region object as part of Address Objects and requering to get the Region
+                                RegionResource matchingRegionByRegionId = await GetMatchingRegionByRegionId(profileaddress).ConfigureAwait(false);
+                                state = matchingRegionByRegionId != null ? matchingRegionByRegionId.Code : "";
+                            }
+ 
+                           cityStateZip += $", {state} {profileaddress.PostalCode}";
+
+                            if (!String.IsNullOrEmpty(address.ToString()))
+                                address.AppendLine($"{cityStateZip}");
                         }
-                        if (!String.IsNullOrEmpty(profile.Addresses[0].StreetAddress2) && !(String.IsNullOrEmpty(address.ToString())))
-                            address.AppendLine($"{profile.Addresses[0].StreetAddress2}");
-                        if (!String.IsNullOrEmpty(profile.Addresses[0].StreetAddress3) && !(String.IsNullOrEmpty(address.ToString())))
-                            address.AppendLine($"{profile.Addresses[0].StreetAddress3}");
-                        if (!String.IsNullOrEmpty(profile.Addresses[0].City) && !(String.IsNullOrEmpty(address.ToString())))
-                        {
-                            cityStateZip = $"{profile.Addresses[0].City}";
-                        }
-                        if (profile.Addresses[0].Region != null && (!String.IsNullOrEmpty(profile.Addresses[0].Region.Code)))
-                            cityStateZip += $", { profile.Addresses[0].Region.Code} {profile.Addresses[0].PostalCode}";
-                        if (!String.IsNullOrEmpty(address.ToString()))
-                            address.AppendLine($"{cityStateZip}");
                     }
                 }
 
@@ -434,39 +444,38 @@ namespace Abim.Platform.Program.App.Services.Impl
                               && a.SelectedToMaintain);
 
                 int certsCount = certs.Count();
-
-                int suspendedCerts = certs.Count(c => c.Status == IssuanceStatusType.Suspended);
-                int revokedCerts = certs.Count(c => c.Status == IssuanceStatusType.Revoked);
-                int surrenderedCerts = certs.Count(c => c.Status == IssuanceStatusType.Surrendered);
-                int expiredCerts = certs.Count(c => c.Status == IssuanceStatusType.Expired);
                 int inactiveCerts = certs.Count(c => c.Status == IssuanceStatusType.Inactive);
-                int activeCerts = certs.Count(c => c.Status == IssuanceStatusType.Active);
-                //
                 int mocCerts = certs.Count(c => c.MaintenanceStatus == MaintenanceStatusType.Maintained);
-                //if all certs are suspended then "Not Certified"
-                if (suspendedCerts == certsCount || expiredCerts == certsCount || certsCount == 0)
-                {
-                    isCertified = false;
-                }
                 //if all certs are inactive thenn "Inactive"
-                else if (inactiveCerts == certsCount)
+                if (certsCount > 0 && inactiveCerts == certsCount)
                 {
                     isActive = false;
                 }
-                if (certsCount > 0)
+                else if (certsCount > 0)
                 {
                     initialCerts.AppendLine($"INITIAL CERTIFICATION");
                     certs.ToList().ForEach(c => initialCerts.AppendLine($"{c.Name}: {c.InitialIssuanceDate.Year}"));
 
-                    var currentCertList = certs.Where(c => c.Status == IssuanceStatusType.Active
-                            // include FPHM only if selected to maintain
-                            && ((c.Name == CertificationName.IMwithFPHM && isFocusPractice == true) ||
-                                    // exclude IM if FPHM is selected to be maintained
-                                    (c.Name == CertificationName.IM && isFocusPractice != true) ||
-                                    // show all others if it is not IM or FPHM
-                                    (c.Name != CertificationName.IMwithFPHM && c.Name != CertificationName.IM)));
+                    var certifiedCerts = certs.Where(c => c.Status == IssuanceStatusType.Active
+                          // include FPHM only if selected to maintain
+                          && ((c.Name == CertificationName.IMwithFPHM && isFocusPractice == true) ||
+                                  // exclude IM if FPHM is selected to be maintained
+                                  (c.Name == CertificationName.IM && isFocusPractice != true) ||
+                                  // show all others if it is not IM or FPHM
+                                  (c.Name != CertificationName.IMwithFPHM && c.Name != CertificationName.IM)));
 
-                    currentCertList.ToList().ForEach(c => currentCertifications.AppendLine($"{c.Name}: Certified"));
+                   
+
+                    certifiedCerts.ToList().ForEach(c => currentCertifications.AppendLine($"{c.Name}: <b>{c.IssuanceStatusWithModifier}</b>"));
+                    if (certifiedCerts.Any())
+                        currentCertifications.AppendLine();
+                    var notCertifiedCerts = certs.Where(c => c.Status != IssuanceStatusType.Active && c.Name != CertificationName.IMwithFPHM);
+                    notCertifiedCerts.ToList().ForEach(c => currentCertifications.AppendLine($"{c.Name}: <b>{c.IssuanceStatusWithModifier}</b>"));
+
+                    if (certifiedCerts.Count()>0 && notCertifiedCerts.Count()==0)
+                    {
+                        isAllCertsCertified = true;
+                    }
                 }
 
                 //Maintaining MOC
@@ -493,7 +502,7 @@ namespace Abim.Platform.Program.App.Services.Impl
                 //pdfData.Text = text;
                 pdfData.Text = DateTime.Now.ToString("MMMM dd, yyyy");
                 pdfData.isActive = isActive;
-                pdfData.isCertified = isCertified;
+                pdfData.isAllCertsCertified = isAllCertsCertified;
                 pdfData.certsCount = certsCount;
                 return pdfData;
             }
@@ -512,7 +521,7 @@ namespace Abim.Platform.Program.App.Services.Impl
             var pagesAll = new List<byte[]>();
 
             // Hold individual pages Here:
-            byte[] pageBytes = null;
+            byte[] pageBytes;
 
             // Read the form template for each item to be output:
             var templateReader = new PdfReader(templateStream);
@@ -613,7 +622,7 @@ namespace Abim.Platform.Program.App.Services.Impl
         /// GetMostRecentExamTypeByCode
         /// </summary>
         /// <param name="MemberId"></param>
-        /// <param name="SubspecialtyCertCode"></param>
+        /// <param name="CertificationId"></param>
         /// <returns></returns>
         public async Task<ExamType> GetMostRecentExamTypeByCode(Guid MemberId, Guid CertificationId)
         {

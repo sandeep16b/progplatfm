@@ -1,4 +1,4 @@
-﻿using Abim.Enterprise.Core.ServiceBus.Registration;
+﻿using ServiceBus.Events;
 using Abim.Platform.Program.App.Services;
 using MassTransit;
 using NLog;
@@ -11,7 +11,7 @@ namespace Abim.Platform.Program.App.ServiceBus
     /// <summary>
     /// A consumer for IMemberUnEnrolledEvent objects
     /// </summary>
-    public class LKAUnenrollmentConsumer : IConsumer<IMemberUnEnrolledEvent>
+    public class LKAUnenrollmentConsumer : IConsumer<IMemberUnenrolled>
     {
         #region Properties
 
@@ -44,7 +44,7 @@ namespace Abim.Platform.Program.App.ServiceBus
         /// </summary>
         /// <param name="context">A MassTransit ConsumeContext</param>
         /// <returns></returns>
-        public async Task Consume(ConsumeContext<IMemberUnEnrolledEvent> context)
+        public async Task Consume(ConsumeContext<IMemberUnenrolled> context)
         {
             try
             {

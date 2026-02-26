@@ -1,11 +1,9 @@
-﻿using Abim.Platform.Program.App.Services;
-using Abim.Platform.Program.Core.Identity;
+﻿using Abim.Platform.Program.Core.Identity;
 using Abim.Platform.Program.WebApi.Testing.Setup;
 using FluentAssertions;
 using IdentityModel.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NLog;
 using NUnit.Framework;
 using Shouldly;
 using System;

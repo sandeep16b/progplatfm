@@ -44,7 +44,7 @@ namespace Abim.Platform.Program.WebApi.Binding
         /// <summary>
         /// The recursion count
         /// </summary>
-        private int recursionCount = 0;
+        private int recursionCount;
 
         //Implement base member        
         /// <summary>
@@ -248,6 +248,7 @@ namespace Abim.Platform.Program.WebApi.Binding
                 }
                 else if (prop.PropertyType.IsArray)
                 {
+                    // ReSharper disable once AssignNullToNotNullAttribute
                     childObj = Activator.CreateInstance(prop.PropertyType.GetElementType());
                 }
                 //Call to process collection

@@ -1,5 +1,4 @@
-﻿using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
-using Abim.Enterprise.Core.Profile.Resource;
+﻿using Abim.Platform.Program.MembershipClient;
 using Abim.Enterprise.Core.Registration.Interservice;
 using Abim.Platform.Program.App.Data;
 using Abim.Platform.Program.App.Domain;
@@ -85,12 +84,18 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
            new GetVocLetterContentWhenIMselectedToMaintainAndNoFPHMexistsSpec().BDDfy();
         }
 
+        [Test]
+        public void GetVocLetterContentWithModifierWhenNotCertified()
+        {
+            new GetVocLetterContentWithModifierWhenNotCertifiedSpec().BDDfy();
+        }
+
         public class GetVocLetterContentWhenValidSpec : CredentialServiceScenario
         {
             private VocPdfData _vocLetterData;
 
             protected HelperService HelperService { get; set; }
-            protected ProfileNestedResource ProfileNestedResource { get; set; }
+            protected ProfileResource ProfileResource { get; set; } 
             protected IEnumerable<Credential> Credentials { get; set; }
 
             protected override List<Type> AdditionalDependencies()
@@ -100,13 +105,13 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             protected override void PreSetup()
             {
-                ProfileNestedResource = new ProfileNestedResource()
+                ProfileResource = new ProfileResource()
                 {
                     AbimId = "345678",
-                    Addresses = new List<AddressSummaryResource>() { new AddressSummaryResource { StreetAddress1 = "110 Dominic Dr", StreetAddress2 = null, StreetAddress3 = null, City = "Scott Depot", PostalCode = "25560", Region = new RegionSummaryResource { Code = "WV" } } },
-                    Name = new NameResource () { FirstName="Sam", MiddleName = "m", LastName="Adams"}
+                    // Addresses = new List<AddressResource>() { new AddressResource { Address1 = "110 Dominic Dr", Address2 = null, Address3 = null, City = "Scott Depot", PostalCode = "25560", Region = new RegionSummaryResource { Code = "WV" } } },
+                    Addresses = new List<ProfileAddressResource>() { new ProfileAddressResource { Address1 = "110 Dominic Dr", Address2 = null, Address3 = null, City = "Scott Depot", PostalCode = "25560", RegionId = 1, CountryId = "US" } },
+                    Name = new ProfileNameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
                 };
-
                 var source = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
 
                 var cred1 = CredentialBuilder.BuildWithoutRandoms(source, "IM", "Internal Medicine", CertificationType.Primary, CredentialType.General, PathwayType.MOC);
@@ -134,7 +139,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 HelperService = new HelperService(new Mock<IBusControl>().Object,
                                                   new Mock<IAccessTokenService>().Object,
-                                                  new Mock<IProfileInterservice>().Object, 
+                                                  new Mock<IMembershipClientService>().Object, 
                                                   new Mock<IRegistrationInterservice>().Object);
 
                 IEnumerable<Credential> credentialList = new List<Credential>()
@@ -149,7 +154,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 try
                 {
-                    _vocLetterData = HelperService.GetVocLetterContent(ProfileNestedResource, Credentials);
+                    _vocLetterData = HelperService.GetVocLetterContent(ProfileResource, Credentials).Result;
                 }
                 catch (Exception ex)
                 {
@@ -178,7 +183,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             private VocPdfData _vocLetterData;
             //Abim.Platform.Program.App.Services.Impl.CredentialService CredentialService { get; set; }
             HelperService HelperService { get; set; }
-            protected ProfileNestedResource ProfileNestedResource { get; set; }
+            protected ProfileResource ProfileResource { get; set; }
             protected PhysicianCertificationsPublicResource PhysicianResource { get; set; }
             protected IEnumerable<Credential> Credentials { get; set; }
 
@@ -189,16 +194,16 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             protected override void PreSetup()
             {
-                ProfileNestedResource = new ProfileNestedResource()
+                ProfileResource = new ProfileResource()
                 {
                     AbimId = "345678",
-                    Addresses = new List<AddressSummaryResource>(),
-                    Name= null
+                    Addresses = new List<ProfileAddressResource>(),
+                    Name = null
                 };
 
                 var source = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
 
-                var cred1 = CredentialBuilder.BuildWithoutRandoms(source, "IM", "Internal Medicine", CertificationType.Primary, CredentialType.General, PathwayType.MOC);
+                var cred1 = CredentialBuilder.BuildWithoutRandoms(source, "IM", "Internal Medicine", CertificationType.Primary, CredentialType.General,   PathwayType.MOC);
                 cred1.AddIssuance(IssuanceBuilder.BuildWithoutRandoms(source: source,
                                                                         issuanceStatus: IssuanceStatusType.Active,
                                                                         issuanceDate: new DateTime(2013, 8, 21),
@@ -224,7 +229,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 HelperService = new HelperService(new Mock<IBusControl>().Object,
                                                 new Mock<IAccessTokenService>().Object,
-                                                  new Mock<IProfileInterservice>().Object,
+                                                  new Mock<IMembershipClientService>().Object,
                                                   new Mock<IRegistrationInterservice>().Object);
 
                 IEnumerable<Credential> credentialList = new List<Credential>()
@@ -240,7 +245,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 try
                 {
-                    _vocLetterData = HelperService.GetVocLetterContent(ProfileNestedResource, Credentials);
+                    _vocLetterData = HelperService.GetVocLetterContent(ProfileResource, Credentials).Result;
                 }
                 catch (Exception ex)
                 {
@@ -264,7 +269,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             private VocPdfData _vocLetterData;
 
             HelperService HelperService { get; set; }
-            protected ProfileNestedResource ProfileNestedResource { get; set; }
+            protected ProfileResource ProfileResource { get; set; }
             protected IEnumerable<Credential> Credentials { get; set; }
 
             protected override List<Type> AdditionalDependencies()
@@ -274,11 +279,11 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             protected override void PreSetup()
             {
-                ProfileNestedResource = new ProfileNestedResource()
+                ProfileResource = new ProfileResource()
                 {
                     AbimId = "345678",
-                    Addresses = new List<AddressSummaryResource>() { new AddressSummaryResource { StreetAddress1 = "110 Dominic Dr", StreetAddress2 = null, StreetAddress3 = null, City = "Scott Depot", PostalCode = "25560", Region = new RegionSummaryResource { Code = "WV" } } },
-                    Name = new NameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
+                    Addresses = new List<ProfileAddressResource>() { new ProfileAddressResource { Address1 = "110 Dominic Dr", Address2 = null, Address3 = null, City = "Scott Depot", PostalCode = "25560", RegionId = 1 } },
+                    Name = new ProfileNameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
                 };
 
                 var source = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
@@ -308,7 +313,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 HelperService = new HelperService(new Mock<IBusControl>().Object,
                                                     new Mock<IAccessTokenService>().Object,
-                                                  new Mock<IProfileInterservice>().Object,
+                                                  new Mock<IMembershipClientService>().Object,
                                                   new Mock<IRegistrationInterservice>().Object);
 
                 IEnumerable<Credential> credentialList = new List<Credential>()
@@ -323,7 +328,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 try
                 {
-                    _vocLetterData = HelperService.GetVocLetterContent(ProfileNestedResource, Credentials);
+                    _vocLetterData = HelperService.GetVocLetterContent(ProfileResource, Credentials).Result;
                 }
                 catch (Exception ex)
                 {
@@ -347,7 +352,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
         {
             private VocPdfData _vocLetterData;
             HelperService HelperService { get; set; }
-            protected ProfileNestedResource ProfileNestedResource { get; set; }
+            protected ProfileResource ProfileResource { get; set; }
             protected IEnumerable<Credential> Credentials { get; set; }
 
             protected override List<Type> AdditionalDependencies()
@@ -357,11 +362,11 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             protected override void PreSetup()
             {
-                ProfileNestedResource = new ProfileNestedResource()
+                ProfileResource = new ProfileResource()
                 {
                     AbimId = "345678",
-                    Addresses = new List<AddressSummaryResource>() { new AddressSummaryResource { StreetAddress1 = "110 Dominic Dr", StreetAddress2 = null, StreetAddress3 = null, City = "Scott Depot", PostalCode = "25560", Region = new RegionSummaryResource { Code = "WV" } } },
-                    Name = new NameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
+                    Addresses = new List<ProfileAddressResource>() { new ProfileAddressResource { Address1 = "110 Dominic Dr", Address2 = null, Address3 = null, City = "Scott Depot", PostalCode = "25560", RegionId = 1 } },
+                    Name = new ProfileNameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
                 };
 
                 var source = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
@@ -391,7 +396,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 HelperService = new HelperService(new Mock<IBusControl>().Object,
                                                      new Mock<IAccessTokenService>().Object,
-                                                  new Mock<IProfileInterservice>().Object,
+                                                  new Mock<IMembershipClientService>().Object,
                                                   new Mock<IRegistrationInterservice>().Object);
 
                 IEnumerable<Credential> credentialList = new List<Credential>()
@@ -406,7 +411,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 try
                 {
-                    _vocLetterData = HelperService.GetVocLetterContent(ProfileNestedResource, Credentials);
+                    _vocLetterData = HelperService.GetVocLetterContent(ProfileResource, Credentials).Result;
                 }
                 catch (Exception ex)
                 {
@@ -421,7 +426,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             private void AndResultShouldBeAsExpected()
             {
-                _vocLetterData.isCertified.Should().BeFalse();
+                _vocLetterData.isAllCertsCertified.Should().BeFalse();
 
             }
         }
@@ -431,7 +436,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             private VocPdfData _vocLetterData;
 
             protected HelperService HelperService { get; set; }
-            protected ProfileNestedResource ProfileNestedResource { get; set; }
+            protected ProfileResource ProfileResource { get; set; }
             protected IEnumerable<Credential> Credentials { get; set; }
 
             protected override List<Type> AdditionalDependencies()
@@ -441,11 +446,11 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             protected override void PreSetup()
             {
-                ProfileNestedResource = new ProfileNestedResource()
+                ProfileResource = new ProfileResource()
                 {
                     AbimId = "345678",
-                    Addresses = new List<AddressSummaryResource>() { new AddressSummaryResource { StreetAddress1 = "110 Dominic Dr", StreetAddress2 = null, StreetAddress3 = null, City = "Scott Depot", PostalCode = "25560", Region = new RegionSummaryResource { Code = "WV" } } },
-                    Name = new NameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
+                    Addresses = new List<ProfileAddressResource>() { new ProfileAddressResource { Address1 = "110 Dominic Dr", Address2 = null, Address3 = null, City = "Scott Depot", PostalCode = "25560", RegionId = 1 } },
+                    Name = new ProfileNameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
                 };
 
                 var source = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
@@ -485,7 +490,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 HelperService = new HelperService(new Mock<IBusControl>().Object,
                                              new Mock<IAccessTokenService>().Object,
-                                                  new Mock<IProfileInterservice>().Object, 
+                                                  new Mock<IMembershipClientService>().Object, 
                                                   new Mock<IRegistrationInterservice>().Object);
 
                 IEnumerable<Credential> credentialList = new List<Credential>()
@@ -500,7 +505,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 try
                 {
-                    _vocLetterData = HelperService.GetVocLetterContent(ProfileNestedResource, Credentials);
+                    _vocLetterData = HelperService.GetVocLetterContent(ProfileResource, Credentials).Result;
                 }
                 catch (Exception ex)
                 {
@@ -526,7 +531,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             private void AndInternalMedicineShouldBeCertified()
             {
                 // SINCE GF is active then diplomate still certified in IM
-                _vocLetterData.CurrentCertifications.Should().Contain("Internal Medicine: Certified");
+                _vocLetterData.CurrentCertifications.Should().Contain("Internal Medicine: <b>Certified</b>");
             }
         }
 
@@ -535,7 +540,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             private VocPdfData _vocLetterData;
 
             protected HelperService HelperService { get; set; }
-            protected ProfileNestedResource ProfileNestedResource { get; set; }
+            protected ProfileResource ProfileResource { get; set; }
             protected IEnumerable<Credential> Credentials { get; set; }
 
             protected override List<Type> AdditionalDependencies()
@@ -545,11 +550,11 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             protected override void PreSetup()
             {
-                ProfileNestedResource = new ProfileNestedResource()
+                ProfileResource = new ProfileResource()
                 {
                     AbimId = "345678",
-                    Addresses = new List<AddressSummaryResource>() { new AddressSummaryResource { StreetAddress1 = "110 Dominic Dr", StreetAddress2 = null, StreetAddress3 = null, City = "Scott Depot", PostalCode = "25560", Region = new RegionSummaryResource { Code = "WV" } } },
-                    Name = new NameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
+                    Addresses = new List<ProfileAddressResource>() { new ProfileAddressResource { Address1 = "110 Dominic Dr", Address2 = null, Address3 = null, City = "Scott Depot", PostalCode = "25560", RegionId = 1 } },
+                    Name = new ProfileNameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
                 };
 
                 var source = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
@@ -589,7 +594,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 HelperService = new HelperService(new Mock<IBusControl>().Object,
                                                   new Mock<IAccessTokenService>().Object,
-                                                  new Mock<IProfileInterservice>().Object, 
+                                                  new Mock<IMembershipClientService>().Object, 
                                                   new Mock<IRegistrationInterservice>().Object);
 
                 IEnumerable<Credential> credentialList = new List<Credential>()
@@ -604,7 +609,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 try
                 {
-                    _vocLetterData = HelperService.GetVocLetterContent(ProfileNestedResource, Credentials);
+                    _vocLetterData = HelperService.GetVocLetterContent(ProfileResource, Credentials).Result;
                 }
                 catch (Exception ex)
                 {
@@ -639,7 +644,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             private VocPdfData _vocLetterData;
 
             protected HelperService HelperService { get; set; }
-            protected ProfileNestedResource ProfileNestedResource { get; set; }
+            protected ProfileResource ProfileResource { get; set; }
             protected IEnumerable<Credential> Credentials { get; set; }
 
             protected override List<Type> AdditionalDependencies()
@@ -649,11 +654,11 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             protected override void PreSetup()
             {
-                ProfileNestedResource = new ProfileNestedResource()
+                ProfileResource = new ProfileResource()
                 {
                     AbimId = "345678",
-                    Addresses = new List<AddressSummaryResource>() { new AddressSummaryResource { StreetAddress1 = "110 Dominic Dr", StreetAddress2 = null, StreetAddress3 = null, City = "Scott Depot", PostalCode = "25560", Region = new RegionSummaryResource { Code = "WV" } } },
-                    Name = new NameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
+                    Addresses = new List<ProfileAddressResource>() { new ProfileAddressResource { Address1 = "110 Dominic Dr", Address2 = null, Address3 = null, City = "Scott Depot", PostalCode = "25560", RegionId = 1 } },
+                    Name = new ProfileNameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
                 };
 
                 var source = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
@@ -698,7 +703,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 HelperService = new HelperService(new Mock<IBusControl>().Object,
                                               new Mock<IAccessTokenService>().Object,
-                                                  new Mock<IProfileInterservice>().Object,
+                                                  new Mock<IMembershipClientService>().Object,
                                                   new Mock<IRegistrationInterservice>().Object);
 
                 IEnumerable<Credential> credentialList = new List<Credential>()
@@ -713,7 +718,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 try
                 {
-                    _vocLetterData = HelperService.GetVocLetterContent(ProfileNestedResource, Credentials);
+                    _vocLetterData = HelperService.GetVocLetterContent(ProfileResource, Credentials).Result;
                 }
                 catch (Exception ex)
                 {
@@ -739,19 +744,19 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             private void AndInternalMedicineShouldNOTBeCertified()
             {
                 // WE should skip IM since FPHM was seleted to be maintained
-                _vocLetterData.CurrentCertifications.Should().NotContain($"{CertificationName.IM}: Certified");
+                _vocLetterData.CurrentCertifications.Should().NotContain($"{CertificationName.IM}: <b>Certified</b>");
             }
 
             private void AndFPHMShouldBeCertified()
             {
                 // WE should skip IM since FPHM was seleted to be maintained
-                _vocLetterData.CurrentCertifications.Should().Contain($"{CertificationName.IMwithFPHM}: Certified");
+                _vocLetterData.CurrentCertifications.Should().Contain($"{CertificationName.IMwithFPHM}: <b>Certified</b>");
             }
 
             private void AndGeriatricMedicineShouldBeCertified()
             {
                 // WE should skip IM since FPHM was seleted to be maintained
-                _vocLetterData.CurrentCertifications.Should().Contain($"Geriatric Medicine: Certified");
+                _vocLetterData.CurrentCertifications.Should().Contain($"Geriatric Medicine: <b>Certified</b>");
             }
         }
 
@@ -760,7 +765,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             private VocPdfData _vocLetterData;
 
             protected HelperService HelperService { get; set; }
-            protected ProfileNestedResource ProfileNestedResource { get; set; }
+            protected ProfileResource ProfileResource { get; set; }
             protected IEnumerable<Credential> Credentials { get; set; }
 
             protected override List<Type> AdditionalDependencies()
@@ -770,11 +775,11 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             protected override void PreSetup()
             {
-                ProfileNestedResource = new ProfileNestedResource()
+                ProfileResource = new ProfileResource()
                 {
                     AbimId = "345678",
-                    Addresses = new List<AddressSummaryResource>() { new AddressSummaryResource { StreetAddress1 = "110 Dominic Dr", StreetAddress2 = null, StreetAddress3 = null, City = "Scott Depot", PostalCode = "25560", Region = new RegionSummaryResource { Code = "WV" } } },
-                    Name = new NameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
+                    Addresses = new List<ProfileAddressResource>() { new ProfileAddressResource { Address1 = "110 Dominic Dr", Address2 = null, Address3 = null, City = "Scott Depot", PostalCode = "25560", RegionId = 1 } },
+                    Name = new ProfileNameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
                 };
 
                 var source = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
@@ -819,7 +824,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 HelperService = new HelperService(new Mock<IBusControl>().Object,
                                                new Mock<IAccessTokenService>().Object,
-                                                  new Mock<IProfileInterservice>().Object,
+                                                  new Mock<IMembershipClientService>().Object,
                                                   new Mock<IRegistrationInterservice>().Object);
 
                 IEnumerable<Credential> credentialList = new List<Credential>()
@@ -834,7 +839,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 try
                 {
-                    _vocLetterData = HelperService.GetVocLetterContent(ProfileNestedResource, Credentials);
+                    _vocLetterData = HelperService.GetVocLetterContent(ProfileResource, Credentials).Result;
                 }
                 catch (Exception ex)
                 {
@@ -860,19 +865,19 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             private void AndInternalMedicineShouldBeCertified()
             {
                 // WE should skip IM since FPHM was seleted to be maintained
-                _vocLetterData.CurrentCertifications.Should().Contain($"{CertificationName.IM}: Certified");
+                _vocLetterData.CurrentCertifications.Should().Contain($"{CertificationName.IM}: <b>Certified</b>");
             }
 
             private void AndFPHMShouldNOTBeCertified()
             {
                 // WE should skip IM since FPHM was seleted to be maintained
-                _vocLetterData.CurrentCertifications.Should().NotContain($"{CertificationName.IMwithFPHM}: Certified");
+                _vocLetterData.CurrentCertifications.Should().NotContain($"{CertificationName.IMwithFPHM}: <b>Certified</b>");
             }
 
             private void AndGeriatricMedicineShouldBeCertified()
             {
                 // WE should skip IM since FPHM was seleted to be maintained
-                _vocLetterData.CurrentCertifications.Should().Contain($"Geriatric Medicine: Certified");
+                _vocLetterData.CurrentCertifications.Should().Contain($"Geriatric Medicine: <b>Certified</b>");
             }
         }
 
@@ -881,7 +886,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             private VocPdfData _vocLetterData;
 
             protected HelperService HelperService { get; set; }
-            protected ProfileNestedResource ProfileNestedResource { get; set; }
+            protected ProfileResource ProfileResource { get; set; }
             protected IEnumerable<Credential> Credentials { get; set; }
 
             protected override List<Type> AdditionalDependencies()
@@ -891,11 +896,11 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
 
             protected override void PreSetup()
             {
-                ProfileNestedResource = new ProfileNestedResource()
+                ProfileResource = new ProfileResource()
                 {
                     AbimId = "345678",
-                    Addresses = new List<AddressSummaryResource>() { new AddressSummaryResource { StreetAddress1 = "110 Dominic Dr", StreetAddress2 = null, StreetAddress3 = null, City = "Scott Depot", PostalCode = "25560", Region = new RegionSummaryResource { Code = "WV" } } },
-                    Name = new NameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
+                    Addresses = new List<ProfileAddressResource>() { new ProfileAddressResource { Address1 = "110 Dominic Dr", Address2 = null, Address3 = null, City = "Scott Depot", PostalCode = "25560", RegionId = 1 } },
+                    Name = new ProfileNameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
                 };
 
                 var source = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
@@ -929,7 +934,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 HelperService = new HelperService(new Mock<IBusControl>().Object,
                                                  new Mock<IAccessTokenService>().Object,
-                                                  new Mock<IProfileInterservice>().Object,
+                                                  new Mock<IMembershipClientService>().Object,
                                                   new Mock<IRegistrationInterservice>().Object);
 
                 IEnumerable<Credential> credentialList = new List<Credential>()
@@ -944,7 +949,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             {
                 try
                 {
-                    _vocLetterData = HelperService.GetVocLetterContent(ProfileNestedResource, Credentials);
+                    _vocLetterData = HelperService.GetVocLetterContent(ProfileResource, Credentials).Result;
                 }
                 catch (Exception ex)
                 {
@@ -970,19 +975,139 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService
             private void AndInternalMedicineShouldBeCertified()
             {
                 // WE should skip IM since FPHM was seleted to be maintained
-                _vocLetterData.CurrentCertifications.Should().Contain($"{CertificationName.IM}: Certified");
+                _vocLetterData.CurrentCertifications.Should().Contain($"{CertificationName.IM}: <b>Certified</b>");
             }
 
             private void AndFPHMShouldNOTBeCertified()
             {
                 // WE should skip IM since FPHM was seleted to be maintained
-                _vocLetterData.CurrentCertifications.Should().NotContain($"{CertificationName.IMwithFPHM}: Certified");
+                _vocLetterData.CurrentCertifications.Should().NotContain($"{CertificationName.IMwithFPHM}: <b>Certified</b>");
             }
 
             private void AndGeriatricMedicineShouldBeCertified()
             {
                 // WE should skip IM since FPHM was seleted to be maintained
-                _vocLetterData.CurrentCertifications.Should().Contain($"Geriatric Medicine: Certified");
+                _vocLetterData.CurrentCertifications.Should().Contain($"Geriatric Medicine: <b>Certified</b>");
+            }
+        }
+
+        public class GetVocLetterContentWithModifierWhenNotCertifiedSpec : CredentialServiceScenario
+        {
+            private VocPdfData _vocLetterData;
+
+            protected HelperService HelperService { get; set; }
+            protected ProfileResource ProfileResource { get; set; }
+            protected IEnumerable<Credential> Credentials { get; set; }
+
+            protected override List<Type> AdditionalDependencies()
+            {
+                return new List<Type>() { typeof(ICredentialRepository), typeof(ICertificationService), typeof(ISourceService), typeof(IHelperService), typeof(IBusControl), typeof(IBackgroundJobClient), typeof(IValidationFactory) };
+            }
+
+            protected override void PreSetup()
+            {
+                ProfileResource = new ProfileResource()
+                {
+                    AbimId = "345678",
+                    Addresses = new List<ProfileAddressResource>() { new ProfileAddressResource { Address1 = "110 Dominic Dr", Address2 = null, Address3 = null, City = "Scott Depot", PostalCode = "25560", RegionId = 1, CountryId = "US" } },
+                    Name = new ProfileNameResource() { FirstName = "Sam", MiddleName = "m", LastName = "Adams" }
+                };
+
+                var source = SourceBuilder.Build("American Board of Internal Medicine", "ABIM", "UnitTest");
+
+                var cred1 = CredentialBuilder.BuildWithoutRandoms(source, "IM", "Internal Medicine", CertificationType.Primary, CredentialType.General, PathwayType.MOC);
+                
+                cred1.AddIssuance(IssuanceBuilder.BuildWithoutRandoms(source: source,
+                                                                        issuanceStatus: IssuanceStatusType.Suspended,
+                                                                        issuanceDate: new DateTime(2010, 11, 02),
+                                                                        durationType: DurationType.Continuous,
+                                                                        maintenanceRequirement: MaintenanceRequirementType.Required,
+                                                                        maintenanceStatus: MaintenanceStatusType.Maintained,
+                                                                        occurrenceType: OccurrenceType.Initial));
+                cred1.SelectedToMaintain = false;
+
+
+                var cred2 = CredentialBuilder.BuildWithoutRandoms(source, "ID", "Infectious Disease", CertificationType.Primary, CredentialType.General, PathwayType.MOC);
+                cred2.AddIssuance(IssuanceBuilder.BuildWithoutRandoms(source: source,
+                                                                        issuanceStatus: IssuanceStatusType.Expired,
+                                                                        issuanceDate: new DateTime(2015, 11, 4),
+                                                                        durationType: DurationType.Continuous,
+                                                                        maintenanceRequirement: MaintenanceRequirementType.Required,
+                                                                        maintenanceStatus: MaintenanceStatusType.Maintained,
+                                                                        occurrenceType: OccurrenceType.Initial));
+
+                var cred3 = CredentialBuilder.BuildWithoutRandoms(source, "GERI", "Geriatric Medicine", CertificationType.Subspecialty, CredentialType.Subspecialty, PathwayType.MOC);
+                cred3.AddIssuance(IssuanceBuilder.BuildWithoutRandoms(source: source,
+                                                                        issuanceStatus: IssuanceStatusType.Revoked,
+                                                                        issuanceDate: new DateTime(2018, 11, 4),
+                                                                        durationType: DurationType.Continuous,
+                                                                        maintenanceRequirement: MaintenanceRequirementType.Required,
+                                                                        maintenanceStatus: MaintenanceStatusType.Maintained,
+                                                                        occurrenceType: OccurrenceType.Initial));
+
+
+
+
+                Credentials = new List<Credential>() { cred1, cred2, cred3 };
+            }
+
+            protected override void PostSetup()
+            {
+                HelperService = new HelperService(new Mock<IBusControl>().Object,
+                                              new Mock<IAccessTokenService>().Object,
+                                              new Mock<IMembershipClientService>().Object,
+                                              new Mock<IRegistrationInterservice>().Object);
+
+                IEnumerable<Credential> credentialList = new List<Credential>()
+                {
+                    CredentialBuilder.Build()
+                };
+                My<ICredentialRepository>().Setup(r => r.SearchByMemberIdAsync(It.IsAny<Guid>()))
+                    .Returns(Task.FromResult(credentialList));
+            }
+
+            private void WhenICallGetVocLetterContent()
+            {
+                try
+                {
+                    _vocLetterData = HelperService.GetVocLetterContent(ProfileResource, Credentials).Result;
+                }
+                catch (Exception ex)
+                {
+                    ExceptionCaught = ex;
+                }
+            }
+
+            private void ThenNoExceptionShouldHaveBeenThrown()
+            {
+                ExceptionCaught.Should().BeNull();
+            }
+
+            private void AndResultShouldBeAsExpected()
+            {
+                _vocLetterData.Name.Should().NotBeNull();
+                _vocLetterData.Date.Should().NotBeNull();
+                _vocLetterData.Address.Should().NotBeNull();
+                _vocLetterData.IntialCertifications.Should().NotBeNull();
+                _vocLetterData.certsCount.Should().BeGreaterOrEqualTo(0);
+
+            }
+
+            private void AndCurrentCertificationShouldHaveSuspendedModifier()
+            {
+               
+                _vocLetterData.CurrentCertifications.Should().Contain($"{CertificationName.IM}: <b>Not Certified, Suspended</b>");
+            }
+
+            private void AndCurrentCertificationShouldHaveRevokedModifier()
+            {
+                _vocLetterData.CurrentCertifications.Should().Contain("Geriatric Medicine: <b>Not Certified, Revoked</b>");
+            }
+
+            private void AndCurrentCertificationShouldHaveLapsedModifier()
+            {
+                _vocLetterData.CurrentCertifications.Should().Contain("Infectious Disease: <b>Not Certified, Lapsed</b>");
+              
             }
         }
     }

@@ -89,7 +89,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Certification
 
         protected override void PostSetup()
         {
-            Container.Inject<IEnumService>(EnumService);
+            Container.Inject(EnumService);
         }
 
         public void GivenIPassTheCorrectUrl()
@@ -144,12 +144,12 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Certification
         protected override void PreSetup()
         {
             EnumService = new EnumService();
-            OverrideScope();
+            OverrideAndInjectUnacceptableScope();
         }
 
         protected override void PostSetup()
         {
-            Container.Inject<IEnumService>(EnumService);
+            Container.Inject(EnumService);
         }
 
         public void GivenIPassTheCorrectUrl()
@@ -190,7 +190,7 @@ namespace Abim.Platform.Program.Integration.Scenarios.Controllers.Certification
 
         protected override void PostSetup()
         {
-            Container.Inject<IEnumService>(EnumService);
+            Container.Inject(EnumService);
         }
 
         public void GivenIPassTheCorrectUrl()

@@ -113,7 +113,7 @@ namespace Abim.Platform.Program.Util
                         if (!skipFailedProperties) throw;
                     }
                 }
-                string json = null;
+                string json;
                 try
                 {
                     json = string.Format("{{{0}}}", string.Join(", ", members.Select(kvp => string.Format("\"{0}\": \"{1}\"", kvp.Key, kvp.Value)).ToArray()));
@@ -144,7 +144,7 @@ namespace Abim.Platform.Program.Util
         /// <returns></returns>
         public static string FullJsonFormat<T>(this T obj, bool tabifyJson = true)
         {
-            return JsonFormat<T>(obj, tabifyJson, true, false, true, true);
+            return JsonFormat(obj, tabifyJson, true, false, true, true);
         }
 
         /// <summary>

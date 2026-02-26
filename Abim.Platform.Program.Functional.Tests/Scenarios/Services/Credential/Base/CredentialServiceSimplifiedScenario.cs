@@ -1,10 +1,9 @@
-﻿using Abim.Enterprise.Core.Profile.Interservice.Interservices.Interfaces;
-using Abim.Enterprise.Core.Registration.Enums;
-using Abim.Enterprise.Core.ServiceBus.Program;
+﻿using Abim.Enterprise.Core.Registration.Enums;
 using Abim.Platform.Program.App.Data;
 using Abim.Platform.Program.App.Services;
 using Abim.Platform.Program.App.Services.Commands;
 using Abim.Platform.Program.App.Services.CommandValidators.Credential;
+using ServiceBus.Events;
 using Abim.Platform.Program.Relational.Classes;
 using Abim.Platform.Program.Relational.Validation;
 using Abim.Platform.Program.Relational.Validation.Impl;
@@ -31,7 +30,6 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService.Base
         protected Mock<ISourceService> _sourceSvcMock;
         protected Mock<IHelperService> _helperSvcMock;
         protected Mock<ICredentialService> _credSvcMock;
-        protected Mock<IProfileInterservice> _profileInterServiceMock;
         protected Mock<IBusControl> _busControlMock;
         protected Mock<IBackgroundJobClient> _jobClientMock;
         protected Mock<IValidationFactory> _validationFactoryMock;
@@ -91,12 +89,7 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService.Base
         protected virtual void SetupCredentialServiceMock()
         {
             _credSvcMock = new Mock<ICredentialService>(MockBehavior.Strict);
-        }
-
-        protected virtual void SetupProfileInterServiceMock()
-        {
-            _profileInterServiceMock = new Mock<IProfileInterservice>(MockBehavior.Strict);
-        }
+        } 
 
         protected virtual void SetupSourceServiceMock()
         {
@@ -117,8 +110,17 @@ namespace Abim.Platform.Program.Tests.Scenarios.Services.CredentialService.Base
         protected virtual void SetupBusControlMock()
         {
             _busControlMock = new Mock<IBusControl>(MockBehavior.Strict);
+            
             _busControlMock
-                .Setup(x => x.Publish(It.IsAny<IssuanceChangedEvent>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.Publish(It.IsAny<IssuanceChanged>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(false));
+
+            _busControlMock
+                .Setup(x => x.Publish(It.IsAny<CMPEnrolled>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(false));
+
+            _busControlMock
+                .Setup(x => x.Publish(It.IsAny<CMPUnEnrolled>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(false));
         }
 

@@ -5,7 +5,7 @@ namespace Abim.Platform.Program.Tests.Setup.ResourceDataBuilders
 {
     public class SeatRegistrationResourceDataBuilder : ResourceDataBuilder<SeatRegistrationSummaryResource, SeatRegistrationResourceDataBuilder>
     {
-        private SeatRegistrationSummaryResource _seatRegistration;
+      //  private SeatRegistrationSummaryResource _seatRegistration;
 
         public SeatRegistrationResourceDataBuilder(SeatRegistrationSummaryResource seatRegistration) : base(seatRegistration)
         {
